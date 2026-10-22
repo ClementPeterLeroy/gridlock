@@ -1,0 +1,26 @@
+"""Small collection of board, window, and colour settings."""
+
+BOARD_SIZE = 9
+CELL_SIZE = 54
+GAP = 7
+BOARD_X = 38
+BOARD_Y = 56
+BOARD_PIXELS = BOARD_SIZE * CELL_SIZE + (BOARD_SIZE - 1) * GAP
+WINDOW_WIDTH = 930
+WINDOW_HEIGHT = 650
+FPS = 60
+
+BACKGROUND = (238, 227, 208)
+WOOD = (215, 179, 126)
+WOOD_LIGHT = (229, 196, 150)
+GROOVE = (91, 65, 45)
+GOLD = (249, 213, 94)
+BLUE = (54, 94, 151)
+RED = (161, 69, 52)
+GREEN = (58, 136, 87)
+VIOLET = (137, 86, 170)
+PLAYER_COLORS = (BLUE, RED, GREEN, VIOLET)
+PLAYER_NAMES = ("Blue", "Red", "Green", "Violet")
+TEXT = (61, 48, 37)
+HIGHLIGHT = (106, 161, 104)
+INVALID = (184, 62, 55)
