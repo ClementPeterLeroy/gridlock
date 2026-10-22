@@ -2,7 +2,9 @@
 
 import pygame
 from board import (draw_board, draw_menu, draw_victory, load_stickers,
-                   square_at, wall_at, button_rects, menu_buttons)
+                   square_at, wall_at, button_rects, menu_buttons,
+                   draw_settings, settings_buttons, victory_buttons)
+from audio import load_audio, set_music, play_sound
 from game import Game
 from rules import valid_moves
 from settings import WINDOW_WIDTH, WINDOW_HEIGHT, FPS
@@ -16,6 +18,10 @@ def main():
              pygame.font.SysFont("arial", 18),
              pygame.font.SysFont("arial", 15))
     stickers = load_stickers()
+    sounds = load_audio()
+    options = {"Music": True, "Sound Effects": True, "Animations": True}
+    settings_open = False
+    victory_played = False
     clock = pygame.time.Clock()
     game = None
     action = "pawn"
@@ -29,19 +35,56 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 continue
+            if not running:
+                continue
             if game is None:
+                if settings_open:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                        settings_open = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        for name, rect in settings_buttons().items():
+                            if rect.collidepoint(event.pos):
+                                if name == "Back":
+                                    settings_open = False
+                                else:
+                                    options[name] = not options[name]
+                                    if name == "Music":
+                                        set_music(options[name])
+                                    elif name == "Sound Effects" and not options[name] and pygame.mixer.get_init():
+                                        pygame.mixer.stop()
+                                break
+                    continue
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for name, rect in menu_buttons().items():
-                        if rect.collidepoint(event.pos) and name != "Settings":
-                            game = Game("Versus" if name == "Rise of the Machines" else name)
-                            action, selected = "pawn", False
+                        if rect.collidepoint(event.pos):
+                            if name == "Settings":
+                                settings_open = True
+                            elif name == "Exit Game":
+                                running = False
+                            else:
+                                game = Game("Versus" if name == "Rise of the Machines" else name)
+                                action, selected = "pawn", False
+                                victory_played = False
                             break
                 continue
-            if event.type == pygame.KEYDOWN:
-                if game.winner is not None and event.key == pygame.K_n:
-                    game = Game(game.mode)
+            if game.winner is not None:
+                choice = None
+                if event.type == pygame.KEYDOWN:
+                    choice = {pygame.K_n: "Play Again", pygame.K_m: "Main Menu"}.get(event.key)
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    choice = next((name for name, rect in victory_buttons().items()
+                                   if rect.collidepoint(event.pos)), None)
+                if choice:
+                    game = Game(game.mode) if choice == "Play Again" else None
                     action, selected = "pawn", False
-                elif event.key == pygame.K_m:
+                    victory_played = False
+                continue
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                if action == "wall":
+                    direction = "V" if direction == "H" else "H"
+                continue
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
                     game = None
                     action, selected = "pawn", False
                 elif event.key == pygame.K_ESCAPE:
@@ -62,6 +105,7 @@ def main():
                 elif buttons["New game"].collidepoint(pos):
                     game = Game(game.mode)
                     action, selected = "pawn", False
+                    victory_played = False
                 elif buttons["Undo"].collidepoint(pos):
                     game.undo()
                     action, selected = "pawn", False
@@ -79,12 +123,19 @@ def main():
                     elif selected and square is not None:
                         if game.move(square):
                             selected = False
+                            play_sound(sounds, "move", options["Sound Effects"])
                     else:
                         selected = False
         if game is None:
-            draw_menu(screen, fonts)
+            if settings_open:
+                draw_settings(screen, fonts, options)
+            else:
+                draw_menu(screen, fonts)
         else:
             game.tick(elapsed)
+            if game.winner is not None and not victory_played:
+                play_sound(sounds, "victory", options["Sound Effects"])
+                victory_played = True
             moves = (valid_moves(game.pawns, game.current_player, game.walls)
                      if selected and action == "pawn" and game.winner is None else set())
             draw_board(screen, game, moves, action, direction, pygame.mouse.get_pos(), fonts)

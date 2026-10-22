@@ -71,7 +71,38 @@ def button_rects():
 
 def menu_buttons():
     names = ("Versus", "Battle Royale", "Blitz", "Rise of the Machines", "Settings")
-    return {name: pygame.Rect(290, 185 + i * 79, 350, 60) for i, name in enumerate(names)}
+    buttons = {name: pygame.Rect(290, 185 + i * 79, 350, 60) for i, name in enumerate(names)}
+    buttons["Exit Game"] = pygame.Rect(750, 594, 155, 40)
+    return buttons
+
+
+def draw_button(screen, font, label, rect):
+    pygame.draw.rect(screen, (114, 82, 56), rect, border_radius=9)
+    pygame.draw.rect(screen, (179, 143, 97), rect, 2, border_radius=9)
+    text = font.render(label, True, (255, 248, 234))
+    screen.blit(text, text.get_rect(center=rect.center))
+
+
+def settings_buttons():
+    return {name: pygame.Rect(260, 200 + i * 85, 410, 60)
+            for i, name in enumerate(("Music", "Sound Effects", "Animations", "Back"))}
+
+
+def draw_settings(screen, fonts, options):
+    title_font, font, small = fonts
+    screen.fill(BACKGROUND)
+    title = title_font.render("SETTINGS", True, TEXT)
+    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 110)))
+    for name, rect in settings_buttons().items():
+        label = name if name == "Back" else f"{name}: {'On' if options[name] else 'Off'}"
+        draw_button(screen, font, label, rect)
+    hint = small.render("Animations: reserved for future features", True, GROOVE)
+    screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, 570)))
+
+
+def victory_buttons():
+    return {"Play Again": pygame.Rect(245, 497, 200, 42),
+            "Main Menu": pygame.Rect(485, 497, 200, 42)}
 
 
 def draw_menu(screen, fonts):
@@ -82,12 +113,8 @@ def draw_menu(screen, fonts):
     sub = font.render("Race across. Block the way.", True, GROOVE)
     screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
-        pygame.draw.rect(screen, (114, 82, 56), rect, border_radius=9)
-        pygame.draw.rect(screen, (179, 143, 97), rect, 2, border_radius=9)
-        label = font.render(name, True, (255, 248, 234))
-        screen.blit(label, label.get_rect(center=rect.center))
+        draw_button(screen, font, name, rect)
     draw_text(screen, small, "Rise of the Machines: 2-player placeholder", 300, 596)
-    draw_text(screen, small, "Settings: coming later", 300, 616)
 
 
 def draw_board(screen, game, moves, action, direction, mouse, fonts):
@@ -149,8 +176,9 @@ def draw_board(screen, game, moves, action, direction, mouse, fonts):
     for label, rect in button_rects().items():
         pygame.draw.rect(screen, (114, 82, 56), rect, border_radius=5)
         draw_text(screen, font, label, rect.x + 10, rect.y + 9, (255, 248, 234))
-    draw_text(screen, small, "R: rotate wall    Esc: cancel", PANEL_X, 580)
-    draw_text(screen, small, game.message[:65], 38, 618)
+    draw_text(screen, small, "R / right-click: rotate   Esc: cancel", PANEL_X, 580)
+    if game.winner is None:
+        draw_text(screen, small, game.message[:65], 38, 618)
     if action == "wall":
         draw_text(screen, small, f"Wall preview: {direction}", PANEL_X, 603)
 
@@ -184,5 +212,8 @@ def draw_victory(screen, game, stickers, fonts):
     else:
         label = font.render(f"{name.upper()} WINS!", True, PLAYER_COLORS[game.winner])
         screen.blit(label, label.get_rect(center=(WINDOW_WIDTH // 2, 275)))
-    draw_text(screen, small, game.message, 240, 475)
-    draw_text(screen, font, "N: New game       M: Menu", 302, 510)
+    if "ran out of time" in game.message:
+        message = small.render(game.message, True, TEXT)
+        screen.blit(message, message.get_rect(center=(WINDOW_WIDTH // 2, 472)))
+    for label, rect in victory_buttons().items():
+        draw_button(screen, font, label, rect)

@@ -1,0 +1,94 @@
+GRIDLOCK - DEVELOPMENT VERSION HISTORY
+Current version: 2.1
+
+VERSION 1.0 - ORIGINAL GAME
+
+Setting
+Gridlock is a local, turn-based strategy board game for two players sharing
+one computer. Built with Python and Pygame, it takes place on a 9 x 9 board.
+Players race to the opposite side while placing walls to slow each other down.
+
+Rules
+- Blue starts in the middle of the bottom edge; Red starts in the middle
+  of the top edge. Blue takes the first turn.
+- Each player starts with 10 walls.
+- On each turn, either move your pawn or place one wall.
+- Move one square horizontally or vertically, provided no wall blocks it.
+- When an opponent is directly adjacent, jump over that pawn if the square
+  behind it is free and reachable without crossing a wall.
+- If the jump is blocked by a wall or the board edge, step diagonally around
+  the adjacent pawn instead, using an unobstructed route.
+- Pawns cannot share a square or move through walls.
+- A wall spans two square edges and can be horizontal or vertical.
+- Walls cannot overlap or cross. Every player must retain a possible path
+  to their goal edge; completely trapping a player is forbidden.
+- Placing a wall spends one wall from your supply. Placed walls stay put.
+- The first player to reach any square on the opposite edge wins.
+
+VERSION 1.1 - BUG FIXES AND TURN VISIBILITY
+
+- Fixed bugs in the original game.
+- Added a highlight to the cell underneath the current player's pawn,
+  making it easier to see whose turn it is.
+
+VERSION 2.0 - GAME MODES AND PRESENTATION
+
+Game modes and menu
+- Added a main menu for choosing a game mode.
+- Versus: the standard two-player game, with 10 walls per player and an
+  elapsed turn timer without time penalties.
+- Battle Royale: four local players, with 5 walls each. Blue starts at the
+  bottom, Green at the left, Red at the top, and Violet at the right.
+  Turns run clockwise: Blue, Green, Red, Violet. Each player must reach
+  the opposite edge; the first to do so wins. Jumps cannot land on another
+  pawn. A blocked or occupied landing square allows a legal sidestep.
+- Blitz: two players, with 180 seconds each. Only the active player's clock
+  runs. At the start of a turn, remaining time below 10 seconds is raised
+  to 10 seconds. Running out of time costs one wall and grants 15 seconds
+  to finish the turn. Running out again during that turn loses the game.
+  Running out with no walls available also loses the game.
+- Rise of the Machines: menu entry reserved for a future AI mode;
+  currently starts a regular two-player Versus game.
+- Settings: placeholder menu entry; configuration is not implemented yet.
+
+Visuals and controls
+- Added victory screens with color-specific stickers for Blue, Red, Green,
+  and Violet. SVG originals and PNG versions are bundled with the game.
+- Added highlighted legal destinations when selecting the active pawn.
+- Added wall placement previews, rotation with R, and cancellation with Esc.
+- Added Undo / Ctrl+Z to restore the previous completed move, including
+  stored clocks, wall supplies, and Blitz penalty state.
+- Added New game and Menu controls. On victory, N starts a new match
+  and M returns to the menu.
+- The active player's cell remains highlighted in gold.
+
+Maintenance
+- Added automated checks for movement, jumps, walls, goal detection,
+  four-player turn order, undo behavior, and Blitz timing.
+
+VERSION 2.1 - QUALITY OF LIFE & AUDIO UPDATE
+
+- Added right-click to rotate the wall preview by 90 degrees during wall
+  placement. The R shortcut remains available.
+- Kept player-specific victory stickers and removed redundant winner text.
+- Added clickable Play Again and Main Menu buttons to the victory screen.
+  Play Again restarts the same mode; N and M shortcuts remain available.
+- Centered the explanation of timeout defeats beneath the victory sticker.
+- Added continuous, low-volume background music through pygame.mixer.
+  Menu and match transitions do not restart the track.
+- Added a sound for successful pawn moves and a one-time match-end sound.
+  The victory audio file's extension is detected automatically.
+- Enabled Settings with immediate Music and Sound Effects toggles, plus an
+  Animations toggle reserved for future features. Settings persist for the
+  current application session.
+- Added Exit Game to the bottom-right of the main menu.
+- Preserved the wooden visual style, existing modes, rules, clocks,
+  wall penalties, and turn order. Rise of the Machines remains a
+  two-player placeholder without AI.
+- Added interface tests for rotation, settings, move audio, timeout audio,
+  victory navigation, and clean exit.
+- Audio assets are development placeholders. The music is not final,
+  optimized, or tailor-made for Gridlock yet.
+
+Future releases
+Append a new version entry here when gameplay, visuals, or fixes change.
