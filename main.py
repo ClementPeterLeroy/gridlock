@@ -1,19 +1,28 @@
 """Start Gridlock with: python main.py"""
 
 import pygame
+from time import perf_counter
 from board import (draw_board, draw_menu, draw_victory, load_stickers,
                    square_at, wall_at, button_rects, menu_buttons,
-                   draw_settings, settings_buttons, victory_buttons)
+                   draw_settings, settings_buttons, victory_buttons,
+                   draw_difficulty, difficulty_buttons)
+from ai.pathfinder import search
 from audio import load_audio, set_music, play_sound
 from game import Game
 from rules import valid_moves
 from settings import WINDOW_WIDTH, WINDOW_HEIGHT, FPS
 
 
+def undo_turn(game):
+    game.undo()
+    if game.mode == "Rise of the Machines" and game.current_player == 1:
+        game.undo()
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Gridlock")
+    pygame.display.set_caption("Gridlock v2.3")
     fonts = (pygame.font.SysFont("georgia", 36, bold=True),
              pygame.font.SysFont("arial", 18),
              pygame.font.SysFont("arial", 15))
@@ -21,6 +30,10 @@ def main():
     sounds = load_audio()
     options = {"Music": True, "Sound Effects": True, "Animations": True}
     settings_open = False
+    difficulty_open = False
+    ai_search = None
+    ai_position = None
+    ai_action = None
     victory_played = False
     clock = pygame.time.Clock()
     game = None
@@ -38,6 +51,20 @@ def main():
             if not running:
                 continue
             if game is None:
+                if difficulty_open:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                        difficulty_open = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        for name, rect in difficulty_buttons().items():
+                            if rect.collidepoint(event.pos):
+                                difficulty_open = False
+                                if name != "Back to Main Menu":
+                                    game = Game("Rise of the Machines")
+                                    game.difficulty = name
+                                    action, selected = "pawn", False
+                                    victory_played = False
+                                break
+                    continue
                 if settings_open:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                         settings_open = False
@@ -61,8 +88,10 @@ def main():
                                 settings_open = True
                             elif name == "Exit Game":
                                 running = False
+                            elif name == "Rise of the Machines":
+                                difficulty_open = True
                             else:
-                                game = Game("Versus" if name == "Rise of the Machines" else name)
+                                game = Game(name)
                                 action, selected = "pawn", False
                                 victory_played = False
                             break
@@ -75,12 +104,17 @@ def main():
                     choice = next((name for name, rect in victory_buttons().items()
                                    if rect.collidepoint(event.pos)), None)
                 if choice:
-                    game = Game(game.mode) if choice == "Play Again" else None
+                    if choice == "Play Again":
+                        mode, difficulty = game.mode, game.difficulty
+                        game = Game(mode)
+                        game.difficulty = difficulty
+                    else:
+                        game = None
                     action, selected = "pawn", False
                     victory_played = False
                 continue
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                if action == "wall":
+                if action == "wall" and not (game.mode == "Rise of the Machines" and game.current_player == 1):
                     direction = "V" if direction == "H" else "H"
                 continue
             if event.type == pygame.KEYDOWN:
@@ -92,7 +126,7 @@ def main():
                 elif event.key == pygame.K_r and action == "wall":
                     direction = "V" if direction == "H" else "H"
                 elif event.key == pygame.K_z and event.mod & pygame.KMOD_CTRL:
-                    game.undo()
+                    undo_turn(game)
                     action, selected = "pawn", False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
@@ -103,12 +137,16 @@ def main():
                     game = None
                     action, selected = "pawn", False
                 elif buttons["New game"].collidepoint(pos):
+                    difficulty = game.difficulty
                     game = Game(game.mode)
+                    game.difficulty = difficulty
                     action, selected = "pawn", False
                     victory_played = False
                 elif buttons["Undo"].collidepoint(pos):
-                    game.undo()
+                    undo_turn(game)
                     action, selected = "pawn", False
+                elif game.mode == "Rise of the Machines" and game.current_player == 1:
+                    continue
                 elif buttons["Wall"].collidepoint(pos):
                     action = "pawn" if action == "wall" else "wall"
                     selected = False
@@ -126,8 +164,36 @@ def main():
                             play_sound(sounds, "move", options["Sound Effects"])
                     else:
                         selected = False
+        computer_turn = (game is not None and game.mode == "Rise of the Machines"
+                         and game.current_player == 1 and game.winner is None)
+        if computer_turn and running:
+            position = (id(game), tuple(game.pawns), frozenset(game.walls),
+                        tuple(game.walls_left), len(game.history))
+            if position != ai_position:
+                ai_position = position
+                ai_search = search(game, game.difficulty)
+                ai_action = None
+            frame_deadline = perf_counter() + 0.004
+            while perf_counter() < frame_deadline:
+                try:
+                    ai_action = next(ai_search)
+                except StopIteration:
+                    if ai_action:
+                        kind, target = ai_action
+                        if kind == "move":
+                            if game.move(target):
+                                play_sound(sounds, "move", options["Sound Effects"])
+                        else:
+                            game.place_wall(target)
+                    action, selected = "pawn", False
+                    ai_position = None
+                    break
+        else:
+            ai_search = ai_position = ai_action = None
         if game is None:
-            if settings_open:
+            if difficulty_open:
+                draw_difficulty(screen, fonts)
+            elif settings_open:
                 draw_settings(screen, fonts, options)
             else:
                 draw_menu(screen, fonts)

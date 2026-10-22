@@ -1,5 +1,5 @@
 GRIDLOCK - DEVELOPMENT VERSION HISTORY
-Current version: 2.1
+Current version: 2.3
 
 VERSION 1.0 - ORIGINAL GAME
 
@@ -89,6 +89,34 @@ VERSION 2.1 - QUALITY OF LIFE & AUDIO UPDATE
   victory navigation, and clean exit.
 - Audio assets are development placeholders. The music is not final,
   optimized, or tailor-made for Gridlock yet.
+
+VERSION 2.3 - RISE OF THE MACHINES
+
+- Enabled Rise of the Machines with a difficulty selection screen:
+  Casual, Challenging, and Back to Main Menu.
+- Added Pathfinder, a lightweight rule-based computer opponent controlling
+  Red. The human controls Blue and moves first; both receive 10 walls.
+- Casual favors movement, varies reasonable choices, and occasionally
+  considers nearby walls. Challenging evaluates both players' BFS routes
+  and all legal wall positions, favoring useful delays and wall conservation.
+- Both difficulties take immediate wins and try to prevent immediate losses.
+- Isolated search in ai/pathfinder.py. Proposed moves and walls are validated
+  and executed through the existing game engine and shared rules.
+- Search runs incrementally between frames, with a legal fallback, about
+  4 ms of work per frame, and a maximum 10-second decision budget.
+- Displayed Red - Pathfinder and the selected difficulty during play.
+- Ignored human board input during computer turns while retaining menu,
+  restart, undo, and window-close controls. Undo restores the human's turn.
+- Play Again and New game preserve the selected AI difficulty.
+- Preserved Versus, Battle Royale, Blitz, victory stickers, audio,
+  settings, wall rotation, clocks, penalties, and turn order.
+- Added AI legality, tactical, deadline, adjacent-pawn, zero-wall,
+  full-match, and UI regression tests, plus a seeded comparison script.
+- Known limitations: no deep lookahead or machine learning; BFS route
+  estimates ignore temporary pawn obstacles, but legal move generation
+  includes them. Difficulty strength is heuristic. Audio remains placeholder.
+- Neural networks using a future backend are deferred to a later release;
+  no PyTorch, TensorFlow, or Keras dependencies have been introduced.
 
 Future releases
 Append a new version entry here when gameplay, visuals, or fixes change.

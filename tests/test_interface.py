@@ -12,7 +12,8 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pygame
 import main
-from board import menu_buttons, settings_buttons, button_rects, victory_buttons
+from board import (menu_buttons, settings_buttons, button_rects, victory_buttons,
+                   difficulty_buttons)
 from game import Game
 
 
@@ -85,11 +86,97 @@ class InterfaceTests(unittest.TestCase):
     def test_all_mode_entries_still_start(self):
         for label, mode in (("Versus", "Versus"),
                             ("Battle Royale", "Battle Royale"),
-                            ("Blitz", "Blitz"),
-                            ("Rise of the Machines", "Versus")):
+                            ("Blitz", "Blitz")):
             with self.subTest(label=label):
                 states, _, _, _ = self.run_frames([[click(menu_buttons()[label])]])
                 self.assertEqual(states[0][0], mode)
+
+    def test_machine_difficulty_selection_and_restart(self):
+        games = []
+        def factory(mode):
+            game = Game(mode)
+            games.append(game)
+            return game
+        for difficulty in ("Casual", "Challenging"):
+            games.clear()
+            states, _, _, _ = self.run_frames([
+                [click(menu_buttons()["Rise of the Machines"])],
+                [click(difficulty_buttons()[difficulty])],
+                [click(button_rects()["New game"])],
+            ], factory)
+            self.assertEqual(len(games), 2)
+            self.assertTrue(all(g.mode == "Rise of the Machines" and
+                                g.difficulty == difficulty for g in games))
+            self.assertEqual(games[-1].current_player, 0)
+
+    def test_computer_turn_ignores_board_input_and_remains_responsive(self):
+        games = []
+        def factory(mode):
+            game = Game(mode, current_player=1)
+            games.append(game)
+            return game
+        def pending_search(*args):
+            while True:
+                yield "move", (1, 4)
+        with patch.object(main, "search", side_effect=pending_search):
+            self.run_frames([
+                [click(menu_buttons()["Rise of the Machines"])],
+                [click(difficulty_buttons()["Challenging"])],
+                [click(button_rects()["Wall"]),
+                 click(pygame.Rect(0, 0, 930, 650), 3)],
+                [click(button_rects()["Menu"])],
+            ], factory)
+        self.assertEqual(games[0].history, [])
+        self.assertEqual(games[0].pawns[1], (0, 4))
+
+    def test_machine_undo_returns_control_to_human(self):
+        game = Game("Rise of the Machines")
+        game.move((7, 4))
+        game.move((1, 4))
+        main.undo_turn(game)
+        self.assertEqual(game.current_player, 0)
+        self.assertEqual(game.pawns, [(8, 4), (0, 4)])
+
+    def test_machine_victory_replay_preserves_difficulty(self):
+        games = []
+        def factory(mode):
+            game = Game(mode)
+            if not games:
+                game.winner = 1
+            games.append(game)
+            return game
+        self.run_frames([
+            [click(menu_buttons()["Rise of the Machines"])],
+            [click(difficulty_buttons()["Challenging"])],
+            [click(victory_buttons()["Play Again"])],
+        ], factory)
+        self.assertEqual(len(games), 2)
+        self.assertEqual(games[1].mode, "Rise of the Machines")
+        self.assertEqual(games[1].difficulty, "Challenging")
+        self.assertIsNone(games[1].winner)
+
+    def test_difficulty_back_returns_to_menu(self):
+        states, _, _, _ = self.run_frames([
+            [click(menu_buttons()["Rise of the Machines"])],
+            [click(difficulty_buttons()["Back to Main Menu"])],
+            [click(menu_buttons()["Versus"])],
+        ])
+        self.assertEqual(states[0][0], "Versus")
+
+    def test_computer_winning_move_uses_engine_and_audio(self):
+        games = []
+        def factory(mode):
+            game = Game(mode, pawns=[(5, 0), (7, 4)], current_player=1)
+            games.append(game)
+            return game
+        _, sound, _, _ = self.run_frames([
+            [click(menu_buttons()["Rise of the Machines"])],
+            [click(difficulty_buttons()["Challenging"])], [],
+        ], factory)
+        self.assertEqual(games[0].winner, 1)
+        self.assertEqual(len(games[0].history), 1)
+        self.assertEqual([call.args[1] for call in sound.call_args_list],
+                         ["move", "victory"])
 
     def test_timeout_sound_once_and_victory_navigation(self):
         matches = []

@@ -23,6 +23,7 @@ class Game:
     time_left: list = field(default_factory=list)
     penalty_used: bool = False
     overtime: float = 0.0
+    difficulty: str = "Casual"
 
     def __post_init__(self):
         count = 4 if self.mode == "Battle Royale" else 2

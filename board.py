@@ -105,6 +105,22 @@ def victory_buttons():
             "Main Menu": pygame.Rect(485, 497, 200, 42)}
 
 
+def difficulty_buttons():
+    return {name: pygame.Rect(260, 220 + i * 90, 410, 60)
+            for i, name in enumerate(("Casual", "Challenging", "Back to Main Menu"))}
+
+
+def draw_difficulty(screen, fonts):
+    title_font, font, small = fonts
+    screen.fill(BACKGROUND)
+    title = title_font.render("RISE OF THE MACHINES", True, TEXT)
+    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 110)))
+    subtitle = font.render("Choose your Pathfinder opponent", True, GROOVE)
+    screen.blit(subtitle, subtitle.get_rect(center=(WINDOW_WIDTH // 2, 160)))
+    for label, rect in difficulty_buttons().items():
+        draw_button(screen, font, label, rect)
+
+
 def draw_menu(screen, fonts):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
@@ -114,7 +130,7 @@ def draw_menu(screen, fonts):
     screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
         draw_button(screen, font, name, rect)
-    draw_text(screen, small, "Rise of the Machines: 2-player placeholder", 300, 596)
+    draw_text(screen, small, "v2.3 - Rise of the Machines", 300, 596)
 
 
 def draw_board(screen, game, moves, action, direction, mouse, fonts):
@@ -151,6 +167,8 @@ def draw_board(screen, game, moves, action, direction, mouse, fonts):
 
     draw_text(screen, title_font, "GRIDLOCK", PANEL_X, 48)
     draw_text(screen, small, game.mode, PANEL_X, 91)
+    if game.mode == "Rise of the Machines":
+        draw_text(screen, small, game.difficulty, PANEL_X + 190, 91)
     pygame.draw.line(screen, GROOVE, (PANEL_X, 116), (885, 116), 1)
     for slot, player in enumerate((0, 2, 1, 3) if game.player_count == 4 else (0, 1)):
         y = 130 + slot * (67 if game.player_count == 4 else 86)
@@ -158,7 +176,8 @@ def draw_board(screen, game, moves, action, direction, mouse, fonts):
         if active:
             pygame.draw.rect(screen, (250, 223, 147), (PANEL_X - 6, y - 7, 276, 60), border_radius=6)
         pygame.draw.circle(screen, PLAYER_COLORS[player], (PANEL_X + 12, y + 12), 11)
-        draw_text(screen, font, PLAYER_NAMES[player] + ("  • TURN" if active else ""), PANEL_X + 31, y)
+        name = "Red - Pathfinder" if game.mode == "Rise of the Machines" and player == 1 else PLAYER_NAMES[player]
+        draw_text(screen, font, name + ("  • TURN" if active else ""), PANEL_X + 31, y)
         draw_text(screen, small, f"Walls: {game.walls_left[player]}", PANEL_X + 31, y + 27)
         if game.is_blitz:
             draw_text(screen, small, f"Clock: {game.time_left[player]:.1f}s", PANEL_X + 164, y + 27)
