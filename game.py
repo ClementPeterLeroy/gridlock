@@ -7,6 +7,8 @@ from settings import PLAYER_NAMES
 STARTS = ((8, 4), (0, 4), (4, 0), (4, 8))
 # Clockwise around the board: bottom -> left -> top -> right.
 FOUR_PLAYER_ORDER = (0, 2, 1, 3)
+CONTROL_OPTIONS = ("Human", "AI - Casual", "AI - Challenging")
+DEFAULT_BR_CONTROLS = ("Human", "AI - Casual", "AI - Casual", "AI - Casual")
 
 
 @dataclass
@@ -24,6 +26,7 @@ class Game:
     penalty_used: bool = False
     overtime: float = 0.0
     difficulty: str = "Casual"
+    controllers: list = field(default_factory=list)
 
     def __post_init__(self):
         count = 4 if self.mode == "Battle Royale" else 2
@@ -41,6 +44,21 @@ class Game:
     @property
     def is_blitz(self):
         return self.mode == "Blitz"
+
+    def controller(self, player):
+        if self.controllers:
+            return self.controllers[player]
+        if self.mode == "Rise of the Machines" and player == 1:
+            return f"AI - {self.difficulty}"
+        return "Human"
+
+    @property
+    def is_ai_turn(self):
+        return self.winner is None and self.controller(self.current_player) != "Human"
+
+    @property
+    def ai_difficulty(self):
+        return self.controller(self.current_player).removeprefix("AI - ")
 
     def snapshot(self):
         return (self.pawns.copy(), self.walls.copy(), self.walls_left.copy(),

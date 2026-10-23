@@ -5,24 +5,33 @@ from time import perf_counter
 from board import (draw_board, draw_menu, draw_victory, load_stickers,
                    square_at, preview_wall, button_rects, menu_buttons,
                    draw_settings, settings_buttons, victory_buttons,
-                   draw_difficulty, difficulty_buttons)
+                   draw_difficulty, difficulty_buttons,
+                   draw_battle_setup, battle_setup_buttons)
 from ai.pathfinder import search
 from audio import load_audio, set_music, play_sound
-from game import Game
+from game import Game, CONTROL_OPTIONS, DEFAULT_BR_CONTROLS
 from rules import valid_moves, wall_error
 from settings import WINDOW_WIDTH, WINDOW_HEIGHT, FPS
 
 
 def undo_turn(game):
     game.undo()
-    if game.mode == "Rise of the Machines" and game.current_player == 1:
+    has_human = any(game.controller(i) == "Human" for i in range(game.player_count))
+    while has_human and game.is_ai_turn and game.history:
         game.undo()
+
+
+def restart_game(game):
+    new_game = Game(game.mode)
+    new_game.difficulty = game.difficulty
+    new_game.controllers = game.controllers.copy()
+    return new_game
 
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Gridlock v2.4")
+    pygame.display.set_caption("Gridlock v2.5")
     fonts = (pygame.font.SysFont("georgia", 36, bold=True),
              pygame.font.SysFont("arial", 18),
              pygame.font.SysFont("arial", 15))
@@ -31,9 +40,12 @@ def main():
     options = {"Music": True, "Sound Effects": True, "Animations": True}
     settings_open = False
     difficulty_open = False
+    battle_setup_open = False
+    battle_controllers = list(DEFAULT_BR_CONTROLS)
     ai_search = None
     ai_position = None
     ai_action = None
+    ai_ready_at = 0.0
     victory_played = False
     clock = pygame.time.Clock()
     game = None
@@ -50,6 +62,25 @@ def main():
             if not running:
                 continue
             if game is None:
+                if battle_setup_open:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                        battle_setup_open = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        for seat, rect in battle_setup_buttons().items():
+                            if rect.collidepoint(event.pos):
+                                if seat == "Back":
+                                    battle_setup_open = False
+                                elif seat == "Start Match":
+                                    game = Game("Battle Royale")
+                                    game.controllers = battle_controllers.copy()
+                                    battle_setup_open = False
+                                    selected = False
+                                    victory_played = False
+                                else:
+                                    index = CONTROL_OPTIONS.index(battle_controllers[seat])
+                                    battle_controllers[seat] = CONTROL_OPTIONS[(index + 1) % len(CONTROL_OPTIONS)]
+                                break
+                    continue
                 if difficulty_open:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                         difficulty_open = False
@@ -89,6 +120,8 @@ def main():
                                 running = False
                             elif name == "Rise of the Machines":
                                 difficulty_open = True
+                            elif name == "Battle Royale":
+                                battle_setup_open = True
                             else:
                                 game = Game(name)
                                 selected = False
@@ -104,16 +137,14 @@ def main():
                                    if rect.collidepoint(event.pos)), None)
                 if choice:
                     if choice == "Play Again":
-                        mode, difficulty = game.mode, game.difficulty
-                        game = Game(mode)
-                        game.difficulty = difficulty
+                        game = restart_game(game)
                     else:
                         game = None
                     selected = False
                     victory_played = False
                 continue
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                if not (game.mode == "Rise of the Machines" and game.current_player == 1):
+                if not game.is_ai_turn:
                     direction = "V" if direction == "H" else "H"
                 continue
             if event.type == pygame.KEYDOWN:
@@ -122,7 +153,7 @@ def main():
                     selected = False
                 elif event.key == pygame.K_ESCAPE:
                     selected = False
-                elif event.key == pygame.K_r and not (game.mode == "Rise of the Machines" and game.current_player == 1):
+                elif event.key == pygame.K_r and not game.is_ai_turn:
                     direction = "V" if direction == "H" else "H"
                 elif event.key == pygame.K_z and event.mod & pygame.KMOD_CTRL:
                     undo_turn(game)
@@ -136,15 +167,13 @@ def main():
                     game = None
                     selected = False
                 elif buttons["New game"].collidepoint(pos):
-                    difficulty = game.difficulty
-                    game = Game(game.mode)
-                    game.difficulty = difficulty
+                    game = restart_game(game)
                     selected = False
                     victory_played = False
                 elif buttons["Undo"].collidepoint(pos):
                     undo_turn(game)
                     selected = False
-                elif game.mode == "Rise of the Machines" and game.current_player == 1:
+                elif game.is_ai_turn:
                     continue
                 else:
                     square = square_at(pos)
@@ -159,34 +188,37 @@ def main():
                         if wall and wall_error(wall, game.walls, game.pawns,
                                                game.walls_left[game.current_player]) is None:
                             game.place_wall(wall)
-        computer_turn = (game is not None and game.mode == "Rise of the Machines"
-                         and game.current_player == 1 and game.winner is None)
+        computer_turn = game is not None and game.is_ai_turn
         if computer_turn and running:
-            position = (id(game), tuple(game.pawns), frozenset(game.walls),
+            position = (id(game), game.current_player, tuple(game.pawns), frozenset(game.walls),
                         tuple(game.walls_left), len(game.history))
             if position != ai_position:
                 ai_position = position
-                ai_search = search(game, game.difficulty)
+                ai_search = search(game, game.ai_difficulty)
                 ai_action = None
+                ai_ready_at = perf_counter() + 3.0
             frame_deadline = perf_counter() + 0.004
-            while perf_counter() < frame_deadline:
+            while ai_search is not None and perf_counter() < frame_deadline:
                 try:
                     ai_action = next(ai_search)
                 except StopIteration:
-                    if ai_action:
-                        kind, target = ai_action
-                        if kind == "move":
-                            if game.move(target):
-                                play_sound(sounds, "move", options["Sound Effects"])
-                        else:
-                            game.place_wall(target)
-                    selected = False
-                    ai_position = None
+                    ai_search = None
                     break
+            if ai_search is None and ai_action and perf_counter() >= ai_ready_at:
+                kind, target = ai_action
+                if kind == "move":
+                    if game.move(target):
+                        play_sound(sounds, "move", options["Sound Effects"])
+                else:
+                    game.place_wall(target)
+                selected = False
+                ai_position = None
         else:
             ai_search = ai_position = ai_action = None
         if game is None:
-            if difficulty_open:
+            if battle_setup_open:
+                draw_battle_setup(screen, fonts, battle_controllers)
+            elif difficulty_open:
                 draw_difficulty(screen, fonts)
             elif settings_open:
                 draw_settings(screen, fonts, options)

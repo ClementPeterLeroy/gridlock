@@ -52,6 +52,10 @@ class MousePreviewTests(unittest.TestCase):
         self.assertIsNone(preview_wall(game, False, "H", intersection()))
         game = Game("Rise of the Machines", current_player=1)
         self.assertIsNone(preview_wall(game, False, "H", intersection()))
+        for player in range(4):
+            game = Game("Battle Royale", current_player=player,
+                        controllers=["AI - Casual"] * 4)
+            self.assertIsNone(preview_wall(game, False, "H", intersection()))
 
     def test_rendered_hover_color_and_removal(self):
         pygame.init()

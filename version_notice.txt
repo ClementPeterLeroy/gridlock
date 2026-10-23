@@ -1,5 +1,5 @@
 GRIDLOCK - DEVELOPMENT VERSION HISTORY
-Current version: 2.4
+Current version: 2.5
 
 VERSION 1.0 - ORIGINAL GAME
 
@@ -149,6 +149,41 @@ VERSION 2.4 - SMART MOUSE CONTROLS
 - Known limitations: narrow grooves require accurate cursor placement.
   Away from groove intersections, previews require a groove matching the
   chosen orientation. Existing placeholder audio and AI limitations remain.
+
+VERSION 2.5 - BATTLE ROYALE: RISE OF THE MACHINES
+
+- Added a Battle Royale setup screen with Human, AI - Casual, and
+  AI - Challenging controls for every seat, plus Start Match and Back.
+- Default seats: Blue Human, Green Casual AI, Red Casual AI, Violet Casual AI.
+  All-human, mixed, and all-AI configurations are supported.
+- Extended the shared Pathfinder to all four goal directions, all opponents'
+  BFS distances, and immediate threats from any opponent. Closest opponents
+  receive priority; wall validation still preserves a route for every pawn.
+- Added a legal wall fallback for temporarily blocked pawn corridors when
+  no pawn move is available and the current player still has walls.
+- Kept clockwise Blue, Green, Red, Violet turns and five walls per seat.
+- Added a nonblocking three-second minimum wait before each AI action in
+  both AI modes. Search overlaps the wait and retains its ten-second limit,
+  incremental processing, and legal fallback proposal.
+- Added per-player Human, Casual AI, and Challenging AI labels. Human board
+  input and previews are disabled during AI turns; menu controls stay usable.
+- Reused the normal game engine for AI execution, move/victory sounds,
+  victory detection, and player-specific stickers.
+- Play Again and New game preserve every seat and difficulty. Undo in mixed
+  matches restores the previous human turn; all-AI undo reverses one action.
+- Preserved v2.4 smart controls, Oxblood walls, lighter previews, bottom-left
+  version label, wooden visuals, audio, settings, and the other game modes.
+- Added controller tests for all 81 configurations, four-direction AI
+  legality and tactics, deadlines, adjacent pawns, no walls, full games,
+  nonblocking pacing, automatic turn advancement, and replay configuration.
+- Automated four-AI check: 12 seeded games finished within 400 turns with
+  no illegal actions or crashes; 815 decisions and 147 wall placements.
+  Mean search 22.9 ms, maximum 112.8 ms, longest incremental step 1.8 ms.
+  Measurements exclude UI pacing and are specific to this local test run.
+- Known limitations: heuristic play has no deep multiplayer lookahead;
+  simultaneous winning threats may not all be preventable in one action.
+  BFS estimates ignore temporary pawn obstacles. Sampled matches do not
+  establish balanced seat strength. Placeholder audio remains unchanged.
 
 Future releases
 Append a new version entry here when gameplay, visuals, or fixes change.

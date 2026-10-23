@@ -7,6 +7,7 @@ from settings import (BOARD_SIZE, CELL_SIZE, GAP, BOARD_X, BOARD_Y,
                       PLAYER_COLORS, PLAYER_NAMES, TEXT, HIGHLIGHT, INVALID,
                       WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND)
 from rules import wall_error
+from game import FOUR_PLAYER_ORDER
 
 STEP = CELL_SIZE + GAP
 PANEL_X = 615
@@ -52,7 +53,7 @@ def preview_wall(game, selected, direction, mouse):
     """Shared hover/click target; unavailable board interactions return None."""
     if (selected or game.winner is not None or square_at(mouse) in game.pawns
             or game.walls_left[game.current_player] <= 0
-            or (game.mode == "Rise of the Machines" and game.current_player == 1)):
+            or game.is_ai_turn):
         return None
     return wall_at(mouse, direction)
 
@@ -132,6 +133,34 @@ def draw_difficulty(screen, fonts):
         draw_button(screen, font, label, rect)
 
 
+def battle_setup_buttons():
+    buttons = {player: pygame.Rect(460, 180 + slot * 78, 285, 52)
+               for slot, player in enumerate(FOUR_PLAYER_ORDER)}
+    buttons["Start Match"] = pygame.Rect(260, 535, 200, 52)
+    buttons["Back"] = pygame.Rect(480, 535, 200, 52)
+    return buttons
+
+
+def draw_battle_setup(screen, fonts, controllers):
+    title_font, font, small = fonts
+    screen.fill(BACKGROUND)
+    title = title_font.render("BATTLE ROYALE", True, TEXT)
+    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 90)))
+    subtitle = font.render("Click each seat to choose Human or Pathfinder AI", True, GROOVE)
+    screen.blit(subtitle, subtitle.get_rect(center=(WINDOW_WIDTH // 2, 135)))
+    positions = ("bottom -> top row", "top -> bottom row",
+                 "left -> right column", "right -> left column")
+    buttons = battle_setup_buttons()
+    for player in FOUR_PLAYER_ORDER:
+        rect = buttons[player]
+        pygame.draw.circle(screen, PLAYER_COLORS[player], (205, rect.centery), 13)
+        draw_text(screen, font, PLAYER_NAMES[player], 230, rect.y)
+        draw_text(screen, small, positions[player], 230, rect.y + 27)
+        draw_button(screen, font, controllers[player], rect)
+    for label in ("Start Match", "Back"):
+        draw_button(screen, font, label, buttons[label])
+
+
 def draw_menu(screen, fonts):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
@@ -141,7 +170,7 @@ def draw_menu(screen, fonts):
     screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
         draw_button(screen, font, name, rect)
-    draw_text(screen, small, "v2.4 - Smart Mouse Controls", 24, WINDOW_HEIGHT - 30)
+    draw_text(screen, small, "v2.5 - Battle Royale: Rise of the Machines", 24, WINDOW_HEIGHT - 30)
 
 
 def draw_board(screen, game, moves, selected, direction, mouse, fonts):
@@ -189,6 +218,10 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts):
         name = "Red - Pathfinder" if game.mode == "Rise of the Machines" and player == 1 else PLAYER_NAMES[player]
         draw_text(screen, font, name + ("  • TURN" if active else ""), PANEL_X + 31, y)
         draw_text(screen, small, f"Walls: {game.walls_left[player]}", PANEL_X + 31, y + 27)
+        if game.mode in ("Battle Royale", "Rise of the Machines"):
+            controller = game.controller(player)
+            label = "Human" if controller == "Human" else controller.removeprefix("AI - ") + " AI"
+            draw_text(screen, small, label, PANEL_X + 137, y + 27)
         if game.is_blitz:
             draw_text(screen, small, f"Clock: {game.time_left[player]:.1f}s", PANEL_X + 164, y + 27)
     timer_y = 422 if game.player_count == 4 else 340
@@ -208,7 +241,9 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts):
     draw_text(screen, small, "R / right-click: rotate   Esc: cancel", PANEL_X, 580)
     if game.winner is None:
         draw_text(screen, small, game.message[:65], 38, 618)
-    hint = "Pawn selected: click again to deselect" if selected else f"Hover grooves to place walls ({direction})"
+    hint = ("Pathfinder thinking / preparing move..." if game.is_ai_turn else
+            "Pawn selected: click again to deselect" if selected else
+            f"Hover grooves to place walls ({direction})")
     draw_text(screen, small, hint, PANEL_X, 603)
 
 

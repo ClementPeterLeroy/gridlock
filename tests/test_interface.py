@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pygame
 import main
 from board import (menu_buttons, settings_buttons, button_rects, victory_buttons,
-                   difficulty_buttons, STEP)
+                   difficulty_buttons, battle_setup_buttons, STEP)
 from game import Game
 from settings import BOARD_X, BOARD_Y, CELL_SIZE, GAP
 
@@ -32,22 +32,46 @@ def groove(row=3, col=3):
                        BOARD_Y + (row + 1) * STEP - GAP, GAP, GAP)
 
 
+def start_mode(mode):
+    events = [click(menu_buttons()[mode])]
+    if mode == "Battle Royale":
+        events.append(click(battle_setup_buttons()["Start Match"]))
+    return events
+
+
 class InterfaceTests(unittest.TestCase):
-    def run_frames(self, frames, factory=Game):
+    def run_frames(self, frames, factory=Game, frame_seconds=0.016):
         states = []
         self.observed = []
+        self.setup_observed = []
+        draw_setup = main.draw_battle_setup
+        def capture_setup(screen, fonts, controllers):
+            self.setup_observed.append(controllers.copy())
+            draw_setup(screen, fonts, controllers)
         def capture(*args):
             states.append((args[1].mode, args[3], args[4], args[1].winner))
             self.observed.append({"selected": args[3], "moves": set(args[2]),
-                                  "snapshot": args[1].snapshot(), "direction": args[4]})
+                                  "snapshot": args[1].snapshot(), "direction": args[4],
+                                  "history_len": len(args[1].history)})
         frames = iter(frames + [[pygame.event.Event(pygame.QUIT)]])
-        with patch.object(main.pygame.event, "get", side_effect=lambda: next(frames)), \
+        now = 0.0
+        def next_frame():
+            nonlocal now
+            now += frame_seconds
+            return next(frames)
+        def timer():
+            nonlocal now
+            now += 0.00005
+            return now
+        with patch.object(main.pygame.event, "get", side_effect=next_frame), \
+             patch.object(main, "perf_counter", side_effect=timer), \
              patch.object(main.pygame.time, "Clock", return_value=SimpleNamespace(tick=lambda fps: 16)), \
              patch.object(main, "Game", side_effect=factory), \
              patch.object(main, "load_audio", return_value={}), \
              patch.object(main, "play_sound") as sound, \
              patch.object(main, "set_music") as music, \
              patch.object(main, "draw_board", side_effect=capture), \
+             patch.object(main, "draw_battle_setup", side_effect=capture_setup), \
              patch.object(main, "draw_settings", wraps=main.draw_settings) as settings:
             main.main()
         return states, sound, music, settings
@@ -91,7 +115,7 @@ class InterfaceTests(unittest.TestCase):
                 game = Game(name)
                 games.append(game)
                 return game
-            frames = [[click(menu_buttons()[mode])]]
+            frames = [start_mode(mode)]
             if mode == "Rise of the Machines":
                 frames.append([click(difficulty_buttons()["Casual"])])
             frames.append([click(groove())])
@@ -161,7 +185,9 @@ class InterfaceTests(unittest.TestCase):
     def test_battle_royale_only_current_pawn_can_be_selected(self):
         game = Game("Battle Royale", current_player=2)
         self.run_frames([
-            [click(menu_buttons()["Battle Royale"])],
+            [click(menu_buttons()["Battle Royale"]),
+             *[click(battle_setup_buttons()[i]) for i in (1, 1, 2, 2, 3, 3)],
+             click(battle_setup_buttons()["Start Match"])],
             [click(square(8, 4)), click(square(0, 4)), click(square(4, 8))],
             [click(square(4, 0))],
         ], lambda mode: game)
@@ -180,6 +206,93 @@ class InterfaceTests(unittest.TestCase):
         self.assertEqual(self.observed[2]["snapshot"][1], set())
         self.assertEqual(self.observed[2]["snapshot"][2], [10, 10])
 
+    def test_battle_setup_defaults_and_back(self):
+        states, _, _, _ = self.run_frames([
+            [click(menu_buttons()["Battle Royale"])],
+            [click(battle_setup_buttons()["Back"])],
+        ])
+        self.assertEqual(states, [])
+        self.assertEqual(self.setup_observed[0], ["Human"] + ["AI - Casual"] * 3)
+
+    def test_battle_setup_cycles_and_replay_preserves_configuration(self):
+        games = []
+        def factory(mode):
+            game = Game(mode)
+            if not games:
+                game.winner = 2
+            games.append(game)
+            return game
+        self.run_frames([
+            [click(menu_buttons()["Battle Royale"])],
+            [click(battle_setup_buttons()[0]), click(battle_setup_buttons()[0]),
+             click(battle_setup_buttons()[1]), click(battle_setup_buttons()[2]),
+             click(battle_setup_buttons()[2]), click(battle_setup_buttons()["Start Match"])],
+            [click(victory_buttons()["Play Again"])],
+            [click(button_rects()["New game"])],
+        ], factory)
+        expected = ["AI - Challenging", "AI - Challenging", "Human", "AI - Casual"]
+        self.assertEqual(len(games), 3)
+        self.assertTrue(all(g.controllers == expected for g in games))
+        self.assertIsNot(games[0].controllers, games[1].controllers)
+        self.assertIsNone(games[1].winner)
+
+    def test_all_human_battle_match_smart_controls(self):
+        self.run_frames([
+            [click(menu_buttons()["Battle Royale"]),
+             *[click(battle_setup_buttons()[i]) for i in (1, 1, 2, 2, 3, 3)],
+             click(battle_setup_buttons()["Start Match"])],
+            [click(square(8, 4)), click(square(7, 4))],
+            [click(square(4, 0))],
+        ])
+        self.assertEqual(self.observed[1]["snapshot"][3], 2)
+        self.assertTrue(self.observed[2]["selected"])
+        self.assertEqual(self.observed[2]["moves"], {(3, 0), (5, 0), (4, 1)})
+
+    def test_ai_waits_three_seconds_without_blocking(self):
+        games = []
+        def factory(mode):
+            game = Game(mode, current_player=1, walls_left=[0, 0])
+            games.append(game)
+            return game
+        self.run_frames([
+            [click(menu_buttons()["Rise of the Machines"])],
+            [click(difficulty_buttons()["Casual"])],
+            [], [], [], [], [], [], [],
+        ], factory, frame_seconds=0.5)
+        self.assertTrue(all(f["history_len"] == 0 for f in self.observed[:6]))
+        self.assertEqual(games[0].current_player, 0)
+        self.assertEqual(len(games[0].history), 1)
+
+    def test_all_ai_battle_advances_automatically_in_clockwise_order(self):
+        games = []
+        def factory(mode):
+            game = Game(mode, walls_left=[0] * 4)
+            games.append(game)
+            return game
+        self.run_frames([
+            [click(menu_buttons()["Battle Royale"]),
+             click(battle_setup_buttons()[0]), click(battle_setup_buttons()["Start Match"])],
+            *[[] for _ in range(19)],
+        ], factory, frame_seconds=1.0)
+        changes = {}
+        for frame in self.observed:
+            changes.setdefault(frame["history_len"], frame["snapshot"][3])
+        self.assertGreaterEqual(len(games[0].history), 4)
+        self.assertEqual([changes[i] for i in range(5)], [0, 2, 1, 3, 0])
+
+    def test_menu_cancels_pending_ai_action(self):
+        games = []
+        def factory(mode):
+            game = Game(mode, current_player=1, walls_left=[0, 0])
+            games.append(game)
+            return game
+        self.run_frames([
+            [click(menu_buttons()["Rise of the Machines"])],
+            [click(difficulty_buttons()["Casual"])],
+            [click(button_rects()["Menu"])], [], [], [], [],
+        ], factory, frame_seconds=1.0)
+        self.assertEqual(games[0].history, [])
+
     def test_effect_toggle_suppresses_playback(self):
         from unittest.mock import Mock
         from audio import play_sound
@@ -194,7 +307,7 @@ class InterfaceTests(unittest.TestCase):
                             ("Battle Royale", "Battle Royale"),
                             ("Blitz", "Blitz")):
             with self.subTest(label=label):
-                states, _, _, _ = self.run_frames([[click(menu_buttons()[label])]])
+                states, _, _, _ = self.run_frames([start_mode(label)])
                 self.assertEqual(states[0][0], mode)
 
     def test_machine_difficulty_selection_and_restart(self):
@@ -277,8 +390,8 @@ class InterfaceTests(unittest.TestCase):
             return game
         _, sound, _, _ = self.run_frames([
             [click(menu_buttons()["Rise of the Machines"])],
-            [click(difficulty_buttons()["Challenging"])], [],
-        ], factory)
+            [click(difficulty_buttons()["Challenging"])], [], [], [], [],
+        ], factory, frame_seconds=1.0)
         self.assertEqual(games[0].winner, 1)
         self.assertEqual(len(games[0].history), 1)
         self.assertEqual([call.args[1] for call in sound.call_args_list],
@@ -309,7 +422,7 @@ class InterfaceTests(unittest.TestCase):
             game.winner = 0
             return game
         states, _, _, _ = self.run_frames([
-            [click(menu_buttons()["Battle Royale"])],
+            start_mode("Battle Royale"),
             [click(victory_buttons()["Main Menu"])],
             [click(menu_buttons()["Exit Game"])],
         ], factory)
