@@ -1,5 +1,5 @@
 GRIDLOCK - DEVELOPMENT VERSION HISTORY
-Current version: 2.3
+Current version: 2.4
 
 VERSION 1.0 - ORIGINAL GAME
 
@@ -117,6 +117,38 @@ VERSION 2.3 - RISE OF THE MACHINES
   includes them. Difficulty strength is heuristic. Audio remains placeholder.
 - Neural networks using a future backend are deferred to a later release;
   no PyTorch, TensorFlow, or Keras dependencies have been introduced.
+
+VERSION 2.4 - SMART MOUSE CONTROLS
+
+- Widened groove detection by 3 pixels on each side for easier aiming.
+- Lightened golden wall previews and used Oxblood (#5C1F25) for placed walls.
+- Moved the main-menu version label to the bottom-left.
+
+- Replaced manual Wall Mode with automatic wall-hover previews and direct
+  left-click placement. Removed the Wall button and expanded Undo to fill
+  the freed space while preserving New game and Menu.
+- Valid walls preview in translucent golden brown; invalid walls preview
+  in red. Hovering off a groove immediately hides the preview.
+- Restricted wall detection to actual board grooves to avoid previews or
+  accidental placements over squares, pawns, and interface controls.
+- Preserved right-click and R rotation. The chosen orientation persists
+  across turns until changed. Preview validity updates after rotation.
+- Clicking the active pawn selects it and shows green legal destinations.
+  Clicking it again deselects it and restores automatic wall previews.
+  Esc also clears selection. Illegal destinations and groove clicks keep
+  movement selection active without placing walls.
+- Successful moves and wall placements clear selection and end the turn.
+- Disabled interactive wall previews with no walls left, during computer
+  turns, and after victory. Only the active pawn is selectable in all modes.
+- Reused the existing rules engine for placement validation and movement;
+  Pathfinder's action interface and both difficulty algorithms are unchanged.
+- Preserved rules, clocks, penalties, turn order, music, sounds, settings,
+  victory screens, undo, restart, and all four game modes.
+- Added direct-placement and selection regression tests across modes,
+  plus headless Pygame rendering checks for preview colors and visibility.
+- Known limitations: narrow grooves require accurate cursor placement.
+  Away from groove intersections, previews require a groove matching the
+  chosen orientation. Existing placeholder audio and AI limitations remain.
 
 Future releases
 Append a new version entry here when gameplay, visuals, or fixes change.

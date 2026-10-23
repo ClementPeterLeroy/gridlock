@@ -1,4 +1,4 @@
-# Gridlock — version 2.3
+# Gridlock — version 2.4
 
 A local desktop strategy board game made with Python and Pygame.
 
@@ -22,9 +22,19 @@ python main.py
 
 ## Controls
 
-- Click the current pawn, then a highlighted square to move.
-- Click **Wall**, hover near a groove, and click to place a wall.
-- **R** or **right-click** rotates the wall preview during wall placement; **Esc** cancels selection.
+- Hover over a board groove to preview a wall, then **left-click** to place it.
+  Valid previews are translucent golden brown; invalid previews are red.
+  No Wall button or mode activation is needed. Previews disappear off grooves.
+- **R** or **right-click** rotates the wall orientation, which stays selected
+  until you change it again. At a groove intersection both orientations can
+  be previewed; elsewhere the cursor must be on a groove matching the orientation.
+- Click the current player's pawn to show legal destinations in green and
+  hide wall previews. Click a highlighted square to move, or click the pawn
+  again to deselect. Illegal destinations and wall-slot clicks keep the pawn
+  selected without placing a wall. **Esc** also clears selection.
+- Successful moves and walls end the turn and clear pawn selection.
+- Wall previews and placement are disabled with no walls left, during the
+  computer's turn, and after the match ends.
 - **Undo** or **Ctrl+Z** restores the previous completed move (including clocks and wall penalties stored at that time).
 - **New game** restarts the current mode; **Menu** returns to the menu.
 - On victory: click **Play Again** to restart the same mode or **Main Menu** to return to mode selection. **N** and **M** remain available as shortcuts.
@@ -48,7 +58,7 @@ The game remains playable if an audio device or file is unavailable.
 The music and sound files are development placeholders: they are not final,
 optimized, or tailor-made for Gridlock yet.
 
-See `version_notice.txt` for development history from 1.0 through 2.3.
+See `version_notice.txt` for development history from 1.0 through 2.4.
 
 ## Pathfinder
 

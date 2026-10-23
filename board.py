@@ -24,25 +24,37 @@ def square_at(pos):
 
 
 def wall_at(pos, direction):
-    """Pick the nearest groove intersection for a wall preview."""
+    """Pick a groove with three pixels of tolerance on either side."""
     x, y = pos[0] - BOARD_X, pos[1] - BOARD_Y
+    if not (0 <= x < BOARD_PIXELS and 0 <= y < BOARD_PIXELS):
+        return None
+    tolerance = GAP / 2 + 3
     if direction == "H":
-        col = int((x - CELL_SIZE / 2) // STEP)
-        row = int((y - CELL_SIZE) // STEP)
+        row = round((y - CELL_SIZE - GAP / 2) / STEP)
+        col = max(0, min(7, int((x - CELL_SIZE / 2) // STEP)))
         if 0 <= row < 8 and 0 <= col < 8:
             center_x = (col + 1) * STEP - GAP / 2
             center_y = (row + 1) * STEP - GAP / 2
-            if abs(y - center_y) <= 16 and abs(x - center_x) <= STEP:
+            if abs(y - center_y) <= tolerance and abs(x - center_x) <= STEP:
                 return row, col, "H"
     else:
-        col = int((x - CELL_SIZE) // STEP)
-        row = int((y - CELL_SIZE / 2) // STEP)
+        col = round((x - CELL_SIZE - GAP / 2) / STEP)
+        row = max(0, min(7, int((y - CELL_SIZE / 2) // STEP)))
         if 0 <= row < 8 and 0 <= col < 8:
             center_x = (col + 1) * STEP - GAP / 2
             center_y = (row + 1) * STEP - GAP / 2
-            if abs(x - center_x) <= 16 and abs(y - center_y) <= STEP:
+            if abs(x - center_x) <= tolerance and abs(y - center_y) <= STEP:
                 return row, col, "V"
     return None
+
+
+def preview_wall(game, selected, direction, mouse):
+    """Shared hover/click target; unavailable board interactions return None."""
+    if (selected or game.winner is not None or square_at(mouse) in game.pawns
+            or game.walls_left[game.current_player] <= 0
+            or (game.mode == "Rise of the Machines" and game.current_player == 1)):
+        return None
+    return wall_at(mouse, direction)
 
 
 def wall_rect(wall):
@@ -62,8 +74,7 @@ def draw_text(screen, font, value, x, y, color=TEXT):
 
 def button_rects():
     return {
-        "Wall": pygame.Rect(PANEL_X, 477, 130, 39),
-        "Undo": pygame.Rect(PANEL_X + 140, 477, 130, 39),
+        "Undo": pygame.Rect(PANEL_X, 477, 270, 39),
         "New game": pygame.Rect(PANEL_X, 526, 130, 39),
         "Menu": pygame.Rect(PANEL_X + 140, 526, 130, 39),
     }
@@ -130,10 +141,10 @@ def draw_menu(screen, fonts):
     screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
         draw_button(screen, font, name, rect)
-    draw_text(screen, small, "v2.3 - Rise of the Machines", 300, 596)
+    draw_text(screen, small, "v2.4 - Smart Mouse Controls", 24, WINDOW_HEIGHT - 30)
 
 
-def draw_board(screen, game, moves, action, direction, mouse, fonts):
+def draw_board(screen, game, moves, selected, direction, mouse, fonts):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
     pygame.draw.rect(screen, GROOVE, (BOARD_X - 10, BOARD_Y - 10,
@@ -149,15 +160,14 @@ def draw_board(screen, game, moves, action, direction, mouse, fonts):
                 pygame.draw.circle(screen, HIGHLIGHT,
                                    (x + CELL_SIZE // 2, y + CELL_SIZE // 2), 9)
     for wall in game.walls:
-        pygame.draw.rect(screen, (69, 45, 30), wall_rect(wall), border_radius=3)
-    if action == "wall" and game.winner is None:
-        wall = wall_at(mouse, direction)
-        if wall:
-            error = wall_error(wall, game.walls, game.pawns, game.walls_left[game.current_player])
-            overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
-            color = (*INVALID, 160) if error else (*HIGHLIGHT, 180)
-            pygame.draw.rect(overlay, color, wall_rect(wall), border_radius=3)
-            screen.blit(overlay, (0, 0))
+        pygame.draw.rect(screen, (92, 31, 37), wall_rect(wall), border_radius=3)
+    wall = preview_wall(game, selected, direction, mouse)
+    if wall:
+        error = wall_error(wall, game.walls, game.pawns, game.walls_left[game.current_player])
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+        color = (*INVALID, 160) if error else (255, 225, 140, 200)
+        pygame.draw.rect(overlay, color, wall_rect(wall), border_radius=3)
+        screen.blit(overlay, (0, 0))
     for player, (row, col) in enumerate(game.pawns):
         center = (BOARD_X + col * STEP + CELL_SIZE // 2,
                   BOARD_Y + row * STEP + CELL_SIZE // 2)
@@ -198,8 +208,8 @@ def draw_board(screen, game, moves, action, direction, mouse, fonts):
     draw_text(screen, small, "R / right-click: rotate   Esc: cancel", PANEL_X, 580)
     if game.winner is None:
         draw_text(screen, small, game.message[:65], 38, 618)
-    if action == "wall":
-        draw_text(screen, small, f"Wall preview: {direction}", PANEL_X, 603)
+    hint = "Pawn selected: click again to deselect" if selected else f"Hover grooves to place walls ({direction})"
+    draw_text(screen, small, hint, PANEL_X, 603)
 
 
 def load_stickers():

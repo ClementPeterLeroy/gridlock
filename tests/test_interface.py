@@ -13,17 +13,33 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pygame
 import main
 from board import (menu_buttons, settings_buttons, button_rects, victory_buttons,
-                   difficulty_buttons)
+                   difficulty_buttons, STEP)
 from game import Game
+from settings import BOARD_X, BOARD_Y, CELL_SIZE, GAP
 
 
 def click(rect, button=1):
     return pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=rect.center, button=button)
 
 
+def square(row, col):
+    return pygame.Rect(BOARD_X + col * STEP, BOARD_Y + row * STEP,
+                       CELL_SIZE, CELL_SIZE)
+
+
+def groove(row=3, col=3):
+    return pygame.Rect(BOARD_X + (col + 1) * STEP - GAP,
+                       BOARD_Y + (row + 1) * STEP - GAP, GAP, GAP)
+
+
 class InterfaceTests(unittest.TestCase):
     def run_frames(self, frames, factory=Game):
         states = []
+        self.observed = []
+        def capture(*args):
+            states.append((args[1].mode, args[3], args[4], args[1].winner))
+            self.observed.append({"selected": args[3], "moves": set(args[2]),
+                                  "snapshot": args[1].snapshot(), "direction": args[4]})
         frames = iter(frames + [[pygame.event.Event(pygame.QUIT)]])
         with patch.object(main.pygame.event, "get", side_effect=lambda: next(frames)), \
              patch.object(main.pygame.time, "Clock", return_value=SimpleNamespace(tick=lambda fps: 16)), \
@@ -31,21 +47,20 @@ class InterfaceTests(unittest.TestCase):
              patch.object(main, "load_audio", return_value={}), \
              patch.object(main, "play_sound") as sound, \
              patch.object(main, "set_music") as music, \
-             patch.object(main, "draw_board", side_effect=lambda *args: states.append(
-                 (args[1].mode, args[3], args[4], args[1].winner))), \
+             patch.object(main, "draw_board", side_effect=capture), \
              patch.object(main, "draw_settings", wraps=main.draw_settings) as settings:
             main.main()
         return states, sound, music, settings
 
-    def test_rotation_only_during_wall_placement(self):
+    def test_rotation_without_manual_wall_mode(self):
         states, _, _, _ = self.run_frames([
             [click(menu_buttons()["Versus"])],
             [click(pygame.Rect(0, 0, 1, 1), 3)],
-            [click(button_rects()["Wall"])],
             [click(pygame.Rect(0, 0, 1, 1), 3)],
             [pygame.event.Event(pygame.KEYDOWN, key=pygame.K_r, mod=0)],
         ])
-        self.assertEqual([s[2] for s in states[:5]], ["H", "H", "H", "V", "H"])
+        self.assertEqual([s[2] for s in states[:4]], ["H", "V", "H", "V"])
+        self.assertNotIn("Wall", button_rects())
 
     def test_settings_persist_when_reopened(self):
         _, _, music, settings = self.run_frames([
@@ -63,16 +78,107 @@ class InterfaceTests(unittest.TestCase):
                          {"Music": False, "Sound Effects": False, "Animations": False})
 
     def test_successful_move_plays_sound(self):
-        from settings import BOARD_X, BOARD_Y, CELL_SIZE
-        from board import STEP
-        def square(row, col):
-            return pygame.Rect(BOARD_X + col * STEP, BOARD_Y + row * STEP,
-                               CELL_SIZE, CELL_SIZE)
         _, sound, _, _ = self.run_frames([
             [click(menu_buttons()["Versus"])],
             [click(square(8, 4)), click(square(7, 4))],
         ])
         sound.assert_called_once_with({}, "move", True)
+
+    def test_direct_wall_placement_in_all_modes(self):
+        for mode in ("Versus", "Blitz", "Battle Royale", "Rise of the Machines"):
+            games = []
+            def factory(name):
+                game = Game(name)
+                games.append(game)
+                return game
+            frames = [[click(menu_buttons()[mode])]]
+            if mode == "Rise of the Machines":
+                frames.append([click(difficulty_buttons()["Casual"])])
+            frames.append([click(groove())])
+            def pending(*args):
+                while True:
+                    yield "move", (1, 4)
+            with self.subTest(mode=mode), patch.object(main, "search", side_effect=pending):
+                self.run_frames(frames, factory)
+                self.assertEqual(games[0].walls, {(3, 3, "H")})
+                self.assertEqual(games[0].walls_left[0], 4 if mode == "Battle Royale" else 9)
+                self.assertEqual(games[0].current_player, 2 if mode == "Battle Royale" else 1)
+
+    def test_selected_pawn_blocks_walls_and_keeps_selection_on_illegal_click(self):
+        self.run_frames([
+            [click(menu_buttons()["Versus"])],
+            [click(square(8, 4))],
+            [click(groove())],
+            [click(square(4, 4))],
+            [click(square(7, 4))],
+        ])
+        for frame in self.observed[1:4]:
+            self.assertTrue(frame["selected"])
+            self.assertEqual(frame["moves"], {(7, 4), (8, 3), (8, 5)})
+            self.assertEqual(frame["snapshot"][1], set())
+            self.assertEqual(frame["snapshot"][0][0], (8, 4))
+        self.assertFalse(self.observed[4]["selected"])
+        self.assertEqual(self.observed[4]["moves"], set())
+        self.assertEqual(self.observed[4]["snapshot"][0][0], (7, 4))
+
+    def test_deselection_restores_direct_placement(self):
+        self.run_frames([
+            [click(menu_buttons()["Versus"])],
+            [click(square(8, 4))],
+            [click(square(8, 4))],
+            [click(groove())],
+        ])
+        self.assertTrue(self.observed[1]["selected"])
+        self.assertFalse(self.observed[2]["selected"])
+        self.assertEqual(self.observed[2]["moves"], set())
+        self.assertEqual(self.observed[3]["snapshot"][1], {(3, 3, "H")})
+
+    def test_invalid_wall_and_empty_square_do_not_change_state(self):
+        game = Game(walls={(3, 3, "H")})
+        before = game.snapshot()
+        self.run_frames([
+            [click(menu_buttons()["Versus"])],
+            [click(groove()), click(square(4, 4))],
+            [click(groove(), 3), click(groove())],
+        ], lambda mode: game)
+        self.assertEqual(game.snapshot()[:5], before[:5])
+        self.assertEqual(game.history, [])
+
+    def test_zero_walls_and_finished_match_ignore_placement(self):
+        for finished in (False, True):
+            game = Game(walls_left=[0, 10])
+            if finished:
+                game.winner = 0
+                game.walls_left[0] = 10
+            before = game.snapshot()
+            self.run_frames([
+                [click(menu_buttons()["Versus"])],
+                [click(groove()), click(square(8, 4))],
+            ], lambda mode: game)
+            self.assertEqual(game.snapshot()[:5], before[:5])
+            self.assertEqual(game.history, [])
+
+    def test_battle_royale_only_current_pawn_can_be_selected(self):
+        game = Game("Battle Royale", current_player=2)
+        self.run_frames([
+            [click(menu_buttons()["Battle Royale"])],
+            [click(square(8, 4)), click(square(0, 4)), click(square(4, 8))],
+            [click(square(4, 0))],
+        ], lambda mode: game)
+        self.assertFalse(self.observed[1]["selected"])
+        self.assertTrue(self.observed[2]["selected"])
+        self.assertEqual(self.observed[2]["moves"], {(3, 0), (5, 0), (4, 1)})
+
+    def test_wall_orientation_persists_and_undo_restores_wall(self):
+        self.run_frames([
+            [click(menu_buttons()["Versus"])],
+            [pygame.event.Event(pygame.KEYDOWN, key=pygame.K_r, mod=0), click(groove())],
+            [click(button_rects()["Undo"])],
+        ])
+        self.assertEqual(self.observed[1]["snapshot"][1], {(3, 3, "V")})
+        self.assertEqual(self.observed[2]["direction"], "V")
+        self.assertEqual(self.observed[2]["snapshot"][1], set())
+        self.assertEqual(self.observed[2]["snapshot"][2], [10, 10])
 
     def test_effect_toggle_suppresses_playback(self):
         from unittest.mock import Mock
@@ -122,7 +228,7 @@ class InterfaceTests(unittest.TestCase):
             self.run_frames([
                 [click(menu_buttons()["Rise of the Machines"])],
                 [click(difficulty_buttons()["Challenging"])],
-                [click(button_rects()["Wall"]),
+                [click(groove()), click(square(0, 4)),
                  click(pygame.Rect(0, 0, 930, 650), 3)],
                 [click(button_rects()["Menu"])],
             ], factory)
