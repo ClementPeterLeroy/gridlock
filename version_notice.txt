@@ -90,6 +90,11 @@ VERSION 2.1 - QUALITY OF LIFE & AUDIO UPDATE
 - Audio assets are development placeholders. The music is not final,
   optimized, or tailor-made for Gridlock yet.
 
+VERSION 2.2 - PHANTOM RELEASE
+
+- Skipped release: development work was scrapped and deferred to a later
+  patch. Development moved directly to v2.3; no v2.2 features were released.
+
 VERSION 2.3 - RISE OF THE MACHINES
 
 - Enabled Rise of the Machines with a difficulty selection screen:
@@ -150,7 +155,7 @@ VERSION 2.4 - SMART MOUSE CONTROLS
   Away from groove intersections, previews require a groove matching the
   chosen orientation. Existing placeholder audio and AI limitations remain.
 
-VERSION 2.5 - BATTLE ROYALE: RISE OF THE MACHINES
+VERSION 2.5 - DAWN OF THE MACHINES
 
 - Added a Battle Royale setup screen with Human, AI - Casual, and
   AI - Challenging controls for every seat, plus Start Match and Back.
