@@ -42,7 +42,7 @@ def main():
                     break
             else:
                 unfinished += 1
-    print(f"20 matches, seeds 0-9, alternating Blue/Red: {wins}")
+    print(f"20 matches, seeds 0-9, alternating Sapphire/Crimson: {wins}")
     print(f"Unfinished at 300 turns: {unfinished}")
     print(f"Decisions: {len(times)}, mean: {sum(times) / len(times):.4f}s, "
           f"maximum: {max(times):.4f}s, longest search step: {longest_step:.4f}s")

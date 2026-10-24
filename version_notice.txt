@@ -1,5 +1,5 @@
 GRIDLOCK - DEVELOPMENT VERSION HISTORY
-Current version: 2.6
+Current version: 2.7
 
 VERSION 1.0 - ORIGINAL GAME
 
@@ -226,6 +226,39 @@ VERSION 2.6 - MATCH CUSTOMIZATION
 - Known limitations: session-only names/options, 12-character names with
   system-font coverage, simple animations, heuristic AI, and placeholder
   audio. No records, branding overhaul, or machine learning added.
+
+VERSION 2.7 - GRIDLOCK IDENTITY
+
+- Renamed player identities to Sapphire (index 0), Crimson (index 1),
+  Emerald (index 2), and Violet (index 3), preserving all positions,
+  goal directions, colors, and clockwise turn order.
+- Kept 12-character custom human names; empty names and AI seats use their
+  color identity. Pathfinder difficulty remains visible separately.
+- Prepared text-free color-specific SVG victory templates and transparent
+  PNG exports, retaining the original trophy, foam hands, and banner.
+- Added uppercase personalized victory text with Cinzel, centered and scaled
+  to fit each banner. Generated stickers are cached at match initialization,
+  reused across restart/replay, and replaced only when a seat's name changes.
+- Added the official logo above the main-menu buttons and a 128-pixel window
+  icon with the existing lock/gems, dark grid, and white outer background.
+  Separate logo/icon assets were absent: these exports reuse artwork from
+  the supplied video's final frame rather than generating replacement art.
+- Added once-per-launch startup MP4 playback before the menu and music.
+  Every frame is displayed with preserved aspect ratio. Playback cannot be
+  skipped, but window close remains active and shuts down the decoder.
+- Added imageio-ffmpeg for video decoding on a worker with a bounded frame
+  queue. Kept Pygame rendering/events on the main thread; no large video
+  framework or mandatory runtime SVG renderer was introduced.
+- Bundled Cinzel display and Lato interface fonts with their SIL OFL 1.1
+  licenses. Cached font sizes, fitted long labels, and provided logged
+  fallbacks for missing fonts, media, and artwork.
+- Added identity.py, startup.py, development-only asset export tooling,
+  asset provenance documentation, and identity/cache/startup lifecycle tests.
+- Preserved all v2.6 gameplay, match options, pause behavior, smart controls,
+  Oxblood walls, golden previews, audio, AI algorithms, and AI presentation delay.
+- Known limitations: logo exports inherit the video's opaque grid and
+  compression; startup playback is video-only, with game music afterward.
+  Font character coverage is finite; placeholder audio and heuristic AI remain.
 
 Future releases
 Append a new version entry here when gameplay, visuals, or fixes change.

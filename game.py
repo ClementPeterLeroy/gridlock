@@ -68,7 +68,7 @@ class Game:
         return self.controller(self.current_player).removeprefix("AI - ")
 
     def display_name(self, player):
-        return ("Pathfinder" if self.controller(player) != "Human" else
+        return (PLAYER_NAMES[player] if self.controller(player) != "Human" else
                 clean_name(self.config.names[player], player))
 
     def player_label(self, player):

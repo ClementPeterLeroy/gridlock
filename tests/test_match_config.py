@@ -16,13 +16,13 @@ from rules import wall_error, valid_moves, has_path
 
 class MatchConfigTests(unittest.TestCase):
     def test_names_defaults_limit_and_ai_identity(self):
-        self.assertEqual(clean_name('  ', 2), 'Green')
+        self.assertEqual(clean_name('  ', 2), 'Emerald')
         self.assertEqual(clean_name('abcdefghijklmnop', 0), 'abcdefghijkl')
         config = MatchConfig.for_mode('Battle Royale')
         config.names[0] = 'Alex'
         game = create_game(config)
         self.assertEqual(game.display_name(0), 'Alex')
-        self.assertEqual(game.display_name(1), 'Pathfinder')
+        self.assertEqual(game.display_name(1), 'Crimson')
 
     def test_random_start_and_clockwise_order_for_every_seat(self):
         config = MatchConfig.for_mode('Battle Royale')

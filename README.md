@@ -1,4 +1,4 @@
-# Gridlock — version 2.6
+# Gridlock — version 2.7
 
 A local desktop strategy board game made with Python and Pygame.
 
@@ -14,9 +14,9 @@ python main.py
 ## Modes
 
 - **Versus:** two human players, 10 walls each; choose Untimed or a turn limit.
-- **Battle Royale:** four seats, 5 walls each. The setup screen lets you click each seat to cycle between Human, AI - Casual, and AI - Challenging, then select Start Match or Back. Initially Blue is Human and the other three seats are Casual AI. Any combination works, including all humans or all AI. Turn order remains Blue (bottom), Green (left), Red (top), Violet (right), clockwise. Each pawn must reach the opposite edge.
+- **Battle Royale:** four seats, 5 walls each. The setup screen lets you click each seat to cycle between Human, AI - Casual, and AI - Challenging, then select Start Match or Back. Initially Sapphire is Human and the other three seats are Casual AI. Any combination works, including all humans or all AI. Turn order remains Sapphire (bottom), Emerald (left), Crimson (top), Violet (right), clockwise. Each pawn must reach the opposite edge.
 - **Blitz:** two human players with a selectable 1-, 3-, or 5-minute starting clock (3 by default), paused outside their turns. At the start of each turn, remaining time is raised to 10 seconds **only when below 10**. When it runs out, the player loses one wall and gets 15 seconds to finish the turn. One wall penalty maximum per turn; subsequent time expiry in that turn loses the game. No walls to pay the penalty also loses the game.
-- **Rise of the Machines:** play Blue against Red — Pathfinder. Choose Casual or Challenging in setup. Blue moves first unless Random Starting Player is enabled; both players start with 10 walls and use standard Versus rules. This mode remains untimed.
+- **Rise of the Machines:** play Sapphire against Crimson, controlled by Pathfinder. Choose Casual or Challenging in setup. Sapphire moves first unless Random Starting Player is enabled; both players start with 10 walls and use standard Versus rules. This mode remains untimed.
 - **Settings:** Music, Sound Effects, and Animations On/Off toggles. Changes apply immediately and last until the app closes. Animations controls the starting-player reveal and brief incoming-turn highlights.
 - **Exit Game:** closes the application from the bottom-right of the main menu.
 
@@ -24,8 +24,9 @@ python main.py
 
 Every mode opens the same setup layout before starting. Click a human name
 field and type to enter up to 12 characters; Backspace edits and Enter ends
-editing. Blank names default to the player's color. AI seats are always
-named Pathfinder, with difficulty displayed separately. Versus and Blitz
+editing. Blank names default to Sapphire, Emerald, Crimson, or Violet.
+AI seats also use their color identity, with difficulty displayed separately.
+Pathfinder remains the name of the AI algorithm. Versus and Blitz
 retain two human seats; Battle Royale allows any human/AI combination.
 
 Random Starting Player is off by default. When enabled, a starter is drawn
@@ -73,7 +74,28 @@ available during the application session; nothing is stored permanently.
   resumes automatically. Board input is ignored on the computer's turn;
   Menu, New game, Undo, and closing the window remain available.
 
-The active player's square is gold. Original SVG stickers are in `content/px`; PNG renderings of the same stickers are bundled for reliable Pygame display without extra packages.
+The active player's square is gold. Personalized uppercase victory text is
+rendered into the appropriate color-specific sticker when a match starts.
+Stickers are cached and reused on restart when names are unchanged. Long
+names scale to fit the banner, and no duplicate winner label is displayed.
+
+## Identity and startup
+
+The official logo appears above the main-menu buttons, with a matching
+application icon. The provided 5.8-second startup MP4 plays once per launch
+before the menu and background music. It is not skippable; window-close
+events remain responsive. Video playback is silent and preserves aspect
+ratio. Missing assets or decoding failures log warnings and fall back safely.
+
+Cinzel supplies display headings and victory banners; Lato supplies interface
+text. Font files and licenses are bundled, with a built-in Pygame fallback.
+`imageio-ffmpeg` in `requirements.txt` provides video decoding. No CairoSVG,
+Pillow, or SVG conversion tool is required at runtime.
+
+The separate official logo/icon files were absent, so the bundled menu logo
+and icon reuse the final-frame artwork from the supplied video. Its dark grid
+is opaque. See [asset sources, licenses, and export instructions](content/ASSETS.md)
+for these derivations and the text-free SVG/PNG sticker templates.
 
 ## Audio
 
@@ -87,7 +109,7 @@ The game remains playable if an audio device or file is unavailable.
 The music and sound files are development placeholders: they are not final,
 optimized, or tailor-made for Gridlock yet.
 
-See `version_notice.txt` for development history from 1.0 through 2.6.
+See `version_notice.txt` for development history from 1.0 through 2.7.
 
 ## Pathfinder
 
@@ -121,8 +143,9 @@ full jump and sidestep rules. Difficulty is heuristic, not a skill rating.
 Future neural agents can provide the same proposed-action interface.
 
 Match options live in `match_config.py`, rule and timeout state in `game.py`,
-and setup/pause presentation in `board.py` and `main.py`. Names are limited
-to 12 characters and rely on the system font's character support. The start
+and setup/pause presentation in `board.py` and `main.py`. Identity assets and
+their caches live in `identity.py`; video playback lives in `startup.py`.
+Names are limited to 12 characters and rely on the bundled font's character support. The start
 reveal and turn highlight are deliberately simple; no profiles, records,
 or new graphics/audio dependencies are included.
 

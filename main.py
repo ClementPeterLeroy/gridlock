@@ -5,12 +5,14 @@ import random
 from time import perf_counter
 import pygame
 
-from board import (draw_board, draw_menu, draw_victory, load_stickers,
+from board import (draw_board, draw_menu, draw_victory,
                    square_at, preview_wall, button_rects, menu_buttons,
                    draw_settings, settings_buttons, setup_buttons, draw_setup,
                    pause_buttons, draw_pause, draw_starting_player, victory_buttons)
 from ai.pathfinder import search
 from audio import load_audio, set_music, play_sound
+from identity import IdentityAssets
+from startup import play_startup
 from game import Game
 from match_config import MatchConfig, CONTROL_OPTIONS, NAME_LIMIT
 from rules import valid_moves, wall_error
@@ -53,10 +55,16 @@ def position_key(game):
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Gridlock v2.6")
-    fonts = (pygame.font.SysFont("georgia", 36, bold=True),
-             pygame.font.SysFont("arial", 18), pygame.font.SysFont("arial", 15))
-    stickers = load_stickers()
+    pygame.display.set_caption("Gridlock v2.7")
+    assets = IdentityAssets()
+    if assets.icon is not None:
+        pygame.display.set_icon(assets.icon)
+    fonts = assets.fonts
+    clock = pygame.time.Clock()
+    if not play_startup(screen, clock):
+        pygame.quit()
+        return
+    stickers = {}
     sounds = load_audio()
     options = {"Music": True, "Sound Effects": True, "Animations": True}
     presets = {}
@@ -73,11 +81,11 @@ def main():
     turn_key = None
     victory_played = False
     running = True
-    clock = pygame.time.Clock()
 
     def launch(new_game):
-        nonlocal game, view, ai_state, selected, intro_elapsed, victory_played, turn_key, turn_age
+        nonlocal game, view, ai_state, selected, intro_elapsed, victory_played, turn_key, turn_age, stickers
         game = new_game
+        stickers = assets.stickers_for(game)
         game.paused = False
         view = "intro" if game.config.random_start and options["Animations"] else "game"
         ai_state, selected = None, False
@@ -290,7 +298,7 @@ def main():
                 victory_played = True
 
         if view == "menu":
-            draw_menu(screen, fonts)
+            draw_menu(screen, fonts, assets.logo)
         elif view == "setup":
             draw_setup(screen, fonts, config, editing)
         elif view in ("settings", "pause_settings"):

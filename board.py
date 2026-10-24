@@ -1,7 +1,7 @@
 """Pygame drawing and mouse position helpers."""
 
-from pathlib import Path
 import pygame
+from identity import fit_image
 from settings import (BOARD_SIZE, CELL_SIZE, GAP, BOARD_X, BOARD_Y,
                       BOARD_PIXELS, WOOD, WOOD_LIGHT, GROOVE, GOLD,
                       PLAYER_COLORS, PLAYER_NAMES, TEXT, HIGHLIGHT, INVALID,
@@ -70,8 +70,11 @@ def wall_rect(wall):
                        GAP + 4, 2 * CELL_SIZE + GAP + 4)
 
 
-def draw_text(screen, font, value, x, y, color=TEXT):
-    screen.blit(font.render(str(value), True, color), (x, y))
+def draw_text(screen, font, value, x, y, color=TEXT, width=None):
+    label = font.render(str(value), True, color)
+    if width and label.get_width() > width:
+        label = fit_image(label, (width, label.get_height()))
+    screen.blit(label, (x, y))
 
 
 def button_rects():
@@ -147,7 +150,7 @@ def draw_setup(screen, fonts, config, editing=None):
         pygame.draw.circle(screen, PLAYER_COLORS[player], (110, rect.centery), 12)
         draw_text(screen, font, PLAYER_NAMES[player], 135, rect.y + 12)
         human = config.controllers[player] == "Human"
-        value = (config.names[player] if editing == player else clean_name(config.names[player], player)) if human else "Pathfinder"
+        value = (config.names[player] if editing == player else clean_name(config.names[player], player)) if human else PLAYER_NAMES[player]
         draw_button(screen, font, value + (" |" if editing == player else ""), rect)
         if editing == player:
             pygame.draw.rect(screen, GOLD, rect, 3, border_radius=9)
@@ -198,16 +201,20 @@ def draw_starting_player(screen, fonts, game, elapsed):
     screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, 470)))
 
 
-def draw_menu(screen, fonts):
+def draw_menu(screen, fonts, logo=None):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
-    heading = title_font.render("GRIDLOCK", True, TEXT)
-    screen.blit(heading, heading.get_rect(center=(WINDOW_WIDTH // 2, 85)))
-    sub = font.render("Race across. Block the way.", True, GROOVE)
-    screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
+    if logo is not None:
+        artwork = fit_image(logo, (560, 160))
+        screen.blit(artwork, artwork.get_rect(center=(WINDOW_WIDTH // 2, 88)))
+    else:
+        heading = title_font.render("GRIDLOCK", True, TEXT)
+        screen.blit(heading, heading.get_rect(center=(WINDOW_WIDTH // 2, 85)))
+        sub = font.render("Race across. Block the way.", True, GROOVE)
+        screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
         draw_button(screen, font, name, rect)
-    draw_text(screen, small, "v2.6 - Match Customization", 24, WINDOW_HEIGHT - 30)
+    draw_text(screen, small, "v2.7 - Gridlock Identity", 24, WINDOW_HEIGHT - 30)
 
 
 def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=False):
@@ -259,7 +266,7 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=Fal
         pygame.draw.circle(screen, PLAYER_COLORS[player], (PANEL_X + 12, y + 12), 11)
         name = game.display_name(player)
         label = PLAYER_NAMES[player] if name == PLAYER_NAMES[player] else f"{PLAYER_NAMES[player]} - {name}"
-        draw_text(screen, font, label, PANEL_X + 31, y)
+        draw_text(screen, font, label, PANEL_X + 31, y, width=238)
         controller = game.controller(player)
         control_label = ("Forfeited" if player in game.eliminated else "Human" if controller == "Human"
                          else controller.removeprefix("AI - ") + " AI")
@@ -286,22 +293,10 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=Fal
     draw_text(screen, small, "R / right-click: rotate   Esc: pause", PANEL_X, 580)
     if game.winner is None:
         draw_text(screen, small, game.message[:65], 38, 618)
-    hint = ("Pathfinder thinking / preparing move..." if game.is_ai_turn else
+    hint = (f"{PLAYER_NAMES[game.current_player]} AI preparing a move..." if game.is_ai_turn else
             "Pawn selected: click again to deselect" if selected else
             f"Hover grooves to place walls ({direction})")
     draw_text(screen, small, hint, PANEL_X, 603)
-
-
-def load_stickers():
-    """PNG renderings are packaged alongside the original editable SVGs."""
-    folder = Path(__file__).resolve().parent / "content" / "px"
-    images = {}
-    for name in ("blue", "red", "green", "violet"):
-        path = folder / f"{name}_victory.png"
-        if path.exists():
-            image = pygame.image.load(str(path)).convert_alpha()
-            images[name] = pygame.transform.smoothscale(image, (540, 312))
-    return images
 
 
 def draw_victory(screen, game, stickers, fonts):
@@ -314,15 +309,16 @@ def draw_victory(screen, game, stickers, fonts):
     card = pygame.Rect(163, 92, 605, 466)
     pygame.draw.rect(screen, (247, 232, 205), card, border_radius=16)
     pygame.draw.rect(screen, GROOVE, card, 3, border_radius=16)
-    name = PLAYER_NAMES[game.winner]
-    sticker = stickers.get(name.lower())
+    sticker = stickers.get(game.winner)
     if sticker:
         screen.blit(sticker, sticker.get_rect(center=(WINDOW_WIDTH // 2, 297)))
     else:
-        label = font.render(f"{name.upper()} WINS!", True, PLAYER_COLORS[game.winner])
+        label = font.render(f"{game.display_name(game.winner).upper()} WINS!", True, PLAYER_COLORS[game.winner])
         screen.blit(label, label.get_rect(center=(WINDOW_WIDTH // 2, 275)))
     if "ran out of time" in game.message:
         message = small.render(game.message, True, TEXT)
+        if message.get_width() > 560:
+            message = fit_image(message, (560, message.get_height()))
         screen.blit(message, message.get_rect(center=(WINDOW_WIDTH // 2, 472)))
     for label, rect in victory_buttons().items():
         draw_button(screen, font, label, rect)

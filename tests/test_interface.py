@@ -72,11 +72,13 @@ class InterfaceTests(unittest.TestCase):
              patch.object(main, 'perf_counter', side_effect=timer), \
              patch.object(main, 'Game', side_effect=make_game), \
              patch.object(main, 'load_audio', return_value={}), \
+             patch.object(main, 'play_startup', return_value=True) as startup, \
              patch.object(main, 'play_sound') as sound, \
              patch.object(main, 'set_music') as music, \
              patch.object(main, 'draw_setup', side_effect=setup), \
              patch.object(main, 'draw_board', side_effect=board):
             main.main()
+        self.startup_calls = startup.call_count
         return sound, music
 
     def test_all_modes_open_setup_before_starting(self):
@@ -95,7 +97,7 @@ class InterfaceTests(unittest.TestCase):
             [key(pygame.K_BACKSPACE), key(pygame.K_RETURN), click(b['Start Match'])],
         ])
         self.assertEqual(self.games[0].display_name(0), 'Alexabcdefg')
-        self.assertEqual(self.games[0].display_name(1), 'Red')
+        self.assertEqual(self.games[0].display_name(1), 'Crimson')
 
     def test_timer_selection_for_each_mode(self):
         for mode, expected in (('Versus', 15), ('Battle Royale', 15), ('Blitz', 5)):
@@ -285,6 +287,11 @@ class InterfaceTests(unittest.TestCase):
     def test_exit_closes_cleanly(self):
         self.run_frames([[click(menu_buttons()['Exit Game'])]])
         self.assertFalse(pygame.get_init())
+
+    def test_returning_to_menu_does_not_repeat_startup(self):
+        self.run_frames([start('Versus'), [key(pygame.K_m)],
+                         start('Blitz'), [key(pygame.K_m)]])
+        self.assertEqual(self.startup_calls, 1)
 
 
 if __name__ == '__main__':
