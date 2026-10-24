@@ -8,6 +8,7 @@ from settings import (BOARD_SIZE, CELL_SIZE, GAP, BOARD_X, BOARD_Y,
                       WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND)
 from rules import wall_error
 from game import FOUR_PLAYER_ORDER
+from match_config import clean_name
 
 STEP = CELL_SIZE + GAP
 PANEL_X = 615
@@ -51,7 +52,7 @@ def wall_at(pos, direction):
 
 def preview_wall(game, selected, direction, mouse):
     """Shared hover/click target; unavailable board interactions return None."""
-    if (selected or game.winner is not None or square_at(mouse) in game.pawns
+    if (selected or game.paused or game.winner is not None or square_at(mouse) in game.pawns
             or game.walls_left[game.current_player] <= 0
             or game.is_ai_turn):
         return None
@@ -75,7 +76,8 @@ def draw_text(screen, font, value, x, y, color=TEXT):
 
 def button_rects():
     return {
-        "Undo": pygame.Rect(PANEL_X, 477, 270, 39),
+        "Undo": pygame.Rect(PANEL_X, 477, 130, 39),
+        "Pause": pygame.Rect(PANEL_X + 140, 477, 130, 39),
         "New game": pygame.Rect(PANEL_X, 526, 130, 39),
         "Menu": pygame.Rect(PANEL_X + 140, 526, 130, 39),
     }
@@ -108,7 +110,7 @@ def draw_settings(screen, fonts, options):
     for name, rect in settings_buttons().items():
         label = name if name == "Back" else f"{name}: {'On' if options[name] else 'Off'}"
         draw_button(screen, font, label, rect)
-    hint = small.render("Animations: reserved for future features", True, GROOVE)
+    hint = small.render("Animations: starting-player reveal and incoming-turn highlights", True, GROOVE)
     screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, 570)))
 
 
@@ -117,48 +119,83 @@ def victory_buttons():
             "Main Menu": pygame.Rect(485, 497, 200, 42)}
 
 
-def difficulty_buttons():
-    return {name: pygame.Rect(260, 220 + i * 90, 410, 60)
-            for i, name in enumerate(("Casual", "Challenging", "Back to Main Menu"))}
-
-
-def draw_difficulty(screen, fonts):
-    title_font, font, small = fonts
-    screen.fill(BACKGROUND)
-    title = title_font.render("RISE OF THE MACHINES", True, TEXT)
-    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 110)))
-    subtitle = font.render("Choose your Pathfinder opponent", True, GROOVE)
-    screen.blit(subtitle, subtitle.get_rect(center=(WINDOW_WIDTH // 2, 160)))
-    for label, rect in difficulty_buttons().items():
-        draw_button(screen, font, label, rect)
-
-
-def battle_setup_buttons():
-    buttons = {player: pygame.Rect(460, 180 + slot * 78, 285, 52)
-               for slot, player in enumerate(FOUR_PLAYER_ORDER)}
-    buttons["Start Match"] = pygame.Rect(260, 535, 200, 52)
-    buttons["Back"] = pygame.Rect(480, 535, 200, 52)
+def setup_buttons(mode):
+    players = FOUR_PLAYER_ORDER if mode == "Battle Royale" else (0, 1)
+    buttons = {}
+    for slot, player in enumerate(players):
+        buttons[("name", player)] = pygame.Rect(240, 150 + slot * 72, 230, 48)
+        if mode == "Battle Royale" or (mode == "Rise of the Machines" and player == 1):
+            buttons[("control", player)] = pygame.Rect(490, 150 + slot * 72, 290, 48)
+    buttons["Random Start"] = pygame.Rect(240, 453, 540, 42)
+    if mode != "Rise of the Machines":
+        buttons["Timer"] = pygame.Rect(240, 503, 540, 42)
+    buttons["Start Match"] = pygame.Rect(240, 570, 260, 48)
+    buttons["Back"] = pygame.Rect(520, 570, 260, 48)
     return buttons
 
 
-def draw_battle_setup(screen, fonts, controllers):
+def draw_setup(screen, fonts, config, editing=None):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
-    title = title_font.render("BATTLE ROYALE", True, TEXT)
-    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 90)))
-    subtitle = font.render("Click each seat to choose Human or Pathfinder AI", True, GROOVE)
-    screen.blit(subtitle, subtitle.get_rect(center=(WINDOW_WIDTH // 2, 135)))
-    positions = ("bottom -> top row", "top -> bottom row",
-                 "left -> right column", "right -> left column")
-    buttons = battle_setup_buttons()
-    for player in FOUR_PLAYER_ORDER:
-        rect = buttons[player]
-        pygame.draw.circle(screen, PLAYER_COLORS[player], (205, rect.centery), 13)
-        draw_text(screen, font, PLAYER_NAMES[player], 230, rect.y)
-        draw_text(screen, small, positions[player], 230, rect.y + 27)
-        draw_button(screen, font, controllers[player], rect)
+    title = title_font.render(config.mode.upper(), True, TEXT)
+    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 70)))
+    draw_text(screen, small, "Click a human name to edit; click an AI control to cycle difficulty.", 180, 112)
+    players = FOUR_PLAYER_ORDER if config.mode == "Battle Royale" else (0, 1)
+    buttons = setup_buttons(config.mode)
+    for player in players:
+        rect = buttons[("name", player)]
+        pygame.draw.circle(screen, PLAYER_COLORS[player], (110, rect.centery), 12)
+        draw_text(screen, font, PLAYER_NAMES[player], 135, rect.y + 12)
+        human = config.controllers[player] == "Human"
+        value = (config.names[player] if editing == player else clean_name(config.names[player], player)) if human else "Pathfinder"
+        draw_button(screen, font, value + (" |" if editing == player else ""), rect)
+        if editing == player:
+            pygame.draw.rect(screen, GOLD, rect, 3, border_radius=9)
+        if ("control", player) in buttons:
+            draw_button(screen, font, config.controllers[player], buttons[("control", player)])
+    draw_text(screen, small, "Human names: up to 12 characters. Blank names use the player color.", 240, 428)
+    draw_button(screen, font, "Random Starting Player: " + ("On" if config.random_start else "Off"), buttons["Random Start"])
+    if "Timer" in buttons:
+        timer = f"Starting clock: {config.blitz_minutes} minutes" if config.mode == "Blitz" else (f"Turn Limit: {config.turn_limit} seconds" if config.turn_limit else "Untimed")
+        draw_button(screen, font, timer, buttons["Timer"])
     for label in ("Start Match", "Back"):
         draw_button(screen, font, label, buttons[label])
+
+
+def pause_buttons():
+    return {label: pygame.Rect(280, 200 + i * 75, 370, 55)
+            for i, label in enumerate(("Resume Game", "Restart Match", "Settings", "Main Menu"))}
+
+
+def draw_pause(screen, fonts):
+    shade = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+    shade.fill((32, 23, 17, 190))
+    screen.blit(shade, (0, 0))
+    title = fonts[0].render("PAUSED", True, GOLD)
+    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 125)))
+    for label, rect in pause_buttons().items():
+        draw_button(screen, fonts[1], label, rect)
+
+
+def draw_starting_player(screen, fonts, game, elapsed):
+    screen.fill(BACKGROUND)
+    title = fonts[0].render("WHO STARTS?", True, TEXT)
+    screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 130)))
+    players = game.active_players
+    highlighted = players[int(elapsed / 0.12) % len(players)] if elapsed < 1.1 else game.current_player
+    for slot, player in enumerate(players):
+        x = WINDOW_WIDTH // 2 + int((slot - (len(players) - 1) / 2) * 190)
+        rect = pygame.Rect(x - 85, 240, 170, 100)
+        pygame.draw.rect(screen, GOLD if player == highlighted else WOOD, rect, border_radius=9)
+        label = fonts[1].render(PLAYER_NAMES[player], True, PLAYER_COLORS[player])
+        screen.blit(label, label.get_rect(center=(x, 275)))
+        name = fonts[2].render(game.display_name(player), True, TEXT)
+        screen.blit(name, name.get_rect(center=(x, 310)))
+    text = f"{game.player_label(game.current_player)} starts!" if elapsed >= 1.1 else "Selecting starting player..."
+    label = fonts[1].render(text, True, TEXT)
+    screen.blit(label, label.get_rect(center=(WINDOW_WIDTH // 2, 410)))
+    hint = fonts[2].render("Click or press Space / Enter / Esc to skip", True, GROOVE)
+    screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, 470)))
 
 
 def draw_menu(screen, fonts):
@@ -170,10 +207,10 @@ def draw_menu(screen, fonts):
     screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
         draw_button(screen, font, name, rect)
-    draw_text(screen, small, "v2.5 - Battle Royale: Rise of the Machines", 24, WINDOW_HEIGHT - 30)
+    draw_text(screen, small, "v2.6 - Match Customization", 24, WINDOW_HEIGHT - 30)
 
 
-def draw_board(screen, game, moves, selected, direction, mouse, fonts):
+def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=False):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
     pygame.draw.rect(screen, GROOVE, (BOARD_X - 10, BOARD_Y - 10,
@@ -197,7 +234,10 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts):
         color = (*INVALID, 160) if error else (255, 225, 140, 200)
         pygame.draw.rect(overlay, color, wall_rect(wall), border_radius=3)
         screen.blit(overlay, (0, 0))
-    for player, (row, col) in enumerate(game.pawns):
+    for player, square in enumerate(game.pawns):
+        if square is None:
+            continue
+        row, col = square
         center = (BOARD_X + col * STEP + CELL_SIZE // 2,
                   BOARD_Y + row * STEP + CELL_SIZE // 2)
         pygame.draw.circle(screen, (73, 52, 36), (center[0] + 2, center[1] + 3), 19)
@@ -214,20 +254,25 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts):
         active = game.winner is None and player == game.current_player
         if active:
             pygame.draw.rect(screen, (250, 223, 147), (PANEL_X - 6, y - 7, 276, 60), border_radius=6)
+            if flash:
+                pygame.draw.rect(screen, GOLD, (PANEL_X - 6, y - 7, 276, 60), 3, border_radius=6)
         pygame.draw.circle(screen, PLAYER_COLORS[player], (PANEL_X + 12, y + 12), 11)
-        name = "Red - Pathfinder" if game.mode == "Rise of the Machines" and player == 1 else PLAYER_NAMES[player]
-        draw_text(screen, font, name + ("  • TURN" if active else ""), PANEL_X + 31, y)
-        draw_text(screen, small, f"Walls: {game.walls_left[player]}", PANEL_X + 31, y + 27)
-        if game.mode in ("Battle Royale", "Rise of the Machines"):
-            controller = game.controller(player)
-            label = "Human" if controller == "Human" else controller.removeprefix("AI - ") + " AI"
-            draw_text(screen, small, label, PANEL_X + 137, y + 27)
+        name = game.display_name(player)
+        label = PLAYER_NAMES[player] if name == PLAYER_NAMES[player] else f"{PLAYER_NAMES[player]} - {name}"
+        draw_text(screen, font, label, PANEL_X + 31, y)
+        controller = game.controller(player)
+        control_label = ("Forfeited" if player in game.eliminated else "Human" if controller == "Human"
+                         else controller.removeprefix("AI - ") + " AI")
+        draw_text(screen, small, control_label, PANEL_X + 31, y + 20)
+        draw_text(screen, small, f"Walls: {game.walls_left[player]}", PANEL_X + 31, y + 40)
         if game.is_blitz:
-            draw_text(screen, small, f"Clock: {game.time_left[player]:.1f}s", PANEL_X + 164, y + 27)
+            draw_text(screen, small, f"Clock: {game.time_left[player]:.1f}s", PANEL_X + 150, y + 40)
     timer_y = 422 if game.player_count == 4 else 340
     if game.is_blitz:
         value = game.overtime if game.penalty_used else game.time_left[game.current_player]
         timer_text = f"Time left: {value:.1f}s"
+    elif game.config.turn_limit:
+        timer_text = f"Turn left: {game.remaining_turn_time:.1f}s"
     else:
         timer_text = f"Turn: {game.turn_elapsed:.1f}s"
     draw_text(screen, font, timer_text, PANEL_X, timer_y)
@@ -238,7 +283,7 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts):
     for label, rect in button_rects().items():
         pygame.draw.rect(screen, (114, 82, 56), rect, border_radius=5)
         draw_text(screen, font, label, rect.x + 10, rect.y + 9, (255, 248, 234))
-    draw_text(screen, small, "R / right-click: rotate   Esc: cancel", PANEL_X, 580)
+    draw_text(screen, small, "R / right-click: rotate   Esc: pause", PANEL_X, 580)
     if game.winner is None:
         draw_text(screen, small, game.message[:65], 38, 618)
     hint = ("Pathfinder thinking / preparing move..." if game.is_ai_turn else

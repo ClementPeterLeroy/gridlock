@@ -35,7 +35,9 @@ def valid_moves(pawns, player, walls):
     In four-player games, a jump cannot land on another pawn.
     """
     own = pawns[player]
-    occupied = set(pawns) - {own}
+    if own is None:
+        return set()
+    occupied = set(pawns) - {own, None}
     moves = set()
     for dr, dc in DIRECTIONS:
         adjacent = (own[0] + dr, own[1] + dc)
@@ -95,6 +97,6 @@ def wall_error(wall, walls, pawns, walls_remaining):
     if direction == "V" and ((row - 1, col, "V") in walls or (row + 1, col, "V") in walls):
         return "Walls cannot overlap."
     proposed = walls | {wall}
-    if any(not has_path(pawn, i, proposed) for i, pawn in enumerate(pawns)):
+    if any(pawn is not None and not has_path(pawn, i, proposed) for i, pawn in enumerate(pawns)):
         return "Every player must keep a path to the goal."
     return None

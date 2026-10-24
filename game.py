@@ -3,11 +3,11 @@
 from dataclasses import dataclass, field
 from rules import valid_moves, wall_error, reached_goal
 from settings import PLAYER_NAMES
+from match_config import MatchConfig, clean_name, CONTROL_OPTIONS
 
 STARTS = ((8, 4), (0, 4), (4, 0), (4, 8))
 # Clockwise around the board: bottom -> left -> top -> right.
 FOUR_PLAYER_ORDER = (0, 2, 1, 3)
-CONTROL_OPTIONS = ("Human", "AI - Casual", "AI - Challenging")
 DEFAULT_BR_CONTROLS = ("Human", "AI - Casual", "AI - Casual", "AI - Casual")
 
 
@@ -27,15 +27,22 @@ class Game:
     overtime: float = 0.0
     difficulty: str = "Casual"
     controllers: list = field(default_factory=list)
+    config: MatchConfig | None = None
+    eliminated: set = field(default_factory=set)
+    paused: bool = False
 
     def __post_init__(self):
+        if self.config is None:
+            self.config = MatchConfig(mode=self.mode)
+        else:
+            self.controllers = self.config.controllers.copy()
         count = 4 if self.mode == "Battle Royale" else 2
         if not self.pawns:
             self.pawns = list(STARTS[:count])
         if not self.walls_left:
             self.walls_left = [5] * count if count == 4 else [10] * count
         if not self.time_left:
-            self.time_left = [180.0] * count
+            self.time_left = [60.0 * self.config.blitz_minutes] * count
 
     @property
     def player_count(self):
@@ -60,15 +67,37 @@ class Game:
     def ai_difficulty(self):
         return self.controller(self.current_player).removeprefix("AI - ")
 
+    def display_name(self, player):
+        return ("Pathfinder" if self.controller(player) != "Human" else
+                clean_name(self.config.names[player], player))
+
+    def player_label(self, player):
+        name = self.display_name(player)
+        return name if name == PLAYER_NAMES[player] else f"{name} ({PLAYER_NAMES[player]})"
+
+    @property
+    def active_players(self):
+        order = FOUR_PLAYER_ORDER if self.player_count == 4 else (0, 1)
+        return [p for p in order if p not in self.eliminated]
+
+    @property
+    def remaining_turn_time(self):
+        if self.is_blitz:
+            return self.overtime if self.penalty_used else self.time_left[self.current_player]
+        return max(0.0, self.config.turn_limit - self.turn_elapsed) if self.config.turn_limit else float("inf")
+
     def snapshot(self):
         return (self.pawns.copy(), self.walls.copy(), self.walls_left.copy(),
                 self.current_player, self.winner, self.turn_elapsed,
-                self.time_left.copy(), self.penalty_used, self.overtime)
+                self.time_left.copy(), self.penalty_used, self.overtime,
+                self.eliminated.copy())
 
     def next_turn(self):
         if self.player_count == 4:
             order = FOUR_PLAYER_ORDER
-            self.current_player = order[(order.index(self.current_player) + 1) % 4]
+            index = order.index(self.current_player)
+            self.current_player = next(order[(index + step) % 4] for step in range(1, 5)
+                                       if order[(index + step) % 4] not in self.eliminated)
         else:
             self.current_player = 1 - self.current_player
         self.turn_elapsed = 0.0
@@ -77,22 +106,22 @@ class Game:
         if self.is_blitz:
             p = self.current_player
             self.time_left[p] = max(10.0, self.time_left[p])
-        self.message = f"{PLAYER_NAMES[self.current_player]}'s turn."
+        self.message = f"{self.player_label(self.current_player)}'s turn."
 
     def move(self, target):
-        if self.winner is not None or target not in valid_moves(self.pawns, self.current_player, self.walls):
+        if self.paused or self.winner is not None or target not in valid_moves(self.pawns, self.current_player, self.walls):
             return False
         self.history.append(self.snapshot())
         self.pawns[self.current_player] = target
         if reached_goal(target, self.current_player):
             self.winner = self.current_player
-            self.message = f"{PLAYER_NAMES[self.winner]} wins!"
+            self.message = f"{self.player_label(self.winner)} wins!"
         else:
             self.next_turn()
         return True
 
     def place_wall(self, wall):
-        if self.winner is not None:
+        if self.paused or self.winner is not None:
             return False
         error = wall_error(wall, self.walls, self.pawns, self.walls_left[self.current_player])
         if error:
@@ -106,10 +135,13 @@ class Game:
 
     def tick(self, seconds):
         """Advance active turn clock by elapsed real time in seconds."""
-        if self.winner is not None:
+        if self.paused or self.winner is not None:
             return
         seconds = max(0.0, seconds)
         self.turn_elapsed += seconds
+        if not self.is_blitz and self.config.turn_limit and self.turn_elapsed >= self.config.turn_limit:
+            self.forfeit()
+            return
         if not self.is_blitz:
             return
         p = self.current_player
@@ -117,19 +149,31 @@ class Game:
             self.overtime = max(0.0, self.overtime - seconds)
             if self.overtime <= 0:
                 self.winner = 1 - p
-                self.message = f"{PLAYER_NAMES[p]} ran out of time."
+                self.message = f"{self.player_label(p)} ran out of time."
             return
         self.time_left[p] = max(0.0, self.time_left[p] - seconds)
         if self.time_left[p] > 0:
             return
         if self.walls_left[p] == 0:
             self.winner = 1 - p
-            self.message = f"{PLAYER_NAMES[p]} ran out of time with no walls."
+            self.message = f"{self.player_label(p)} ran out of time with no walls."
             return
         self.walls_left[p] -= 1
         self.penalty_used = True
         self.overtime = 15.0
-        self.message = f"{PLAYER_NAMES[p]} loses a wall! 15 seconds left."
+        self.message = f"{self.player_label(p)} loses a wall! 15 seconds left."
+
+    def forfeit(self):
+        """Remove timed-out pawns; their placed walls remain on the board."""
+        player = self.current_player
+        self.history.append(self.snapshot())
+        self.eliminated.add(player)
+        self.pawns[player] = None
+        if len(self.active_players) == 1:
+            self.winner = self.active_players[0]
+        else:
+            self.next_turn()
+        self.message = f"{self.player_label(player)} ran out of time and forfeited."
 
     def undo(self):
         if not self.history:
@@ -137,6 +181,6 @@ class Game:
             return False
         (self.pawns, self.walls, self.walls_left, self.current_player,
          self.winner, self.turn_elapsed, self.time_left,
-         self.penalty_used, self.overtime) = self.history.pop()
+         self.penalty_used, self.overtime, self.eliminated) = self.history.pop()
         self.message = "Last turn undone."
         return True

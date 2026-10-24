@@ -1,5 +1,5 @@
 GRIDLOCK - DEVELOPMENT VERSION HISTORY
-Current version: 2.5
+Current version: 2.6
 
 VERSION 1.0 - ORIGINAL GAME
 
@@ -184,6 +184,43 @@ VERSION 2.5 - BATTLE ROYALE: RISE OF THE MACHINES
   simultaneous winning threats may not all be preventable in one action.
   BFS estimates ignore temporary pawn obstacles. Sampled matches do not
   establish balanced seat strength. Placeholder audio remains unchanged.
+
+VERSION 2.6 - MATCH CUSTOMIZATION
+
+- Unified setup for Versus, Battle Royale, Blitz, and Rise of the Machines,
+  with relevant seat, name, difficulty, starting-player, and timer options.
+- Added editable human names, limited to 12 characters with color defaults.
+  AI seats use Pathfinder plus their difficulty. Configuration is session-only.
+- Added optional uniformly random starting players. Restart rerolls the
+  starter while preserving the preference and all other match options.
+- Added a short cycling starter reveal with a final announcement; click,
+  Space, Enter, or Esc skips it. Animations Off skips it automatically.
+  Clocks and AI actions stay suspended until the reveal finishes.
+- Added Untimed or 15/30/60/120-second turn limits to Versus and Battle Royale.
+  Versus timeouts forfeit the match. Battle Royale removes the timed-out
+  pawn and skips that seat while keeping placed walls; the last survivor wins.
+- Kept stable player indices for goal directions and victory stickers after
+  elimination; rules and Pathfinder ignore eliminated pawns and their paths.
+- Added 1/3/5-minute Blitz starting clocks; preserved the ten-second minimum,
+  one-wall penalty, 15-second compensation, and existing forfeit conditions.
+- Added Pause via Esc and a visible button, with Resume Game, Restart Match,
+  Settings, and Main Menu. Pausing freezes timers, AI search deadlines,
+  presentation delay, and board input while keeping the window responsive.
+- Preserved three-second AI pacing without charging presentation time to
+  the AI's clock. Thinking is capped by the available turn time and ten
+  seconds; paused time is excluded from its budget.
+- Preserved names, seats, difficulties, timing options, and starting-player
+  preference across New game, Restart Match, and Play Again.
+- Improved incoming-turn highlights and fitted custom names, colors,
+  controller labels, wall counts, and clocks into both player layouts.
+- Added match_config.py to keep configuration separate from rules. Updated
+  setup and event-loop tests and added name, randomized-order, clock,
+  pause, timeout elimination, and surviving-player AI regression tests.
+- Preserved Smart Mouse Controls, wooden visuals, Oxblood walls, settings,
+  audio, victory stickers, all game modes, and both Pathfinder difficulties.
+- Known limitations: session-only names/options, 12-character names with
+  system-font coverage, simple animations, heuristic AI, and placeholder
+  audio. No records, branding overhaul, or machine learning added.
 
 Future releases
 Append a new version entry here when gameplay, visuals, or fixes change.

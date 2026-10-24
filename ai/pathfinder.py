@@ -27,7 +27,7 @@ def immediate_win(pawns, player, walls):
                for target in valid_moves(pawns, player, walls))
 
 
-def search(game, difficulty="Casual", time_limit=10.0, rng=None):
+def search(game, difficulty="Casual", time_limit=10.0, rng=None, clock=None):
     """Yield the best legal action so far after each candidate evaluation.
 
     Consume in small frame budgets; the last yielded action is the result.
@@ -35,9 +35,10 @@ def search(game, difficulty="Casual", time_limit=10.0, rng=None):
     even with a zero time budget. Supports two- and four-player matches.
     """
     rng = rng or random
-    deadline = perf_counter() + min(10.0, max(0.0, time_limit))
+    clock = clock or perf_counter
+    deadline = clock() + min(10.0, max(0.0, time_limit))
     player = game.current_player
-    opponents = [i for i in range(game.player_count) if i != player]
+    opponents = [i for i in game.active_players if i != player]
     pawns, walls = game.pawns.copy(), game.walls.copy()
     moves = sorted(valid_moves(pawns, player, walls))
     if game.winner is not None:
@@ -79,7 +80,7 @@ def search(game, difficulty="Casual", time_limit=10.0, rng=None):
 
     opponent_distance = opposition_score(routes)
     for target in moves:
-        if perf_counter() >= deadline:
+        if clock() >= deadline:
             return
         proposed = pawns.copy()
         proposed[player] = target
@@ -108,7 +109,7 @@ def search(game, difficulty="Casual", time_limit=10.0, rng=None):
     if difficulty == "Casual" and not threatened:
         candidates = candidates[:20]
     for wall in candidates:
-        if perf_counter() >= deadline:
+        if clock() >= deadline:
             return
         if wall_error(wall, walls, pawns, game.walls_left[player]) is None:
             proposed = walls | {wall}
