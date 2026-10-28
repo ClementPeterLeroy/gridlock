@@ -1,0 +1,61 @@
+GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
+Current version: 3.0-alpha.2.1
+
+VERSION 3.0-alpha.1 - 3D Foundations
+Completion date: 2026-10-28 (existing foundations commit 207706a)
+Status: Completed
+
+Features
+- Added the Godot 4 3D prototype with Blender-designed board, tile, pawn, and wall
+  exports, a wooden board/frame, four player-colored pawns, and a demonstration wall.
+- Added runtime alternating tile materials, pawn identity materials, lighting,
+  environment, and Classic / Isometric / Cinematic orthographic camera switching.
+- Keys 1, 2, and 3 switch views with the existing animated transitions.
+
+Known limitations
+- Visual prototype only: no match engine, pawn input, legal actions, turns, clocks,
+  AI, or playable match flow was connected to the board.
+- Wall material script creates an unused material; the wall scene includes a null
+  color override. These audit findings have not been visually corrected.
+Next milestone: 3.0-alpha.2.1 - Core Game Engine
+
+VERSION 3.0-alpha.2.1 - Core Game Engine
+Completion date: 2026-10-28
+Status: Completed
+
+Features
+- Added five scene-independent RefCounted core modules for match configuration,
+  state/snapshots, validated actions, Classic rules, and BFS pathfinding.
+- Preserved the 9 x 9 board, stable Sapphire/Crimson/Emerald/Violet IDs and goals,
+  two/four-player starts, wall inventories, and clockwise 0 -> 2 -> 1 -> 3 order.
+- Ported orthogonal moves, single-pawn jumps, blocked/occupied-landing sidesteps,
+  four-player occupancy, and exact wall overlap/crossing/path-preservation checks.
+- Added move/wall legal-action queries, structured results with stable reason
+  codes, turn advancement, goal victories, and legacy forfeit/elimination transitions.
+- Added deep snapshots, undo, configuration-preserving restart, deterministic
+  random-source injection, and stored controller/name/future-timer configuration.
+- Added a dependency-free headless runner and generated Python parity fixtures.
+- Updated root/Godot documentation and synchronized the project version.
+
+Validation and fixed issues
+- Godot 4.7.2 headless suite: 3353 checks passed, including 20 reference positions,
+  2560 wall comparisons, BFS/move parity, and two 32-action Python match traces.
+- Existing Pygame regression suite: 100 tests passed on Python 3.13.12 / Pygame 2.6.1.
+- Rejected actions preserve state/history; snapshot/configuration copies are
+  independent; eliminated seats keep stable IDs and no longer block routes.
+- Corrected stale README descriptions which said no Godot project existed.
+- Pygame sources/history and existing Godot scenes, cameras, models/materials are unchanged.
+
+Known limitations
+- Engine is intentionally not integrated with the 3D scenes. No mouse interaction,
+  AI execution, live clocks/Blitz penalties, replay persistence, or match UI yet.
+- The no-move/no-wall situation has no defined legacy pass/stalemate rule; it
+  remains a running match with no legal actions pending a future rules decision.
+- The Windows sandbox prints a certificate-store warning during Godot startup;
+  core tests do not use networking and complete successfully.
+Next milestone: 3.0-alpha.2.2 - Interactive Board
+
+Future releases
+Append each completed milestone here with actual dates and test results. Keep
+Current version and application/config/version synchronized. Pygame v2.8 history
+remains authoritative for Classic Edition in ../pygame/version_notice.txt.

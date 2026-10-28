@@ -1,0 +1,66 @@
+class_name GridlockGameState
+extends RefCounted
+## Coordinates are Vector2i(column, row). Player IDs never change after elimination.
+
+const Config = preload("res://scripts/core/match_config.gd")
+const STARTS = [Vector2i(4, 8), Vector2i(4, 0), Vector2i(0, 4), Vector2i(8, 4)]
+const GOALS = [Vector2i(1, 0), Vector2i(1, 8), Vector2i(0, 8), Vector2i(0, 0)]
+
+var config = Config.new()
+var board_size = Vector2i(9, 9)
+var players: Array[Dictionary] = []
+# A set of Vector3i(column, row, orientation): H = 0, V = 1.
+var walls: Dictionary = {}
+var current_player: int = 0
+var status: String = "running"
+var winner: int = -1
+var paused: bool = false
+var turn_number: int = 0
+var result_reason: String = ""
+var history: Array[Dictionary] = []
+
+func _init(options = null) -> void:
+	if options != null:
+		config = options.copy()
+	for player in range(config.player_count()):
+		players.append({"id": player, "identity": Config.IDENTITIES[player],
+			"name": config.display_name(player), "controller": config.controllers[player],
+			"goal": GOALS[player], "position": STARTS[player],
+			"walls_remaining": 5 if config.player_count() == 4 else 10, "eliminated": false})
+	current_player = config.starting_player
+
+func pawn_positions() -> Array:
+	var positions = []
+	for player in players:
+		positions.append(player.position)
+	return positions
+
+func active_players() -> Array:
+	var active = []
+	var order = [0, 2, 1, 3] if players.size() == 4 else [0, 1]
+	for player in order:
+		if not players[player].eliminated:
+			active.append(player)
+	return active
+
+func snapshot() -> Dictionary:
+	# History is intentionally excluded: snapshots must not recursively capture history.
+	return {"config": config.to_dict(), "board_size": board_size,
+		"players": players.duplicate(true), "walls": walls.duplicate(true),
+		"current_player": current_player, "status": status, "winner": winner,
+		"paused": paused, "turn_number": turn_number, "result_reason": result_reason}
+
+func restore(snapshot_data: Dictionary) -> void:
+	var data = snapshot_data.duplicate(true)
+	config = Config.new()
+	for key in data.config:
+		config.set(key, data.config[key])
+	board_size = data.board_size
+	players.assign(data.players)
+	walls = data.walls
+	current_player = data.current_player
+	status = data.status
+	winner = data.winner
+	paused = data.paused
+	turn_number = data.turn_number
+	result_reason = data.result_reason
