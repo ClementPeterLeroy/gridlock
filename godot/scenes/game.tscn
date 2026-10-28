@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://blw3xyofrhv8h"]
+
+[ext_resource type="Script" uid="uid://xkxc1l6k38r4" path="res://scripts/game.gd" id="1_yqjtg"]
+[ext_resource type="PackedScene" uid="uid://bw3aqky658drg" path="res://scenes/board.tscn" id="2_lnu2h"]
+[ext_resource type="PackedScene" uid="uid://yqevaqdp40lj" path="res://scenes/walls.tscn" id="3_lbhrr"]
+[ext_resource type="PackedScene" uid="uid://cwmsgrpbv5tls" path="res://scenes/pieces.tscn" id="4_iywne"]
+[ext_resource type="PackedScene" uid="uid://b8csjplv8n720" path="res://scenes/Wall.tscn" id="4_p57ef"]
+[ext_resource type="PackedScene" uid="uid://c4drqjeqdhcft" path="res://scenes/Pawn.tscn" id="5_iywne"]
+
+[sub_resource type="Environment" id="Environment_e2o6t"]
+background_mode = 1
+background_color = Color(0.14117648, 0.14117648, 0.14117648, 1)
+
+[node name="Game" type="Node3D" unique_id=1171322556]
+script = ExtResource("1_yqjtg")
+
+[node name="Board" parent="." unique_id=1061922320 instance=ExtResource("2_lnu2h")]
+
+[node name="Walls" parent="." unique_id=298264781 instance=ExtResource("3_lbhrr")]
+
+[node name="Wall" parent="Walls" unique_id=1588452614 instance=ExtResource("4_p57ef")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
+wall_color = Color(0.9098039, 0.8509804, 0.70980394, 1)
+
+[node name="Pieces" parent="." unique_id=44346960 instance=ExtResource("4_iywne")]
+
+[node name="SapphirePawn" parent="Pieces" unique_id=816747853 instance=ExtResource("5_iywne")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+
+[node name="CrimsonPawn" parent="Pieces" unique_id=1772047764 instance=ExtResource("5_iywne")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+player_color = Color(0.65882355, 0.2627451, 0.2627451, 1)
+
+[node name="EmeraldPawn" parent="Pieces" unique_id=1133260261 instance=ExtResource("5_iywne")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0)
+player_color = Color(0.24313726, 0.4745098, 0.33333334, 1)
+
+[node name="VioletPawn" parent="Pieces" unique_id=1788025643 instance=ExtResource("5_iywne")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+player_color = Color(0.47058824, 0.32156864, 0.6039216, 1)
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=673448520]
+transform = Transform3D(1, 0, 0, 0, 0.64278764, 0.76604444, 0, -0.76604444, 0.64278764, 0, 12, 10)
+projection = 1
+current = true
+size = 16.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1400676899]
+transform = Transform3D(0.81915206, 0.4698463, -0.32898992, 0, 0.5735764, 0.819152, 0.57357645, -0.67101, 0.4698463, 0, 0, 0)
+light_angular_distance = 2.0
+shadow_enabled = true
+shadow_bias = 0.05
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=725392002]
+environment = SubResource("Environment_e2o6t")

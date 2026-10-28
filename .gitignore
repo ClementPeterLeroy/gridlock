@@ -1,3 +1,8 @@
+# ==========================================
+# GRIDLOCK - ROOT .GITIGNORE
+# ==========================================
+
+# Python / Pygame
 __pycache__/
 *.py[cod]
 .venv*/
@@ -5,4 +10,44 @@ venv/
 .env
 .env.*
 !.env.example
+
+# Portfolio publishing
 .portfolio-publish/
+
+# ==========================================
+# GODOT
+# ==========================================
+
+# Godot 4 generated cache
+**/.godot/
+
+# Godot temporary files
+*.tmp
+*.bak
+
+# ==========================================
+# BLENDER
+# ==========================================
+
+# Blender backup files
+*.blend1
+*.blend2
+*.blend@
+
+# ==========================================
+# OPERATING SYSTEM
+# ==========================================
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# ==========================================
+# IDE
+# ==========================================
+
+# VS Code local settings
+.vscode/

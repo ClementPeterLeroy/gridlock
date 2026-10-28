@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bw3aqky658drg"]
+
+[ext_resource type="Script" uid="uid://c427oxobc7ihe" path="res://scripts/board.gd" id="1_bw3vb"]
+[ext_resource type="PackedScene" uid="uid://l547usi77t20" path="res://assets/models/board.glb" id="2_tx6nw"]
+
+[node name="Board" type="Node3D" unique_id=1061922320]
+script = ExtResource("1_bw3vb")
+
+[node name="board" parent="." unique_id=1296483807 instance=ExtResource("2_tx6nw")]

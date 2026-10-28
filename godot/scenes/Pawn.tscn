@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c4drqjeqdhcft"]
+
+[ext_resource type="Script" uid="uid://cnidtdf6b4xpd" path="res://scripts/pawn.gd" id="1_b4kb6"]
+[ext_resource type="PackedScene" uid="uid://6xbgjxmamsbv" path="res://assets/models/pawn.glb" id="2_ht344"]
+
+[node name="Pawn" type="Node3D" unique_id=816747853]
+script = ExtResource("1_b4kb6")
+
+[node name="PawnModel" parent="." unique_id=1101466130 instance=ExtResource("2_ht344")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 0)

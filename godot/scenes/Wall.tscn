@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://b8csjplv8n720"]
+
+[ext_resource type="Script" uid="uid://bagvmhf0peh0p" path="res://scripts/wall.gd" id="1_efbxx"]
+[ext_resource type="PackedScene" uid="uid://bn4tfdbqq8rij" path="res://assets/models/wall.glb" id="2_awoh5"]
+
+[node name="Wall" type="Node3D" unique_id=1588452614]
+script = ExtResource("1_efbxx")
+wall_color = null
+
+[node name="WallModel" parent="." unique_id=1998194038 instance=ExtResource("2_awoh5")]
