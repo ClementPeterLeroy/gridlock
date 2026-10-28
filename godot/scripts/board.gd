@@ -9,9 +9,71 @@ var light_wood = Color("#C8A477")
 var dark_wood = Color("#B58B5D")
 var frame_wood = Color("#654321")
 
+var move_overlays: Node3D
+var active_ring: MeshInstance3D
+
 
 func _ready():
 	create_board_squares()
+	create_indicators()
+
+
+static func cell_position(square: Vector2i) -> Vector3:
+	return Vector3(square.x - 4, 0, square.y - 4)
+
+
+static func wall_position(anchor: Vector2i) -> Vector3:
+	return Vector3(anchor.x - 3.5, 0, anchor.y - 3.5)
+
+
+func create_indicators() -> void:
+	move_overlays = Node3D.new()
+	move_overlays.name = "LegalMoves"
+	add_child(move_overlays)
+	active_ring = MeshInstance3D.new()
+	active_ring.name = "ActivePlayer"
+	var ring = TorusMesh.new()
+	ring.inner_radius = 0.25
+	ring.outer_radius = 0.34
+	ring.rings = 24
+	ring.ring_segments = 12
+	active_ring.mesh = ring
+	active_ring.scale.y = 0.3
+	active_ring.material_override = overlay_material(Color("#F9D55E"))
+	active_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(active_ring)
+	active_ring.hide()
+
+
+static func overlay_material(color: Color) -> StandardMaterial3D:
+	var material = StandardMaterial3D.new()
+	material.albedo_color = color
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	if color.a < 1.0:
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	return material
+
+
+func show_legal_moves(squares: Array) -> void:
+	for child in move_overlays.get_children():
+		child.free()
+	var material = overlay_material(Color(0.20, 0.85, 0.36, 0.42))
+	for square in squares:
+		var overlay = MeshInstance3D.new()
+		overlay.name = "Move_%d_%d" % [square.y, square.x]
+		var plane = PlaneMesh.new()
+		plane.size = Vector2(0.76, 0.76)
+		overlay.mesh = plane
+		overlay.material_override = material
+		overlay.position = cell_position(square) + Vector3(0, 0.128, 0)
+		overlay.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		move_overlays.add_child(overlay)
+
+
+func show_active_player(square: Variant) -> void:
+	active_ring.visible = square != null
+	if square != null:
+		active_ring.position = cell_position(square) + Vector3(0, 0.145, 0)
 
 
 func create_material(color: Color) -> StandardMaterial3D:

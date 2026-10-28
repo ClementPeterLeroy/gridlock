@@ -2,9 +2,10 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-alpha.2.1 - Core Game Engine is implemented in `godot/`.
-It contains a scene-independent rules engine and the existing 3D prototype.
-The prototype is not yet playable: connecting board interaction is the next milestone.
+Gridlock v3.0-alpha.2.2 - Interactive Board is implemented in `godot/`.
+The 3D board now supports local pawn movement, wall previews/placement, turns,
+and basic victory/restart through the scene-independent engine. Full match menus,
+AI, and live clocks are still under development.
 
 ## Repository layout
 
@@ -30,8 +31,9 @@ Gridlock/
     |-- README.md
     |-- project.godot
     |-- version_notice.txt
-    |-- scenes/ and assets/ (3D prototype)
+    |-- scenes/ and assets/ (interactive 3D board)
     |-- scripts/core/ (headless gameplay engine)
+    |-- scripts/controllers/ (human board interaction)
     `-- tests/
 ```
 
@@ -67,14 +69,18 @@ python pygame/tests/benchmark_battle_ai.py
 
 ## Godot development
 
-Open `godot/project.godot` with Godot 4.7.2 to view the 3D foundations.
+Open `godot/project.godot` with Godot 4.7.2 and run the interactive board.
 Keys 1, 2, and 3 select Classic, Isometric, and Cinematic views.
-The core engine is intentionally not connected to these scenes yet.
+Click the active pawn and a green tile to move, or hover a groove and click to
+place a wall. R / right-click rotates; Esc deselects; N or Restart Match restarts.
+The default board is four local human players. Set the Game node's Board Mode
+to Versus in the Inspector for a two-player board.
 
 From the repository root, with the Godot executable available as `godot`:
 
 ```powershell
 godot --headless --path godot --script res://tests/run_core_tests.gd
+godot --headless --path godot --script res://tests/run_interaction_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 ```
 

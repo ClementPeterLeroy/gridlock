@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-alpha.2.1
+Current version: 3.0-alpha.2.2
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -54,6 +54,54 @@ Known limitations
 - The Windows sandbox prints a certificate-store warning during Godot startup;
   core tests do not use networking and complete successfully.
 Next milestone: 3.0-alpha.2.2 - Interactive Board
+
+VERSION 3.0-alpha.2.2 - Interactive Board
+Completion date: 2026-10-28
+Status: Completed
+
+Features
+- Connected the unchanged core engine to the 3D board. Pawn positions, placed
+  walls, inventories, active player, match status, and winner come from GameState.
+- Added a separate human controller for pawn selection, legal destination queries,
+  groove targeting, preview rotation, and validated action submission.
+- Added translucent green destination overlays and a golden active-player ring,
+  retaining original tile and pawn materials and the existing model offsets.
+- Added engine-validated green/red wall previews, R/right-click rotation, and
+  permanent walls using the existing Blender wall model and imported materials.
+- Added camera-ray pawn picking and board-plane intersection in all three views,
+  including during the unchanged 0.8-second camera transitions.
+- Added a basic active-player/inventory panel, one victory notification, and a
+  Restart Match button / N shortcut. Esc and repeat-click deselect the pawn.
+- Default board uses four local humans; the Game Inspector also supports Versus.
+
+Bug fixes and safeguards
+- Hid the demonstration wall rather than treating it as an engine-placed wall.
+- Tile interiors take precedence over groove tolerance, preventing accidental
+  wall placement. Off-board/HUD targets hide previews; pawn selection suppresses them.
+- Rejected walls preserve inventory, history, and turn order. Successful actions
+  clear selection/preview and update the scene only after engine acceptance.
+- Permanent walls keep imported materials; preview overrides affect preview nodes only.
+
+Validation
+- Godot 4.7.2: 3353 core checks and 602 interaction checks passed.
+- Existing Pygame regression suite: 100 tests passed on Python 3.13.12 / Pygame 2.6.1.
+- Existing Python parity fixtures still match 20 reference positions, 2560 wall
+  comparisons, and two 32-action match traces.
+- D3D12/Forward+ render captures inspected for all three cameras, move overlays,
+  the active-player ring, and a translucent wall preview.
+- Core scripts, Pygame files/history, existing scenes, models, pawn/wall scripts,
+  lighting, and original camera presets remain unchanged.
+
+Known limitations and remaining tasks
+- Full match menus, richer victory presentation, AI execution, live clocks/Blitz
+  penalties, records/replays, and preference migration are not included.
+- Groove aiming comfort and long human play sessions need manual checks at user
+  display resolutions. A verification checklist is included in the Godot README.
+- Existing undefined no-move/no-wall behavior and visual material audit findings
+  remain documented; no new gameplay rule or material redesign was introduced.
+- The sandbox emits a certificate-store warning; rendered capture also reported
+  shader-cache write warnings. Rendering and automated checks completed successfully.
+Next milestone: 3.0-alpha.2.3 - Playable Matches
 
 Future releases
 Append each completed milestone here with actual dates and test results. Keep
