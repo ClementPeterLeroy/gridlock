@@ -15,6 +15,8 @@ import main
 from board import (menu_buttons, setup_buttons, settings_buttons, pause_buttons,
                    button_rects, victory_buttons, STEP)
 from game import Game
+from preferences import DEFAULT_SETTINGS
+from display import GameDisplay
 from settings import BOARD_X, BOARD_Y, CELL_SIZE, GAP
 
 
@@ -40,8 +42,9 @@ def start(mode):
 
 
 class InterfaceTests(unittest.TestCase):
-    def run_frames(self, frames, factory=Game, seconds=0.016):
+    def run_frames(self, frames, factory=Game, seconds=0.016, preferences=None):
         self.observed, self.games, self.setups = [], [], []
+        self.saved_preferences = []
         now = 0.0
         frames = iter(frames + [[pygame.event.Event(pygame.QUIT)]])
         def next_frame():
@@ -71,7 +74,9 @@ class InterfaceTests(unittest.TestCase):
              patch.object(main.pygame.time, 'Clock', return_value=SimpleNamespace(tick=lambda fps: seconds * 1000)), \
              patch.object(main, 'perf_counter', side_effect=timer), \
              patch.object(main, 'Game', side_effect=make_game), \
-             patch.object(main, 'load_audio', return_value={}), \
+             patch.object(main, 'load_audio', return_value={}) as audio, \
+             patch.object(main, 'load_settings', return_value=(preferences or DEFAULT_SETTINGS).copy()), \
+             patch.object(main, 'save_settings', side_effect=lambda options: self.saved_preferences.append(options.copy())), \
              patch.object(main, 'play_startup', return_value=True) as startup, \
              patch.object(main, 'play_sound') as sound, \
              patch.object(main, 'set_music') as music, \
@@ -79,6 +84,7 @@ class InterfaceTests(unittest.TestCase):
              patch.object(main, 'draw_board', side_effect=board):
             main.main()
         self.startup_calls = startup.call_count
+        self.audio_options = audio.call_args.kwargs
         return sound, music
 
     def test_all_modes_open_setup_before_starting(self):
@@ -192,7 +198,7 @@ class InterfaceTests(unittest.TestCase):
     def test_pause_suspends_ai_delay_and_ai_clock_is_free(self):
         self.run_frames([start('Rise of the Machines'), [click(square(8, 4)), click(square(7, 4))],
                          [], [key(pygame.K_ESCAPE)], [], [], [], [],
-                         [key(pygame.K_ESCAPE)], [], [], []], seconds=1.0)
+                         [key(pygame.K_ESCAPE)], [], [], []], seconds=0.25)
         paused = [f for f in self.observed if f['paused']]
         self.assertTrue(all(f['history'] == 1 for f in paused))
         self.assertEqual(len(self.games[0].history), 2)
@@ -235,8 +241,48 @@ class InterfaceTests(unittest.TestCase):
                              *[[] for _ in range(10)]], seconds=1.0)
         self.assertEqual(budgets[0], 10)
         self.assertEqual(len(self.games[0].history), 1)
-        self.assertEqual(self.games[0].history[0][5], 7)
+        self.assertEqual(self.games[0].history[0][5], 10)
+        self.assertEqual(self.games[0].history[0][10], 9)
         self.assertEqual(self.games[0].eliminated, set())
+
+    def test_one_second_ai_pacing_and_live_elapsed_timer_in_both_modes(self):
+        for mode in ('Rise of the Machines', 'Battle Royale'):
+            events = start(mode)
+            if mode == 'Battle Royale':
+                b = setup_buttons(mode)
+                events = [click(menu_buttons()[mode]), click(b[('control', 0)]), click(b['Start Match'])]
+            factory = (lambda m: Game(m, current_player=1)) if mode == 'Rise of the Machines' else Game
+            self.run_frames([events, [], [], [], []], factory, seconds=0.25)
+            self.assertEqual([f['history'] for f in self.observed[:4]], [0, 0, 0, 0])
+            self.assertEqual([f['state'][5] for f in self.observed[:4]], [0, 0.25, 0.5, 0.75])
+            self.assertEqual(self.observed[4]['history'], 1)
+            self.assertEqual(self.games[0].history[0][5], 1)
+            self.assertEqual(self.games[0].history[0][10], 0)
+            self.assertEqual(self.games[0].turn_elapsed, 0)
+
+    def test_ai_countdown_appears_and_updates_without_charging_presentation(self):
+        def pending(game, difficulty, **kwargs):
+            while True:
+                yield 'move', (7, 4)
+        b = setup_buttons('Battle Royale')
+        with patch.object(main, 'search', side_effect=pending):
+            self.run_frames([[click(menu_buttons()['Battle Royale']), click(b[('control', 0)]),
+                              click(b['Timer']), click(b['Start Match'])],
+                             [], [], [], [], [], []], seconds=0.5)
+        self.assertEqual([f['state'][5] for f in self.observed[:4]], [0, 0.5, 1, 1.5])
+        self.assertEqual([f['state'][10] for f in self.observed[:4]], [0, 0, 0, 0.5])
+        self.assertEqual(self.games[0].remaining_turn_time, 13)
+
+    def test_expired_ai_countdown_forfeits_before_a_pending_action(self):
+        b = setup_buttons('Battle Royale')
+        def expired(mode):
+            return Game(mode, turn_clock_elapsed=15)
+        self.run_frames([[click(menu_buttons()['Battle Royale']), click(b[('control', 0)]),
+                          click(b['Timer']), click(b['Start Match'])]], expired)
+        self.assertEqual(self.games[0].eliminated, {0})
+        self.assertIsNone(self.games[0].pawns[0])
+        self.assertEqual(self.games[0].current_player, 2)
+        self.assertEqual(self.games[0].walls, set())
 
     def test_battle_all_human_current_pawn_only(self):
         b = setup_buttons('Battle Royale')
@@ -292,6 +338,64 @@ class InterfaceTests(unittest.TestCase):
         self.run_frames([start('Versus'), [key(pygame.K_m)],
                          start('Blitz'), [key(pygame.K_m)]])
         self.assertEqual(self.startup_calls, 1)
+
+    def test_saved_preferences_load_and_toggles_save_immediately(self):
+        self.run_frames([[click(menu_buttons()['Settings']), click(settings_buttons()['Music']),
+                          click(settings_buttons()['Sound Effects']), click(settings_buttons()['Animations'])]])
+        self.assertEqual(len(self.saved_preferences), 3)
+        saved = self.saved_preferences[-1]
+        self.assertEqual(saved, {name: False for name in DEFAULT_SETTINGS})
+        self.run_frames([[click(menu_buttons()['Settings']), click(settings_buttons()['Music'])]], preferences=saved)
+        self.assertEqual(self.audio_options, {'music_enabled': False})
+        self.assertEqual(self.saved_preferences[-1], {'Music': True, 'Sound Effects': False, 'Animations': False})
+
+    def test_fullscreen_menu_clicks_and_smart_mouse_controls(self):
+        displays = []
+        def create_display():
+            display = GameDisplay()
+            displays.append(display)
+            return display
+        # SDL's dummy desktop is 1024 x 768: the 930 x 650 canvas is centered.
+        def physical(rect):
+            return click(rect.move(47, 59))
+        with patch.object(main, 'GameDisplay', side_effect=create_display):
+            self.run_frames([
+                [click(menu_buttons()['Settings'])],
+                [click(settings_buttons()['Display Mode'])],
+                [physical(settings_buttons()['Back'])],
+                [physical(menu_buttons()['Versus'])],
+                [physical(setup_buttons('Versus')['Start Match'])],
+                [physical(square(8, 4)), physical(square(7, 4))],
+                [physical(groove())],
+            ])
+        self.assertTrue(displays[0].fullscreen)
+        self.assertEqual(self.games[0].pawns[0], (7, 4))
+        self.assertEqual(self.games[0].walls, {(3, 3, 'H')})
+        self.assertEqual(self.saved_preferences, [])
+
+    def test_pause_settings_repeated_switch_keeps_match_and_ai_state(self):
+        def physical(rect):
+            return click(rect.move(47, 59))
+        def pending(game, difficulty, **kwargs):
+            while True:
+                yield 'move', (1, 4)
+        with patch.object(main, 'search', side_effect=pending) as search:
+            self.run_frames([
+                start('Rise of the Machines'),
+                [click(square(8, 4)), click(square(7, 4))],
+                [click(button_rects()['Pause'])],
+                [click(pause_buttons()['Settings'])],
+                [click(settings_buttons()['Display Mode'])],
+                [physical(settings_buttons()['Display Mode'])],
+                [click(settings_buttons()['Back'])],
+                [click(pause_buttons()['Resume Game'])], [],
+            ], seconds=0.25)
+        self.assertEqual(len(self.games), 1)
+        self.assertEqual(len(self.games[0].history), 1)
+        self.assertEqual(search.call_count, 1)
+        paused = [frame['state'] for frame in self.observed if frame['paused']]
+        self.assertTrue(all(state == paused[0] for state in paused))
+        self.assertEqual(self.saved_preferences, [])
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ from pathlib import Path
 import pygame
 
 
-def load_audio():
+def load_audio(music_enabled=True):
     sounds = {}
     folder = Path(__file__).resolve().parent / "content" / "sound"
     try:
@@ -24,7 +24,8 @@ def load_audio():
     try:
         pygame.mixer.music.load(str(folder / "simple_happy_loop.mp3"))
         pygame.mixer.music.set_volume(0.2)
-        pygame.mixer.music.play(-1)
+        if music_enabled:
+            pygame.mixer.music.play(-1)
     except pygame.error:
         pass
     return sounds
@@ -32,10 +33,16 @@ def load_audio():
 
 def set_music(enabled):
     if pygame.mixer.get_init():
-        if enabled:
-            pygame.mixer.music.unpause()
-        else:
-            pygame.mixer.music.pause()
+        try:
+            if enabled:
+                if pygame.mixer.music.get_pos() < 0:
+                    pygame.mixer.music.play(-1)
+                else:
+                    pygame.mixer.music.unpause()
+            else:
+                pygame.mixer.music.pause()
+        except pygame.error:
+            pass
 
 
 def play_sound(sounds, name, enabled):

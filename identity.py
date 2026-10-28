@@ -1,7 +1,10 @@
 """Bundled artwork, fonts, and per-player victory sticker caching."""
 
 import logging
+import base64
+from io import BytesIO
 from pathlib import Path
+import xml.etree.ElementTree as ET
 import pygame
 
 ROOT = Path(__file__).resolve().parent / "content"
@@ -18,8 +21,10 @@ class IdentityAssets:
         self.root = Path(root)
         self._fonts = {}
         self._stickers = {}
-        self.logo = self.image("gridlock_logo.png")
+        self.logo = self.image("gridlock_logo_transparent.svg")
         self.icon = self.image("gridlock_icon.png")
+        if self.icon is not None:
+            self.icon = fit_image(self.icon, (128, 128))
         self.templates = [self.image(f"{name}_victory.png")
                           for name in ("sapphire", "crimson", "emerald", "violet")]
         self.fonts = (self.font("display", 32), self.font("interface", 18),
@@ -28,8 +33,18 @@ class IdentityAssets:
     def image(self, filename):
         path = self.root / "px" / filename
         try:
+            if path.suffix.lower() == ".svg":
+                # SDL_image omits embedded raster images when loading SVGs.
+                # This supplied SVG wraps one full-size transparent PNG.
+                root = ET.parse(path).getroot()
+                embedded = root.find("{http://www.w3.org/2000/svg}image")
+                if embedded is not None:
+                    href = embedded.get("href", "")
+                    if href.startswith("data:image/png;base64,"):
+                        data = base64.b64decode(href.split(",", 1)[1], validate=True)
+                        return pygame.image.load(BytesIO(data)).convert_alpha()
             return pygame.image.load(str(path)).convert_alpha()
-        except (OSError, pygame.error) as error:
+        except (OSError, pygame.error, ET.ParseError, ValueError) as error:
             log.warning("Gridlock asset unavailable: %s (%s)", path, error)
             return None
 

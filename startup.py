@@ -12,7 +12,7 @@ VIDEO = Path(__file__).resolve().parent / "content" / "px" / "gridlock_startup_s
 log = logging.getLogger(__name__)
 
 
-def play_startup(screen, clock, path=VIDEO, reader_factory=None):
+def play_startup(screen, clock, path=VIDEO, reader_factory=None, present=None):
     """Return False on window close; missing/broken media falls through to menu.
 
     Decode off the UI thread, hold at most three queued frames, and preserve
@@ -54,10 +54,11 @@ def play_startup(screen, clock, path=VIDEO, reader_factory=None):
                 reader.close()
             send(None)
 
+    show = present or pygame.display.flip
     worker = Thread(target=decode, name="gridlock-startup", daemon=True)
     worker.start()
     screen.fill((7, 8, 12))
-    pygame.display.flip()
+    show()
     elapsed, pending, last_end = 0.0, None, None
     started, finished = False, False
     last_received = perf_counter()
@@ -87,7 +88,7 @@ def play_startup(screen, clock, path=VIDEO, reader_factory=None):
                     frame = fit_image(frame, screen.get_size())
                     screen.fill((7, 8, 12))
                     screen.blit(frame, frame.get_rect(center=screen.get_rect().center))
-                    pygame.display.flip()
+                    show()
                     last_end = (index + 1) / fps
                     pending = None
             if finished and (last_end is None or elapsed >= last_end):

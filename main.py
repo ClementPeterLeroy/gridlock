@@ -13,10 +13,14 @@ from ai.pathfinder import search
 from audio import load_audio, set_music, play_sound
 from identity import IdentityAssets
 from startup import play_startup
+from display import GameDisplay
 from game import Game
 from match_config import MatchConfig, CONTROL_OPTIONS, NAME_LIMIT
 from rules import valid_moves, wall_error
-from settings import WINDOW_WIDTH, WINDOW_HEIGHT, FPS
+from settings import FPS
+from preferences import load_settings, save_settings
+
+AI_PRESENTATION_DELAY = 1
 
 
 def create_game(config):
@@ -54,19 +58,20 @@ def position_key(game):
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Gridlock v2.7")
+    display = GameDisplay()
+    screen = display.canvas
+    pygame.display.set_caption("Gridlock v2.8 - Definitive Classic Edition")
     assets = IdentityAssets()
     if assets.icon is not None:
         pygame.display.set_icon(assets.icon)
     fonts = assets.fonts
     clock = pygame.time.Clock()
-    if not play_startup(screen, clock):
+    if not play_startup(screen, clock, present=display.present):
         pygame.quit()
         return
     stickers = {}
-    sounds = load_audio()
-    options = {"Music": True, "Sound Effects": True, "Animations": True}
+    options = load_settings()
+    sounds = load_audio(music_enabled=options["Music"])
     presets = {}
     config = None
     editing = None
@@ -105,6 +110,7 @@ def main():
             if position_key(game) != previous_turn:
                 selected = False
         for event in events:
+            event = display.translate_event(event)
             if event.type == pygame.QUIT:
                 running = False
                 continue
@@ -119,8 +125,11 @@ def main():
                         if rect.collidepoint(event.pos):
                             if name == "Back":
                                 back = True
+                            elif name == "Display Mode":
+                                display.set_fullscreen(not display.fullscreen)
                             else:
                                 options[name] = not options[name]
+                                save_settings(options)
                                 if name == "Music":
                                     set_music(options[name])
                                 elif name == "Sound Effects" and not options[name] and pygame.mixer.get_init():
@@ -262,22 +271,29 @@ def main():
                 turn_age += dt
             if game.is_ai_turn:
                 if ai_state is None or ai_state["position"] != token:
+                    budget = min(10.0, game.remaining_turn_time)
                     ai_state = {"position": token, "age": 0.0, "action": None,
+                                "budget": budget,
                                 "search": search(game, game.ai_difficulty,
-                                                 time_limit=min(10.0, game.remaining_turn_time),
+                                                 time_limit=budget,
                                                  clock=lambda: active_time)}
                 old_age = ai_state["age"]
                 ai_state["age"] += dt
-                # Presentation time is free; only thinking beyond it uses a clock.
-                game.tick(max(0.0, ai_state["age"] - 3) - max(0.0, old_age - 3))
+                # Elapsed timers start immediately; countdowns exempt presentation.
+                charge = (max(0.0, ai_state["age"] - AI_PRESENTATION_DELAY)
+                          - max(0.0, old_age - AI_PRESENTATION_DELAY))
+                game.tick(dt, clock_seconds=charge)
                 if position_key(game) == token and game.winner is None:
+                    if ai_state["search"] is not None and ai_state["age"] >= ai_state["budget"] and ai_state["action"]:
+                        ai_state["search"].close()
+                        ai_state["search"] = None
                     deadline = perf_counter() + 0.004
                     while ai_state["search"] is not None and perf_counter() < deadline:
                         try:
                             ai_state["action"] = next(ai_state["search"])
                         except StopIteration:
                             ai_state["search"] = None
-                    if ai_state["search"] is None and ai_state["action"] and ai_state["age"] >= 3:
+                    if ai_state["search"] is None and ai_state["action"] and ai_state["age"] >= AI_PRESENTATION_DELAY:
                         kind, target = ai_state["action"]
                         if kind == "move":
                             if game.move(target):
@@ -302,17 +318,17 @@ def main():
         elif view == "setup":
             draw_setup(screen, fonts, config, editing)
         elif view in ("settings", "pause_settings"):
-            draw_settings(screen, fonts, options)
+            draw_settings(screen, fonts, options, "Fullscreen" if display.fullscreen else "Windowed")
         elif view == "intro":
             draw_starting_player(screen, fonts, game, intro_elapsed)
         else:
             moves = valid_moves(game.pawns, game.current_player, game.walls) if selected and view == "game" and not game.is_ai_turn and game.winner is None else set()
-            draw_board(screen, game, moves, selected, direction, pygame.mouse.get_pos(), fonts,
+            draw_board(screen, game, moves, selected, direction, display.to_logical(pygame.mouse.get_pos()), fonts,
                        options["Animations"] and turn_age < 0.7)
             draw_victory(screen, game, stickers, fonts)
             if view == "pause":
                 draw_pause(screen, fonts)
-        pygame.display.flip()
+        display.present()
     pygame.key.stop_text_input()
     pygame.quit()
 

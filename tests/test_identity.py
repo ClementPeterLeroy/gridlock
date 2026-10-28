@@ -35,13 +35,19 @@ class IdentityTests(unittest.TestCase):
         self.assertEqual(game.display_name(0), "Ella")
         self.assertEqual(game.display_name(1), "Crimson")
 
-    def test_text_free_svg_and_transparent_templates(self):
+    def test_trophy_winner_svg_and_transparent_templates(self):
         assets = IdentityAssets()
         for name, image in zip(("sapphire", "crimson", "emerald", "violet"), assets.templates):
             root = ET.parse(ROOT / "px" / f"{name}_victory.svg").getroot()
-            self.assertFalse(any(node.tag.endswith("}text") for node in root.iter()))
+            texts = [node for node in root.iter() if node.tag.endswith("}text")]
+            self.assertEqual([node.text for node in texts], ["WINNER"])
+            self.assertEqual((texts[0].get("x"), texts[0].get("y")), ("450", "385"))
             self.assertIsNotNone(image)
             self.assertEqual(image.get_at((0, 0)).a, 0)
+            # The plaque's interior must contain rendered dark lettering.
+            dark = sum(image.get_at((x, y)).r < 100 and image.get_at((x, y)).g < 100
+                       for y in range(364, 392) for x in range(387, 513))
+            self.assertGreater(dark, 50)
 
     def test_dynamic_text_is_drawn_in_banner_only(self):
         assets = IdentityAssets()
@@ -80,8 +86,11 @@ class IdentityTests(unittest.TestCase):
     def test_icon_logo_fonts_and_font_cache(self):
         assets = IdentityAssets()
         self.assertEqual(assets.icon.get_size(), (128, 128))
-        self.assertEqual(tuple(assets.icon.get_at((0, 0)))[:3], (255, 255, 255))
+        self.assertTrue(all(channel >= 245 for channel in assets.icon.get_at((0, 0))[:3]))
         logo = fit_image(assets.logo, (560, 160))
+        self.assertEqual(assets.logo.get_size(), (1747, 829))
+        self.assertEqual(assets.logo.get_at((0, 0)).a, 0)
+        self.assertGreater(pygame.mask.from_surface(assets.logo).count(), 0)
         self.assertLessEqual(logo.get_width(), 560)
         self.assertLessEqual(logo.get_height(), 160)
         self.assertIs(assets.font("display", 32), assets.fonts[0])

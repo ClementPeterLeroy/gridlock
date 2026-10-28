@@ -1,12 +1,17 @@
 # Gridlock identity assets
 
+The menu now uses the supplied `px/gridlock_logo_transparent.svg`. This SVG
+wraps a transparent PNG; `identity.py` decodes that embedded image directly
+because SDL_image's SVG renderer omits embedded raster artwork. Transparency,
+original proportions, and artwork are preserved without a new dependency.
+
 The supplied `px/gridlock_startup_storyboard.mp4` contains the official logo
 in its final frame. No separate official logo or icon file was present when
 v2.7 was implemented. `gridlock_logo.png` is a proportional crop of that
 frame; `gridlock_icon.png` arranges its existing lock and gemstone details
 over a dark grid with a white outer border. No replacement artwork was
-generated. The logo's dark grid remains opaque because the MP4 has no
-transparency. A standalone transparent logo can replace this PNG later.
+generated. That older opaque logo PNG is retained as a legacy export and is
+no longer used by the menu. The application icon is loaded independently.
 
 The supplied video is 960 x 540, 20 fps, and 116 frames (5.8 seconds).
 Playback displays every frame and letterboxes proportionally. It is
@@ -18,7 +23,8 @@ a warning and allows the game to continue.
 
 `sapphire_victory.svg`, `crimson_victory.svg`, `emerald_victory.svg`, and
 `violet_victory.svg` retain the supplied trophy, foam hands, colors, and
-banner. Both original text elements were removed. Transparent 900 x 520
+banner. The trophy retains its original `WINNER` plaque; the banner has no
+fixed player text, so custom names can be rendered at runtime. Transparent 900 x 520
 PNG exports are bundled for runtime use; no SVG renderer is needed to play.
 Legacy blue/red/green files are retained as source artwork and are not loaded
 by the new identity layer.
@@ -34,6 +40,8 @@ To reproduce the SVG/PNG/logo/icon exports during development:
 ```powershell
 python -m pip install pillow resvg-py imageio-ffmpeg
 python tools/prepare_identity.py
+# Regenerate stickers alone, preserving the current logo and replacement icon:
+python tools/prepare_identity.py --stickers-only
 ```
 
 Pillow and resvg-py are development tools, not runtime requirements. Cropping

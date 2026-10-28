@@ -15,6 +15,43 @@ from rules import wall_error, valid_moves, has_path
 
 
 class MatchConfigTests(unittest.TestCase):
+    def test_ai_elapsed_and_countdown_are_separate_and_undoable(self):
+        config = MatchConfig.for_mode('Battle Royale')
+        config.turn_limit = 15
+        game = create_game(config)
+        game.current_player = 2
+        game.tick(1, clock_seconds=0)
+        self.assertEqual(game.turn_elapsed, 1)
+        self.assertEqual(game.remaining_turn_time, 15)
+        game.tick(2, clock_seconds=2)
+        self.assertEqual(game.turn_elapsed, 3)
+        self.assertEqual(game.remaining_turn_time, 13)
+        self.assertTrue(game.move((4, 1)))
+        self.assertEqual(game.turn_elapsed, 0)
+        self.assertEqual(game.turn_clock_elapsed, 0)
+        game.undo()
+        self.assertEqual(game.turn_elapsed, 3)
+        self.assertEqual(game.remaining_turn_time, 13)
+        game.tick(13, clock_seconds=13)
+        self.assertEqual(game.eliminated, {2})
+
+    def test_blitz_presentation_exemption_preserves_penalties(self):
+        game = create_game(MatchConfig.for_mode('Blitz'))
+        game.time_left[0] = 0.5
+        game.tick(1, clock_seconds=0)
+        self.assertEqual(game.turn_elapsed, 1)
+        self.assertEqual(game.time_left[0], 0.5)
+        game.tick(0.5, clock_seconds=0.5)
+        self.assertEqual(game.walls_left[0], 9)
+        self.assertEqual(game.overtime, 15)
+        game.paused = True
+        before = game.snapshot()
+        game.tick(100, clock_seconds=100)
+        self.assertEqual(game.snapshot(), before)
+        game.paused = False
+        game.tick(15, clock_seconds=15)
+        self.assertEqual(game.winner, 1)
+
     def test_names_defaults_limit_and_ai_identity(self):
         self.assertEqual(clean_name('  ', 2), 'Emerald')
         self.assertEqual(clean_name('abcdefghijklmnop', 0), 'abcdefghijkl')

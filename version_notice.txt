@@ -1,5 +1,5 @@
 GRIDLOCK - DEVELOPMENT VERSION HISTORY
-Current version: 2.7
+Current version: 2.8
 
 VERSION 1.0 - ORIGINAL GAME
 
@@ -259,6 +259,64 @@ VERSION 2.7 - GRIDLOCK IDENTITY
 - Known limitations: logo exports inherit the video's opaque grid and
   compression; startup playback is video-only, with game music afterward.
   Font character coverage is finite; placeholder audio and heuristic AI remain.
+
+VERSION 2.8 - FINAL POLISH AND STABILISATION (IN DEVELOPMENT)
+
+- Focus: final visual polish, bug fixes, and stabilisation of existing features.
+- Switched the menu to the supplied gridlock_logo_transparent.svg, preserving
+  transparency and aspect ratio. Decode its embedded PNG directly to avoid
+  the blank result produced by SDL_image's SVG renderer.
+- Replaced the glitched application icon with the updated icon artwork.
+  Fit the loaded icon within 128 x 128 pixels while preserving proportions.
+- Updated identity tests for the transparent logo and replacement icon.
+- This patch is in development; further polish and fixes will be recorded here.
+
+VERSION 2.8 — DEFINITIVE CLASSIC EDITION
+
+- Added session-only Display Mode: Windowed / Fullscreen to both Settings
+  menus. Fullscreen uses the native desktop resolution and centers the
+  unscaled 930 x 650 interface with background-filled margins. Mouse positions
+  are translated to the fixed canvas; switching preserves the match and pause
+  state. Windowed mode restores the original dimensions. Displays smaller
+  than the canvas keep windowed mode rather than cropping or scaling the game.
+- Fullscreen validation: 100 automated tests passed, including repeated SDL
+  switching, centered unscaled pixels, translated mouse input, pause/AI-state
+  preservation, and startup/victory presentation. Compilation also passed.
+
+- Added settings.json and preferences.py to persist Music, Sound Effects,
+  and Animations across application sessions. Load preferences at startup
+  and save changes immediately from both Settings menus, using atomic writes.
+  Missing/invalid values fall back to defaults; file errors are logged without
+  stopping the game. Saved Music Off prevents playback on startup.
+
+- Finalized the earlier v2.8 polish work, retaining the transparent menu logo
+  and replacement application icon recorded in the development notes above.
+- Simplified gameplay player cards to names/color identities, wall counts,
+  and relevant clocks. Removed Human/AI/difficulty labels from the sidebar;
+  match setup retains all controller and difficulty choices.
+- Compacted cards into two lines, resized the golden active-player box,
+  and fitted long names and clock text within both two- and four-player layouts.
+- Reduced nonblocking AI presentation from three seconds to one second in
+  Rise of the Machines and Battle Royale, without changing Pathfinder algorithms.
+- Separated visible elapsed turn time from chargeable countdown time.
+  AI elapsed timers start immediately; the one-second presentation portion
+  remains free for countdowns. Further thinking consumes the clock normally.
+- Preserved timeout forfeits, Battle Royale elimination, Blitz wall penalties,
+  pause/resume, and Undo. Both timing counters reset on each new turn.
+- Retained the ten-second search cap and available-turn-time budget, with
+  an event-loop safeguard that executes the best proposal when budget expires.
+- Restored WINNER on all four trophy plaques and regenerated transparent
+  PNG templates. Kept personalized uppercase banners and sticker caching.
+- Added a stickers-only export option to avoid overwriting current branding.
+- Added sidebar text-bounds, live AI elapsed/countdown, one-second pacing,
+  pause, timeout, undo, and trophy-lettering regression checks.
+- Validation: 88 automated tests passed on Python 3.13 / Pygame 2.6.1.
+  Compilation, diff checks, and headless visual checks of long-name player
+  cards and personalized victory screens also passed.
+- Preserved Smart Mouse Controls, match customization, startup video, music,
+  fonts, player identities, game modes, and all movement/wall rules.
+- Existing limitations remain: placeholder audio, heuristic AI, finite font
+  character coverage, and video-only startup playback.
 
 Future releases
 Append a new version entry here when gameplay, visuals, or fixes change.

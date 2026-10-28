@@ -1,4 +1,4 @@
-# Gridlock — version 2.7
+# Gridlock v2.8 — Definitive Classic Edition
 
 A local desktop strategy board game made with Python and Pygame.
 
@@ -17,7 +17,7 @@ python main.py
 - **Battle Royale:** four seats, 5 walls each. The setup screen lets you click each seat to cycle between Human, AI - Casual, and AI - Challenging, then select Start Match or Back. Initially Sapphire is Human and the other three seats are Casual AI. Any combination works, including all humans or all AI. Turn order remains Sapphire (bottom), Emerald (left), Crimson (top), Violet (right), clockwise. Each pawn must reach the opposite edge.
 - **Blitz:** two human players with a selectable 1-, 3-, or 5-minute starting clock (3 by default), paused outside their turns. At the start of each turn, remaining time is raised to 10 seconds **only when below 10**. When it runs out, the player loses one wall and gets 15 seconds to finish the turn. One wall penalty maximum per turn; subsequent time expiry in that turn loses the game. No walls to pay the penalty also loses the game.
 - **Rise of the Machines:** play Sapphire against Crimson, controlled by Pathfinder. Choose Casual or Challenging in setup. Sapphire moves first unless Random Starting Player is enabled; both players start with 10 walls and use standard Versus rules. This mode remains untimed.
-- **Settings:** Music, Sound Effects, and Animations On/Off toggles. Changes apply immediately and last until the app closes. Animations controls the starting-player reveal and brief incoming-turn highlights.
+- **Settings:** Music, Sound Effects, and Animations On/Off toggles. Changes apply immediately and are saved to `settings.json` beside the game for the next session. Animations controls the starting-player reveal and brief incoming-turn highlights.
 - **Exit Game:** closes the application from the bottom-right of the main menu.
 
 ## Match setup
@@ -45,6 +45,19 @@ The last surviving player wins. Blitz retains its separate penalty rules.
 Names, seats, difficulty, random-start preference, and timing rules are
 preserved by New game, Restart Match, and Play Again. Setup choices remain
 available during the application session; nothing is stored permanently.
+
+Application preferences are separate from match options: Music, Sound Effects,
+and Animations persist in `settings.json`. Missing preferences use defaults;
+a missing file is recreated. Invalid files fall back safely with a warning.
+Changes from the main-menu or pause Settings screen save immediately. Muted
+music stays muted on startup and can be switched on later without relaunching.
+
+Settings also includes a session-only **Display Mode: Windowed / Fullscreen**
+toggle, available from the main menu and paused games. Fullscreen centers the
+original 930 x 650 interface at native size on the desktop, filling the margins
+with the game background. Mouse coordinates follow the centered canvas.
+Switching back restores the original window size without resetting the match.
+Displays smaller than the interface stay windowed to avoid cropping or scaling.
 
 ## Controls
 
@@ -78,6 +91,9 @@ The active player's square is gold. Personalized uppercase victory text is
 rendered into the appropriate color-specific sticker when a match starts.
 Stickers are cached and reused on restart when names are unchanged. Long
 names scale to fit the banner, and no duplicate winner label is displayed.
+The original `WINNER` lettering is retained on each central trophy plaque.
+Player cards show only the name/color identity, walls, and relevant clocks;
+controller and difficulty labels remain in setup rather than gameplay.
 
 ## Identity and startup
 
@@ -92,9 +108,9 @@ text. Font files and licenses are bundled, with a built-in Pygame fallback.
 `imageio-ffmpeg` in `requirements.txt` provides video decoding. No CairoSVG,
 Pillow, or SVG conversion tool is required at runtime.
 
-The separate official logo/icon files were absent, so the bundled menu logo
-and icon reuse the final-frame artwork from the supplied video. Its dark grid
-is opaque. See [asset sources, licenses, and export instructions](content/ASSETS.md)
+The menu uses `gridlock_logo_transparent.svg`, preserving transparency and
+aspect ratio. Its embedded PNG is decoded directly for Pygame compatibility.
+The icon is loaded independently. See [asset sources, licenses, and export instructions](content/ASSETS.md)
 for these derivations and the text-free SVG/PNG sticker templates.
 
 ## Audio
@@ -109,7 +125,7 @@ The game remains playable if an audio device or file is unavailable.
 The music and sound files are development placeholders: they are not final,
 optimized, or tailor-made for Gridlock yet.
 
-See `version_notice.txt` for development history from 1.0 through 2.7.
+See `version_notice.txt` for development history from 1.0 through v2.8.
 
 ## Pathfinder
 
@@ -126,11 +142,13 @@ benefit is small or it has a clear racing lead.
 Search yields after each candidate. The event loop spends about 4 ms per
 frame advancing it and uses its best legal proposal when finished or when
 the 10-second search budget expires. Each AI turn also has a nonblocking
-three-second minimum wait before executing its action. Thinking overlaps
-this wait: fast decisions execute after three seconds; slower searches
+one-second minimum wait before executing its action. Thinking overlaps
+this wait: fast decisions execute after one second; slower searches
 execute when ready, with the search budget still capped at ten seconds.
 This pacing applies to Rise of the Machines and every Battle Royale AI seat.
-The three-second presentation portion does not consume an AI's clock.
+Elapsed turn timers start immediately and include presentation time. Countdown
+clocks exempt the one-second presentation portion, then charge further thinking
+time normally. Both counters reset on turn changes and are restored by Undo.
 Search is capped at the lesser of ten seconds and the available turn time;
 its clock excludes paused time. Eliminated seats are excluded from AI
 opponent evaluation, pawn occupancy, and wall-path validation.

@@ -22,6 +22,7 @@ class Game:
     history: list = field(default_factory=list)
     message: str = "Click your pawn to see its moves."
     turn_elapsed: float = 0.0
+    turn_clock_elapsed: float = 0.0
     time_left: list = field(default_factory=list)
     penalty_used: bool = False
     overtime: float = 0.0
@@ -84,13 +85,13 @@ class Game:
     def remaining_turn_time(self):
         if self.is_blitz:
             return self.overtime if self.penalty_used else self.time_left[self.current_player]
-        return max(0.0, self.config.turn_limit - self.turn_elapsed) if self.config.turn_limit else float("inf")
+        return max(0.0, self.config.turn_limit - self.turn_clock_elapsed) if self.config.turn_limit else float("inf")
 
     def snapshot(self):
         return (self.pawns.copy(), self.walls.copy(), self.walls_left.copy(),
                 self.current_player, self.winner, self.turn_elapsed,
                 self.time_left.copy(), self.penalty_used, self.overtime,
-                self.eliminated.copy())
+                self.eliminated.copy(), self.turn_clock_elapsed)
 
     def next_turn(self):
         if self.player_count == 4:
@@ -101,6 +102,7 @@ class Game:
         else:
             self.current_player = 1 - self.current_player
         self.turn_elapsed = 0.0
+        self.turn_clock_elapsed = 0.0
         self.penalty_used = False
         self.overtime = 0.0
         if self.is_blitz:
@@ -133,25 +135,31 @@ class Game:
         self.next_turn()
         return True
 
-    def tick(self, seconds):
-        """Advance active turn clock by elapsed real time in seconds."""
+    def tick(self, seconds, clock_seconds=None):
+        """Track elapsed time separately from chargeable countdown time.
+
+        Human turns charge all elapsed time. The UI can exempt AI presentation
+        time from countdowns while still showing a live elapsed turn timer.
+        """
         if self.paused or self.winner is not None:
             return
         seconds = max(0.0, seconds)
+        clock_seconds = seconds if clock_seconds is None else max(0.0, clock_seconds)
         self.turn_elapsed += seconds
-        if not self.is_blitz and self.config.turn_limit and self.turn_elapsed >= self.config.turn_limit:
+        self.turn_clock_elapsed += clock_seconds
+        if not self.is_blitz and self.config.turn_limit and self.turn_clock_elapsed >= self.config.turn_limit:
             self.forfeit()
             return
         if not self.is_blitz:
             return
         p = self.current_player
         if self.penalty_used:
-            self.overtime = max(0.0, self.overtime - seconds)
+            self.overtime = max(0.0, self.overtime - clock_seconds)
             if self.overtime <= 0:
                 self.winner = 1 - p
                 self.message = f"{self.player_label(p)} ran out of time."
             return
-        self.time_left[p] = max(0.0, self.time_left[p] - seconds)
+        self.time_left[p] = max(0.0, self.time_left[p] - clock_seconds)
         if self.time_left[p] > 0:
             return
         if self.walls_left[p] == 0:
@@ -181,6 +189,6 @@ class Game:
             return False
         (self.pawns, self.walls, self.walls_left, self.current_player,
          self.winner, self.turn_elapsed, self.time_left,
-         self.penalty_used, self.overtime, self.eliminated) = self.history.pop()
+         self.penalty_used, self.overtime, self.eliminated, self.turn_clock_elapsed) = self.history.pop()
         self.message = "Last turn undone."
         return True

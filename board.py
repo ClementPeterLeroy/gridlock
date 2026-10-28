@@ -86,6 +86,11 @@ def button_rects():
     }
 
 
+def player_info_rect(slot, player_count):
+    """Keep names, color markers, walls, and clocks within one player card."""
+    return pygame.Rect(PANEL_X - 6, 122 + slot * (67 if player_count == 4 else 86), 282, 62)
+
+
 def menu_buttons():
     names = ("Versus", "Battle Royale", "Blitz", "Rise of the Machines", "Settings")
     buttons = {name: pygame.Rect(290, 185 + i * 79, 350, 60) for i, name in enumerate(names)}
@@ -101,17 +106,18 @@ def draw_button(screen, font, label, rect):
 
 
 def settings_buttons():
-    return {name: pygame.Rect(260, 200 + i * 85, 410, 60)
-            for i, name in enumerate(("Music", "Sound Effects", "Animations", "Back"))}
+    return {name: pygame.Rect(260, 175 + i * 75, 410, 55)
+            for i, name in enumerate(("Music", "Sound Effects", "Animations", "Display Mode", "Back"))}
 
 
-def draw_settings(screen, fonts, options):
+def draw_settings(screen, fonts, options, display_mode="Windowed"):
     title_font, font, small = fonts
     screen.fill(BACKGROUND)
     title = title_font.render("SETTINGS", True, TEXT)
     screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 110)))
     for name, rect in settings_buttons().items():
-        label = name if name == "Back" else f"{name}: {'On' if options[name] else 'Off'}"
+        label = (name if name == "Back" else f"Display Mode: {display_mode}" if name == "Display Mode"
+                 else f"{name}: {'On' if options[name] else 'Off'}")
         draw_button(screen, font, label, rect)
     hint = small.render("Animations: starting-player reveal and incoming-turn highlights", True, GROOVE)
     screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, 570)))
@@ -214,7 +220,7 @@ def draw_menu(screen, fonts, logo=None):
         screen.blit(sub, sub.get_rect(center=(WINDOW_WIDTH // 2, 125)))
     for name, rect in menu_buttons().items():
         draw_button(screen, font, name, rect)
-    draw_text(screen, small, "v2.7 - Gridlock Identity", 24, WINDOW_HEIGHT - 30)
+    draw_text(screen, small, "v2.8 - Definitive Classic Edition", 24, WINDOW_HEIGHT - 30)
 
 
 def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=False):
@@ -253,27 +259,22 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=Fal
 
     draw_text(screen, title_font, "GRIDLOCK", PANEL_X, 48)
     draw_text(screen, small, game.mode, PANEL_X, 91)
-    if game.mode == "Rise of the Machines":
-        draw_text(screen, small, game.difficulty, PANEL_X + 190, 91)
     pygame.draw.line(screen, GROOVE, (PANEL_X, 116), (885, 116), 1)
     for slot, player in enumerate((0, 2, 1, 3) if game.player_count == 4 else (0, 1)):
-        y = 130 + slot * (67 if game.player_count == 4 else 86)
+        card = player_info_rect(slot, game.player_count)
+        y = card.top + 8
         active = game.winner is None and player == game.current_player
         if active:
-            pygame.draw.rect(screen, (250, 223, 147), (PANEL_X - 6, y - 7, 276, 60), border_radius=6)
+            pygame.draw.rect(screen, (250, 223, 147), card, border_radius=6)
             if flash:
-                pygame.draw.rect(screen, GOLD, (PANEL_X - 6, y - 7, 276, 60), 3, border_radius=6)
+                pygame.draw.rect(screen, GOLD, card, 3, border_radius=6)
         pygame.draw.circle(screen, PLAYER_COLORS[player], (PANEL_X + 12, y + 12), 11)
         name = game.display_name(player)
         label = PLAYER_NAMES[player] if name == PLAYER_NAMES[player] else f"{PLAYER_NAMES[player]} - {name}"
         draw_text(screen, font, label, PANEL_X + 31, y, width=238)
-        controller = game.controller(player)
-        control_label = ("Forfeited" if player in game.eliminated else "Human" if controller == "Human"
-                         else controller.removeprefix("AI - ") + " AI")
-        draw_text(screen, small, control_label, PANEL_X + 31, y + 20)
-        draw_text(screen, small, f"Walls: {game.walls_left[player]}", PANEL_X + 31, y + 40)
+        draw_text(screen, small, f"Walls: {game.walls_left[player]}", PANEL_X + 31, y + 28, width=122)
         if game.is_blitz:
-            draw_text(screen, small, f"Clock: {game.time_left[player]:.1f}s", PANEL_X + 150, y + 40)
+            draw_text(screen, small, f"Clock: {game.time_left[player]:.1f}s", PANEL_X + 150, y + 28, width=120)
     timer_y = 422 if game.player_count == 4 else 340
     if game.is_blitz:
         value = game.overtime if game.penalty_used else game.time_left[game.current_player]
@@ -293,7 +294,7 @@ def draw_board(screen, game, moves, selected, direction, mouse, fonts, flash=Fal
     draw_text(screen, small, "R / right-click: rotate   Esc: pause", PANEL_X, 580)
     if game.winner is None:
         draw_text(screen, small, game.message[:65], 38, 618)
-    hint = (f"{PLAYER_NAMES[game.current_player]} AI preparing a move..." if game.is_ai_turn else
+    hint = (f"{game.display_name(game.current_player)} is preparing a move..." if game.is_ai_turn else
             "Pawn selected: click again to deselect" if selected else
             f"Hover grooves to place walls ({direction})")
     draw_text(screen, small, hint, PANEL_X, 603)
