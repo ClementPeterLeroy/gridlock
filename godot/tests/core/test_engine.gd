@@ -154,6 +154,7 @@ func test_victory() -> bool:
 		check(engine.apply_action(move_action(player, goals[player])).accepted, "winning move")
 		check(engine.state.winner == player and engine.state.current_player == player, "goal wins without advancing turn")
 		check(engine.legal_actions().is_empty(), "no actions after victory")
+		check(engine.set_paused(true).reason_code == "match_finished", "pause cannot reopen a finished match")
 		var before = engine.state.snapshot()
 		var history = engine.state.history.duplicate(true)
 		check(engine.apply_action(move_action(player, starts[player])).reason_code == "match_finished", "reject post-victory action")
@@ -197,7 +198,7 @@ func test_history_and_restart() -> bool:
 		random_engine.restart()
 		check(random_engine.state.current_player == order[control.randi_range(0, 3)], "restart rerolls starter")
 	engine.apply_action(move_action(0, Vector2i(4, 7)))
-	engine.state.paused = true
+	check(engine.set_paused(true).accepted, "pause through engine API")
 	check(engine.undo().accepted and engine.state.paused, "undo preserves current pause state")
 	return true
 
@@ -215,7 +216,7 @@ func test_rejected_actions() -> bool:
 	engine.state.paused = true
 	check(engine.apply_action(move_action(0, Vector2i(4, 7))).reason_code == "match_paused", "pause rejects move")
 	check(engine.legal_actions().is_empty(), "pause hides actions")
-	engine.state.paused = false
+	check(engine.set_paused(false).accepted, "resume through engine API")
 	var before = engine.state.snapshot()
 	var actions = engine.legal_actions()
 	check(actions.size() == 131 and engine.state.snapshot() == before, "legal query does not mutate")

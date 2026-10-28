@@ -2,10 +2,10 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-alpha.2.2 - Interactive Board is implemented in `godot/`.
-The 3D board now supports local pawn movement, wall previews/placement, turns,
-and basic victory/restart through the scene-independent engine. Full match menus,
-AI, and live clocks are still under development.
+Gridlock v3.0-alpha.2.3 - Playable Matches is implemented in `godot/`.
+Versus and Battle Royale now offer complete local match flow with setup, a compact
+HUD, pause/settings, elapsed turn timers, animations, audio, and victory/replay.
+AI, Blitz/countdown clocks, and the later visual polish remain under development.
 
 ## Repository layout
 
@@ -34,6 +34,7 @@ Gridlock/
     |-- scenes/ and assets/ (interactive 3D board)
     |-- scripts/core/ (headless gameplay engine)
     |-- scripts/controllers/ (human board interaction)
+    |-- scripts/ui/ (compact HUD and match pages)
     `-- tests/
 ```
 
@@ -69,18 +70,19 @@ python pygame/tests/benchmark_battle_ai.py
 
 ## Godot development
 
-Open `godot/project.godot` with Godot 4.7.2 and run the interactive board.
+Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus or Battle Royale.
 Keys 1, 2, and 3 select Classic, Isometric, and Cinematic views.
 Click the active pawn and a green tile to move, or hover a groove and click to
-place a wall. R / right-click rotates; Esc deselects; N or Restart Match restarts.
-The default board is four local human players. Set the Game node's Board Mode
-to Versus in the Inspector for a two-player board.
+place a wall. R / right-click rotates; Esc deselects a selected pawn or pauses.
+The top-left hamburger opens Settings, Pause, Restart Match, and Main Menu.
+Top-right cards show player identity, remaining walls, and elapsed turn time.
 
 From the repository root, with the Godot executable available as `godot`:
 
 ```powershell
 godot --headless --path godot --script res://tests/run_core_tests.gd
 godot --headless --path godot --script res://tests/run_interaction_tests.gd
+godot --headless --path godot --script res://tests/run_match_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 ```
 

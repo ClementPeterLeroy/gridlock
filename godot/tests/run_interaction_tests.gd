@@ -28,6 +28,12 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	await process_frame
+	# The board regression suite isolates immediate synchronization. Match-flow
+	# tests exercise the new startup menus and enabled animations separately.
+	game.animations_enabled = false
+	game.ui.animations_enabled = false
+	game.start_match()
+	game.set_volume("effects", 0.0)
 	# Synthetic input uses explicit screen positions, independent of the real cursor.
 	game.set_process(false)
 	for method in ["test_initial_scene", "test_selection_and_move", "test_walls",
@@ -36,7 +42,8 @@ func run() -> void:
 	await test_input_events()
 	await test_cameras()
 	game.free()
-	await process_frame
+	# Audio teardown is asynchronous; allow the mixer to drain queued play/stop requests.
+	await create_timer(0.1).timeout
 	print("INTERACTION TESTS COMPLETE: %d checks, %d failures" % [checks, failures])
 	quit(0 if failures == 0 else 1)
 
@@ -58,7 +65,7 @@ func test_initial_scene() -> bool:
 		check(game.pawn_nodes[player.id].global_position.is_equal_approx(expected), "pawn positions come from engine")
 		check(is_equal_approx(game.pawn_nodes[player.id].get_node("PawnModel").position.y, 0.16), "original pawn model offset")
 	check(game.get_node("Board").active_ring.visible, "active golden indicator visible")
-	check(game.inventory_label.text.contains("Sapphire: 5 walls"), "inventory synchronized")
+	check(game.ui.cards[0].walls.text == "5", "inventory synchronized")
 	return true
 
 func test_selection_and_move() -> bool:
@@ -101,7 +108,7 @@ func test_walls() -> bool:
 	check(game.click_at_screen(screen), "screen wall placement")
 	check(game.wall_nodes.size() == 1 and game.placed_walls.get_child_count() == 1, "one permanent wall created")
 	check(not game.preview_wall.visible, "accepted wall hides ghost")
-	check(game.inventory_label.text.contains("Sapphire: 4 walls"), "HUD inventory decremented")
+	check(game.ui.cards[0].walls.text == "4", "HUD inventory decremented")
 	var permanent = game.wall_nodes[Vector3i(4, 4, 0)]
 	check(permanent.position.is_equal_approx(Vector3(0.5, 0, 0.5)), "permanent wall center")
 	check_mesh_materials(permanent)
@@ -135,7 +142,7 @@ func test_four_player_order() -> bool:
 		game.controller.click({"kind": "pawn", "player_id": player})
 		check(game.controller.click({"kind": "tile", "square": target}), "each human can move")
 		game.sync_scene()
-		check(game.status_label.text == game.engine.state.players[game.engine.state.current_player].name + "'s turn", "active HUD updated")
+		check(game.ui.cards[game.engine.state.current_player].active, "active HUD updated")
 	return true
 
 func test_victory_and_restart() -> bool:
@@ -149,12 +156,12 @@ func test_victory_and_restart() -> bool:
 	game.controller.click({"kind": "pawn", "player_id": 0})
 	check(game.controller.click({"kind": "tile", "square": Vector2i(2, 0)}), "winning move accepted")
 	game.sync_scene()
-	check(game.status_label.text == "ALEX WINS!", "one personalized winner notification")
+	check(game.ui.winner_text.text == "ALEX WINS!", "one personalized winner notification")
 	check(not game.get_node("Board").active_ring.visible, "no active ring after victory")
 	var before = game.engine.state.snapshot()
 	game.click_at_screen(game.camera.unproject_position(Vector3(0.5, 0.12, 0.5)))
 	check(game.engine.state.snapshot() == before, "victory blocks input")
-	var button = game.hud_panel.find_child("RestartMatch", true, false)
+	var button = game.ui.victory_buttons[0]
 	button.pressed.emit()
 	check(game.engine.state.winner == -1 and game.engine.state.history.is_empty(), "restart button clears victory")
 	check(game.engine.state.players[0].name == "Alex" and game.pawn_nodes[0].position == Vector3(0, 0, 4), "restart preserves name, restores board")
@@ -182,7 +189,9 @@ func test_input_events() -> void:
 	check(game.controller.selected, "viewport mouse event selects pawn")
 	viewport_click(screen_point(Vector2i(4, 7)))
 	check(game.engine.state.players[0].position == Vector2i(4, 7), "viewport mouse event moves pawn")
-	var button = game.hud_panel.find_child("RestartMatch", true, false)
+	viewport_click(game.ui.hamburger.get_global_rect().get_center())
+	await process_frame
+	var button = game.ui.menu.find_child("Restart", true, false)
 	viewport_click(button.get_global_rect().get_center())
 	check(game.engine.state.history.is_empty() and game.engine.state.current_player == 0, "GUI restart receives click without board action")
 	root.push_input(key_event(KEY_R))

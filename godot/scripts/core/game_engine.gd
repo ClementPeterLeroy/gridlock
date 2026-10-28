@@ -34,6 +34,12 @@ func start_match(options: Config) -> Dictionary:
 func restart() -> Dictionary:
 	return start_match(state.config)
 
+func set_paused(value: bool) -> Dictionary:
+	if state.status != "running":
+		return result("match_finished")
+	state.paused = value
+	return result()
+
 func action_error(action: Dictionary) -> String:
 	if state.status != "running":
 		return "match_finished"

@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-alpha.2.2
+Current version: 3.0-alpha.2.3
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -102,6 +102,63 @@ Known limitations and remaining tasks
 - The sandbox emits a certificate-store warning; rendered capture also reported
   shader-cache write warnings. Rendering and automated checks completed successfully.
 Next milestone: 3.0-alpha.2.3 - Playable Matches
+
+VERSION 3.0-alpha.2.3 - Playable Matches
+Completion date: 2026-10-28
+Status: Completed
+
+Features
+- Implemented Design B: compact top-right player cards with identity circles,
+  names, elapsed turn times, wall icons/counts, dark rounded translucent panels,
+  and a thin animated golden border for the active player.
+- Added the top-left hamburger menu with Settings, Pause/Resume, Restart Match,
+  and Main Menu. HUD regions and overlays prevent gameplay click-through.
+- Added main menu and setup for local human Versus and Battle Royale, retaining
+  starts, goals, inventories, and clockwise four-player order.
+- Added pause/resume and elapsed timers without timeouts or penalties. Incoming
+  turn timers reset; inactive cards retain their previous turn's elapsed time.
+- Added short pawn translation, wall settling, and golden-highlight transitions.
+  State remains authoritative; input locks during transitions. Pause freezes them,
+  restart/navigation cancels them, and Animations Off safely completes them.
+- Reused all four Classic trophy stickers and Cinzel for one dynamic winner banner.
+  Victory preserves the final board and offers exactly Play Again and Main Menu.
+- Added continuous low-volume music, move/wall/victory sounds, and immediate Music
+  and Sound Effects volume sliders. Reused original audio/artwork/font bytes inside
+  Godot for portable imports, with font licensing and asset provenance preserved.
+- Added a narrow explicit engine pause API; all existing movement and wall rules
+  are unchanged. Cameras, models, materials, lighting, and Pygame files are unchanged.
+
+Bug fixes and technical safeguards
+- Removed the oversized information panel; cards and modal artwork adapt to viewport
+  size while preserving the original board/camera composition.
+- Stopped timers in paused/settings/menu/victory states and during input-locked
+  transitions. Prevented stale animation callbacks after restart or navigation.
+- Preserved victory presentation when disabling an interrupted winning animation.
+- Added safe modal-page removal and audio teardown, including mixer drain on exit.
+  Disabled playback on the silent Dummy backend to avoid headless playback leaks.
+- Updated board regression tests for the new HUD and added match-flow tests.
+
+Validation
+- Godot 4.7.2: 3359 core checks, 602 interaction checks, and 232 match checks passed.
+- Match tests include complete opening-to-victory/replay sequences for both modes,
+  animation/pause interruption, real GUI input, sound-event ordering, four sticker
+  identities, and logical viewport checks at 1280 x 900, 800 x 600, and 640 x 480.
+- Python parity fixtures still match 20 reference positions, 2560 wall comparisons,
+  and two 32-action match traces. Existing Pygame suite: 100 tests passed.
+- Inspected actual D3D12/Forward+ renders of compact HUD/cameras, main/setup pages,
+  pause/settings, and personalized victory at 1280 x 900 and 800 x 600.
+
+Known limitations and remaining tasks
+- AI, Blitz/countdown rules, timed match setup, persistent Godot preferences,
+  records/replays, broader customization, and later visual polish remain deferred.
+- Music/effects remain placeholders. Wall placement uses the move recording at
+  lower pitch; sound quality/volume comfort requires manual audition.
+- Extended human matches, pointer comfort, and display scaling need manual checks;
+  the Godot README includes a checklist. The undefined legacy no-move/no-wall
+  situation remains unchanged; no pass, draw, or automatic loss was added.
+- The sandbox emits the existing certificate-store warning. Headless import could
+  not save global editor preferences, but project imports and verification completed.
+Next milestone: 3.0-alpha.3 - Game Modes & AI
 
 Future releases
 Append each completed milestone here with actual dates and test results. Keep
