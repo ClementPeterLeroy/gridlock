@@ -2,10 +2,11 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-alpha.2.3 - Playable Matches is implemented in `godot/`.
-Versus and Battle Royale now offer complete local match flow with setup, a compact
-HUD, pause/settings, elapsed turn timers, animations, audio, and victory/replay.
-AI, Blitz/countdown clocks, and the later visual polish remain under development.
+Gridlock v3.0-alpha.3.1 - Rise of the Machines is implemented in `godot/`.
+Versus and Battle Royale support any mix of humans and Pathfinder AI, with Casual
+or Challenging difficulty per seat. Compact HUD, pause/settings, elapsed turn
+timers, animations, audio, and victory/replay remain available.
+Blitz/countdown clocks and the later visual polish remain under development.
 
 ## Repository layout
 
@@ -34,6 +35,7 @@ Gridlock/
     |-- scenes/ and assets/ (interactive 3D board)
     |-- scripts/core/ (headless gameplay engine)
     |-- scripts/controllers/ (human board interaction)
+    |-- scripts/ai/ (incremental Pathfinder and turn scheduling)
     |-- scripts/ui/ (compact HUD and match pages)
     `-- tests/
 ```
@@ -71,6 +73,8 @@ python pygame/tests/benchmark_battle_ai.py
 ## Godot development
 
 Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus or Battle Royale.
+Select Human, AI - Casual, or AI - Challenging for each seat before starting.
+AI turns show a thinking message and wait at least one second; pause freezes AI work.
 Keys 1, 2, and 3 select Classic, Isometric, and Cinematic views.
 Click the active pawn and a green tile to move, or hover a groove and click to
 place a wall. R / right-click rotates; Esc deselects a selected pawn or pauses.
@@ -83,7 +87,9 @@ From the repository root, with the Godot executable available as `godot`:
 godot --headless --path godot --script res://tests/run_core_tests.gd
 godot --headless --path godot --script res://tests/run_interaction_tests.gd
 godot --headless --path godot --script res://tests/run_match_tests.gd
+godot --headless --path godot --script res://tests/run_ai_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
+python -B godot/tests/generate_ai_fixtures.py --check
 ```
 
 See the [Godot development guide](godot/README.md) for the engine API, testing,

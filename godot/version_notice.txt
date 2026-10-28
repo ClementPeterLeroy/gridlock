@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-alpha.2.3
+Current version: 3.0-alpha.3.1
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -159,6 +159,73 @@ Known limitations and remaining tasks
 - The sandbox emits the existing certificate-store warning. Headless import could
   not save global editor preferences, but project imports and verification completed.
 Next milestone: 3.0-alpha.3 - Game Modes & AI
+
+VERSION 3.0-alpha.3.1 - Rise of the Machines
+Completion date: 2026-10-28
+Status: Completed
+
+Features
+- Ported Classic's incremental Pathfinder to scene-independent GDScript: BFS
+  route distances, immediate wins, defensive threat scoring across all surviving
+  opponents, useful wall placement, inventory awareness, and racing conservation.
+- Restored Casual (varied movement, fewer walls) and Challenging (full wall
+  evaluation) independently for every seat in Versus and Battle Royale. Any mix
+  of humans and AI is supported, including AI in the first seat and all-AI games.
+- Added pause-aware, frame-budgeted main-thread search targeting 4 ms per update,
+  a one-second minimum presentation delay overlapping search, and an approximately
+  ten-second active search limit with legal fallback. No threads or scene queries.
+- Added per-seat setup selectors, controller/difficulty card tooltips, and a
+  thinking message in the existing feedback area. Compact cards, golden highlights,
+  cameras, pawn/wall animations, music, effects, and victory/replay are retained.
+- All AI actions use the authoritative engine's validation and existing human
+  action presentation path. No gameplay rules, models, materials, or lighting changed.
+
+Bug fixes and technical safeguards
+- Search copies board data and never mutates the live state. Restart, navigation,
+  exit, and victory discard pending work; pause/settings freeze search and delay.
+- Position tokens detect changed turns, walls, inventories, controllers, elimination,
+  restart, and undo. Clear the executed token so undo back to that exact position
+  starts a fresh search instead of leaving an executed-action latch behind.
+- Ignore removed pawns during opponent evaluation. Rejected proposals and the
+  undefined legacy no-action situation stop retrying and show clear feedback.
+- Both human and AI turns keep existing elapsed timer behavior. Countdown clocks
+  and Blitz rules remain deferred; no new timeout, pass, draw, or loss rule was added.
+
+Validation
+- Godot 4.7.2: 3359 core, 602 interaction, 232 match-flow, and 1736 AI checks passed.
+- AI checks cover legal proposals at both levels, every player identity, all 90
+  setup combinations, immediate wins/threats, empty inventories, elimination,
+  pause/settings, restart/cancellation, undo, engine rejection, mixed human/AI
+  handoff, expired budgets, and no-action latching. Existing match tests preserve
+  animation, audio-event, camera, victory, and responsive HUD coverage.
+- Completed 12 AI matches: both modes, Casual/Challenging/mixed difficulties,
+  two seeds each; 842 accepted decisions including 170 walls, all reaching victory.
+- Final headless benchmark: mean decision 41.254 ms, maximum 253.033 ms, maximum
+  candidate 15.359 ms, maximum frame slice 17.811 ms (wall-clock, excluding
+  presentation/animation waits). A run concurrent with graphical capture recorded
+  a 182.273 ms slice; OS scheduling/load affects these cooperative measurements.
+- All 48 deterministic AI decisions match the unchanged Pygame Pathfinder with
+  a shared random policy (no shuffle, zero noise, random=0.1). Existing core parity
+  still matches 20 positions, 2560 walls, and two 32-action traces. Both Python
+  fixture generators pass --check; all 100 Pygame tests pass on Python 3.13.12.
+- Inspected D3D12/Forward+ captures of four-seat setup at 1280 x 900 and 800 x 600,
+  the thinking HUD, and pause. Original Pygame files and previous history remain intact.
+
+Known limitations and remaining tasks
+- Search scheduling is cooperative between candidates, not a hard real-time bound.
+  Individual evaluations and OS scheduling may exceed the requested frame slice.
+- Runtime random sequences differ between Python's MT and Godot's PCG; identical
+  numeric seeds need not produce identical matches. Deadlines can truncate searches
+  at different candidates; deterministic heuristic comparisons match.
+- Undefined no-move/no-wall positions remain safely latched without inventing a
+  new rule. No neural network or minimax was added; neural AI remains for v3.1.
+- Blitz/countdowns, broader customization, persistent Godot settings, records,
+  and later visual polish remain deferred. Audio is still placeholder material.
+- Long interactive play, listening comfort, and device-specific display/input
+  checks remain manual; see the README checklist. The existing sandbox root-
+  certificate-store warning does not prevent tests or rendered startup. Project
+  import succeeds; sandbox access prevents saving global Godot editor preferences.
+Next milestone: 3.0-alpha.3.2 - Blitz & Timers
 
 Future releases
 Append each completed milestone here with actual dates and test results. Keep

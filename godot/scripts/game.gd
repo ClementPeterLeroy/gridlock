@@ -3,6 +3,7 @@ extends Node3D
 const MatchConfig = preload("res://scripts/core/match_config.gd")
 const MatchEngine = preload("res://scripts/core/game_engine.gd")
 const HumanController = preload("res://scripts/controllers/human_controller.gd")
+const AIController = preload("res://scripts/ai/ai_controller.gd")
 const MatchInterface = preload("res://scripts/ui/match_interface.gd")
 const MatchAudio = preload("res://scripts/match_audio.gd")
 const WallScene = preload("res://scenes/Wall.tscn")
@@ -20,6 +21,7 @@ var camera_tween: Tween
 
 var engine
 var controller
+var ai
 var ui
 var audio
 var pawn_nodes: Array[Node3D] = []
@@ -62,12 +64,15 @@ func _ready() -> void:
 	show_main_menu()
 
 func start_match(options = null) -> void:
+	if ai != null:
+		ai.cancel()
 	cancel_transition()
 	if options == null:
 		options = MatchConfig.for_mode(board_mode)
 		options.controllers.fill("Human")
 	engine = MatchEngine.new(options)
 	controller = HumanController.new(engine)
+	ai = AIController.new(engine)
 	reset_match_presentation()
 
 func reset_match_presentation() -> void:
@@ -84,6 +89,7 @@ func reset_match_presentation() -> void:
 	sync_scene()
 
 func restart_match() -> void:
+	ai.cancel()
 	cancel_transition()
 	engine.restart()
 	controller.clear_selection()
@@ -160,6 +166,7 @@ func present_victory() -> void:
 	if engine.state.winner < 0 or victory_shown or view != "game":
 		return
 	victory_shown = true
+	ai.cancel()
 	view = "victory"
 	controller.clear_selection()
 	update_interaction_visuals()
@@ -196,6 +203,10 @@ func _process(delta: float) -> void:
 	if scene_turn != turn_token():
 		sync_scene()
 	update_elapsed(delta)
+	if view == "game" and not engine.state.paused and not animation_busy:
+		var outcome = ai.update(delta)
+		if outcome.get("accepted", false):
+			finish_action(outcome.action)
 	controller.hover(target_at_screen(get_viewport().get_mouse_position()))
 	update_interaction_visuals()
 	update_hud()
@@ -235,12 +246,15 @@ func click_at_screen(screen_position: Vector2) -> bool:
 	var target = target_at_screen(screen_position)
 	var accepted = controller.click(target)
 	if accepted:
-		audio.play_effect("wall" if target.get("kind") == "wall" else "move")
-		sync_scene(true)
+		finish_action({"kind": "wall" if target.get("kind") == "wall" else "move"})
 	else:
 		update_interaction_visuals()
 		update_hud()
 	return accepted
+
+func finish_action(action: Dictionary) -> void:
+	audio.play_effect(action.kind)
+	sync_scene(true)
 
 func update_interaction_visuals() -> void:
 	var moves = controller.legal_destinations() if can_interact() else []
@@ -259,6 +273,9 @@ func update_hud() -> void:
 	if not controller.preview.is_empty() and not controller.preview.valid:
 		reason = controller.preview.reason_code
 	ui.feedback.text = reason.replace("_", " ").capitalize() if view == "game" else ""
+	if view == "game" and not animation_busy and ai.is_ai_turn():
+		ui.feedback.text = "%s is thinking..." % engine.state.players[engine.state.current_player].name \
+			if ai.thinking() else ai.feedback
 
 func handle_ui_action(action: String) -> void:
 	match action:
@@ -269,11 +286,12 @@ func handle_ui_action(action: String) -> void:
 		"setup_versus", "setup_battle":
 			setup_mode = "Versus" if action == "setup_versus" else "Battle Royale"
 			ui.setup_mode = setup_mode
+			ui.setup_controllers = ["Human", "Human", "Human", "Human"] if setup_mode == "Battle Royale" else ["Human", "Human"]
 			view = "setup"
 			ui.show_page("setup")
 		"start":
 			var options = MatchConfig.for_mode(setup_mode)
-			options.controllers.fill("Human")
+			options.controllers = ui.setup_controllers.duplicate()
 			start_match(options)
 		"pause":
 			pause_match(not engine.state.paused)
@@ -315,6 +333,7 @@ func pause_match(value: bool) -> void:
 	update_hud()
 
 func show_main_menu() -> void:
+	ai.cancel()
 	cancel_transition()
 	view = "main_menu"
 	engine.set_paused(true)
@@ -341,6 +360,7 @@ func _notification(what: int) -> void:
 		view = "closing"
 		set_process(false)
 		cancel_transition()
+		ai.cancel()
 		audio.stop_all()
 		# Let the audio mixer drain pending playback before releasing its resources.
 		await get_tree().create_timer(0.1).timeout

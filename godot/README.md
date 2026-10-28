@@ -1,15 +1,17 @@
-# Gridlock v3.0-alpha.2.3 - Playable Matches
+# Gridlock v3.0-alpha.3.1 - Rise of the Machines
 
-Godot 4.7.2 / GDScript. Complete local human matches in Versus and Battle Royale,
+Godot 4.7.2 / GDScript. Human and Pathfinder AI matches in Versus and Battle Royale,
 with the approved Design B compact HUD. The original rules, models, materials,
 lighting, and camera presets are preserved.
 
 ## Play a match
 
 Open `project.godot` in Godot and run the project. Choose a mode in the main menu,
-then confirm Start Match in setup. Versus uses Sapphire/Crimson and ten walls each.
-Battle Royale uses four local humans, five walls each, and clockwise turns:
-Sapphire, Emerald, Crimson, Violet. No AI or Blitz option is exposed yet.
+then select each seat's controller and confirm Start Match. Each seat independently
+offers Human, AI - Casual, or AI - Challenging, including fully automated matches.
+The default is all Human. Versus uses Sapphire/Crimson and ten walls each.
+Battle Royale uses four players, five walls each, and clockwise turns:
+Sapphire, Emerald, Crimson, Violet. Blitz is not exposed yet.
 
 - Left-click the active pawn to select it and show green legal destinations.
 - Click a green tile to move. Click the pawn again or press Esc to deselect.
@@ -80,6 +82,30 @@ and exports. See [asset provenance](assets/ASSETS.md).
 translucent green planes and a golden ring. Original tile and pawn materials are
 not replaced. Preview walls use instance-only overrides; permanent walls retain
 their imported ivory/walnut materials. Pawn model offsets are preserved.
+
+## Pathfinder AI
+
+`scripts/ai/pathfinder.gd` incrementally evaluates a private copy of the match.
+It ports Classic's BFS route heuristic: take immediate wins, penalize opponents'
+winning threats, compare movement with useful walls, and conserve walls when ahead.
+All surviving opponents matter. Casual adds move noise and usually considers fewer
+walls; Challenging checks the complete candidate list. This is the existing shallow
+heuristic, with no minimax or neural network.
+
+`scripts/ai/ai_controller.gd` schedules candidates on the main thread, targeting
+4 ms of work per update. This is a cooperative budget checked between candidates,
+so a single candidate or OS scheduling can exceed it. Search stops at approximately
+10 seconds of active turn time and retains a legal fallback. The minimum one-second
+presentation delay overlaps search; neither search nor delay advances while paused.
+Edit `presentation_delay`, `thinking_limit`, or the `update()` frame-budget argument
+in this controller for experiments (the search clamps its limit to ten seconds).
+
+Every chosen action goes through `GameEngine.apply_action()` and the same animation
+and sound path as human input. Restart, navigation, and victory cancel pending work;
+position changes, elimination, and undo invalidate snapshots. Rejected proposals
+and positions with no legal action stop retrying and display feedback. A thinking
+message appears in the existing feedback area; card tooltips include controller
+and difficulty without expanding the compact cards. Cameras remain usable.
 
 ## Core modules
 
@@ -155,7 +181,7 @@ It undoes one action; future human/AI controllers may group multiple undo operat
 `set_paused(bool)` changes the engine's existing pause flag through an explicit
 API and rejects finished matches. Rule validation and state transitions are otherwise
 unchanged. Elapsed presentation clocks live in the application, separately from
-future countdown/Blitz rules; alpha.2.3 does not expose an Undo UI for these clocks.
+future countdown/Blitz rules; there is no Undo UI for these clocks.
 
 `forfeit(player_id)` provides the existing timeout-removal transition: remove the
 active pawn, keep placed walls, skip the seat, and declare the final survivor.
@@ -169,7 +195,9 @@ From the repository root, substitute your installed executable for `godot` if ne
 godot --headless --path godot --script res://tests/run_core_tests.gd
 godot --headless --path godot --script res://tests/run_interaction_tests.gd
 godot --headless --path godot --script res://tests/run_match_tests.gd
+godot --headless --path godot --script res://tests/run_ai_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
+python -B godot/tests/generate_ai_fixtures.py --check
 python -B -m unittest discover -s pygame/tests -v
 ```
 
@@ -190,11 +218,25 @@ ordering, all four victory stickers, responsive layouts, and complete opening-to
 matches with replay. Existing board regression checks run with animations disabled
 to isolate targeting/synchronization; match tests also verify enabled transitions.
 
-Validation for alpha.2.3: 3359 core checks, 602 interaction checks, and 232 match
-checks passed on Godot 4.7.2. Python parity fixtures matched the unchanged Classic
-implementation. The Pygame suite passed all 100 tests on Python 3.13.12 / Pygame 2.6.1.
-Actual D3D12/Forward+ captures were inspected for gameplay, menus, pause/settings,
-and the personalized victory overlay, including an 800 x 600 window.
+Validation for alpha.3.1: 3359 core checks, 602 interaction checks, 232 match checks,
+and 1736 AI checks passed on Godot 4.7.2. Python parity fixtures matched the unchanged
+Classic implementation. The Pygame suite passed all 100 tests on Python 3.13.12 /
+Pygame 2.6.1.
+The AI suite includes 12 complete automated matches (both modes, both difficulties
+and mixed levels, two seeds), 842 decisions, all 90 controller combinations,
+engine rejection, pause, restart, cancellation, undo, elimination, and safe handling
+of no-action positions. Full-match timing excludes presentation and animation waits.
+See the current release entry for measured timing. D3D12/Forward+ captures were
+inspected for AI setup at 1280 x 900 and 800 x 600, thinking HUD, and pause.
+
+`tests/ai/python_ai_parity.json` adds 48 decisions from the unchanged Classic
+Pathfinder: openings, every identity's immediate win, threats from each other seat,
+jumps, wall fallback, empty inventories, eliminated players, and zero budgets.
+All match with a shared deterministic policy (no shuffle, zero noise, random=0.1).
+Runtime trajectories differ because Python uses MT randomization and Godot uses
+PCG; equal numeric seeds do not imply equal moves. Cooperative deadlines can also
+truncate search at different candidates. Heuristic weights and stable wall ties
+are preserved. Regenerate with `python -B godot/tests/generate_ai_fixtures.py`.
 
 Manual verification before wider release:
 
@@ -211,6 +253,9 @@ Manual verification before wider release:
    toggle animations during a transition. Confirm music continues across pages.
 6. Resize the window, check cards and victory controls remain usable, and replay
    with both the victory buttons and N at your normal display resolution.
+7. Try Human/AI, AI/Human, AI/AI, and mixed four-player seats with both difficulties.
+   While an AI thinks, switch cameras, open Settings, pause/resume, restart, and
+   return to the menu. Confirm no stale move executes and replay retains controllers.
 
 `tests/core/python_parity.json` is generated from the unchanged Pygame rules/state
 and BFS distance implementation. It covers 20 reference positions, all 128 wall
@@ -225,7 +270,6 @@ python -B godot/tests/generate_python_fixtures.py
 
 ## Limitations and next milestones
 
-- AI controllers are metadata only; Pathfinder execution remains deferred.
 - Countdown turn limits and Blitz options remain engine configuration metadata;
   their clocks and penalties do not execute. Only elapsed timers run in this patch.
 - Match customization, persistent Godot preferences, replay storage, records, and
@@ -240,7 +284,7 @@ python -B godot/tests/generate_python_fixtures.py
   material, and `Wall.tscn` contains a null wall-color override. Review separately
   without changing the imported ivory/walnut appearance.
 
-Next: **v3.0-alpha.3 - Game Modes & AI**.
+Next: **v3.0-alpha.3.2 - Blitz & Timers**. Neural AI remains reserved for v3.1.
 
 ## Version workflow
 

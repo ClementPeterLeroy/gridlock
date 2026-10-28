@@ -8,6 +8,7 @@ signal animations_changed(enabled: bool)
 const COLORS = [Color("#345B9A"), Color("#A84343"), Color("#3E7955"), Color("#78529A")]
 const GOLD = Color("#F9D55E")
 const ART_NAMES = ["sapphire", "crimson", "emerald", "violet"]
+const CONTROL_OPTIONS = ["Human", "AI - Casual", "AI - Challenging"]
 
 class WallIcon extends Control:
 	func _draw() -> void:
@@ -25,6 +26,8 @@ var page_panel: PanelContainer
 var page = "main_menu"
 var feedback: Label
 var setup_mode = "Versus"
+var setup_controllers: Array = ["Human", "Human"]
+var controller_options: Dictionary = {}
 var winner_text: Label
 var victory_art: Control
 var victory_buttons: Array[Button] = []
@@ -126,7 +129,7 @@ func build_cards(state) -> void:
 		var name_label = label(player.name, 15)
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		name_label.tooltip_text = player.name + " · " + player.identity
+		name_label.tooltip_text = player.name + " · " + player.identity + " · " + player.controller
 		row.add_child(name_label)
 		var details = HBoxContainer.new()
 		column.add_child(details)
@@ -228,6 +231,7 @@ func show_page(value: String, state = null) -> void:
 	winner_text = null
 	victory_art = null
 	volume_sliders.clear()
+	controller_options.clear()
 	if value == "game":
 		return
 	var center = CenterContainer.new()
@@ -242,15 +246,15 @@ func show_page(value: String, state = null) -> void:
 	match value:
 		"main_menu":
 			column.add_child(label("GRIDLOCK", 32))
-			column.add_child(label("Local multiplayer", 16))
+			column.add_child(label("Local matches · Human or Pathfinder AI", 16))
 			column.add_child(button("Versus", "setup_versus"))
 			column.add_child(button("Battle Royale", "setup_battle"))
 			column.add_child(button("Settings", "settings"))
 		"setup":
 			column.add_child(label(setup_mode, 26))
-			var text = "Sapphire vs Crimson\n2 local players · 10 walls each" if setup_mode == "Versus" \
-				else "Sapphire → Emerald → Crimson → Violet\n4 local players · 5 walls each"
+			var text = "2 players · 10 walls each" if setup_mode == "Versus" else "4 players · 5 walls each"
 			column.add_child(label(text, 16))
+			add_controller_options(column)
 			column.add_child(button("Start Match", "start"))
 			column.add_child(button("Main Menu", "main_menu"))
 		"pause":
@@ -275,6 +279,25 @@ func show_page(value: String, state = null) -> void:
 				column.add_child(control)
 				victory_buttons.append(control)
 	layout_hud()
+
+func add_controller_options(column: VBoxContainer) -> void:
+	var order = [0, 2, 1, 3] if setup_mode == "Battle Royale" else [0, 1]
+	for player_id in order:
+		var row = HBoxContainer.new()
+		column.add_child(row)
+		var identity = label(ART_NAMES[player_id].capitalize(), 16)
+		identity.add_theme_color_override("font_color", COLORS[player_id].lightened(0.25))
+		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(identity)
+		var choice = OptionButton.new()
+		choice.name = "Controller%d" % player_id
+		choice.custom_minimum_size = Vector2(185, 36)
+		for option in CONTROL_OPTIONS:
+			choice.add_item(option)
+		choice.select(CONTROL_OPTIONS.find(setup_controllers[player_id]))
+		choice.item_selected.connect(func(index): setup_controllers[player_id] = CONTROL_OPTIONS[index])
+		row.add_child(choice)
+		controller_options[player_id] = choice
 
 func add_volume(column: VBoxContainer, text: String, category: String, value: float) -> void:
 	column.add_child(label(text, 15))

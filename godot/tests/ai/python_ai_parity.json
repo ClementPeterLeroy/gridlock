@@ -1,0 +1,1980 @@
+{
+  "reference": "pygame/ai/pathfinder.py",
+  "random_policy": "no shuffle, zero noise, random=0.1",
+  "fixtures": [
+    {
+      "name": "opening_Versus_Casual",
+      "mode": "Versus",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        10,
+        10
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          7
+        ]
+      }
+    },
+    {
+      "name": "opening_Battle Royale_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          7
+        ]
+      }
+    },
+    {
+      "name": "immediate_win_0_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          2,
+          0
+        ]
+      }
+    },
+    {
+      "name": "threat_0_from_1_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          6,
+          7
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_0_from_2_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          7,
+          2
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "threat_0_from_3_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          0,
+          6
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "immediate_win_1_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 1,
+        "destination": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "name": "threat_1_from_0_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 1,
+        "anchor": [
+          2,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_1_from_2_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 1,
+        "anchor": [
+          7,
+          2
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "threat_1_from_3_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 1,
+        "anchor": [
+          0,
+          6
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "immediate_win_2_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 2,
+        "destination": [
+          8,
+          2
+        ]
+      }
+    },
+    {
+      "name": "threat_2_from_0_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 2,
+        "anchor": [
+          2,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_2_from_1_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 2,
+        "anchor": [
+          6,
+          7
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_2_from_3_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 2,
+        "anchor": [
+          0,
+          6
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "immediate_win_3_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 3,
+        "destination": [
+          0,
+          6
+        ]
+      }
+    },
+    {
+      "name": "threat_3_from_0_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 3,
+        "anchor": [
+          2,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_3_from_1_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 3,
+        "anchor": [
+          6,
+          7
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_3_from_2_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 3,
+        "anchor": [
+          7,
+          2
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "adjacent_no_walls_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          5,
+          3
+        ],
+        [
+          5,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          2
+        ]
+      }
+    },
+    {
+      "name": "blocked_jump_Casual",
+      "mode": "Versus",
+      "pawns": [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          3
+        ]
+      ],
+      "walls": [
+        [
+          4,
+          2,
+          "H"
+        ]
+      ],
+      "walls_left": [
+        10,
+        10
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "name": "wall_fallback_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "walls": [
+        [
+          0,
+          5,
+          "V"
+        ],
+        [
+          0,
+          7,
+          "V"
+        ]
+      ],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 0.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          0,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "no_legal_action_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "walls": [
+        [
+          0,
+          5,
+          "V"
+        ],
+        [
+          0,
+          7,
+          "V"
+        ]
+      ],
+      "walls_left": [
+        0,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {}
+    },
+    {
+      "name": "eliminated_player_Casual",
+      "mode": "Battle Royale",
+      "pawns": [
+        null,
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [
+        0
+      ],
+      "difficulty": "Casual",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 2,
+        "destination": [
+          1,
+          4
+        ]
+      }
+    },
+    {
+      "name": "zero_budget_Casual",
+      "mode": "Versus",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        10,
+        10
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Casual",
+      "time_limit": 0.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          7
+        ]
+      }
+    },
+    {
+      "name": "opening_Versus_Challenging",
+      "mode": "Versus",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        10,
+        10
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          7
+        ]
+      }
+    },
+    {
+      "name": "opening_Battle Royale_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          7
+        ]
+      }
+    },
+    {
+      "name": "immediate_win_0_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          2,
+          0
+        ]
+      }
+    },
+    {
+      "name": "threat_0_from_1_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          6,
+          7
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_0_from_2_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          7,
+          2
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "threat_0_from_3_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          0,
+          6
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "immediate_win_1_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 1,
+        "destination": [
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "name": "threat_1_from_0_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 1,
+        "anchor": [
+          2,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_1_from_2_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 1,
+        "anchor": [
+          7,
+          2
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "threat_1_from_3_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 1,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 1,
+        "anchor": [
+          0,
+          6
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "immediate_win_2_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 2,
+        "destination": [
+          8,
+          2
+        ]
+      }
+    },
+    {
+      "name": "threat_2_from_0_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 2,
+        "anchor": [
+          2,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_2_from_1_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 2,
+        "anchor": [
+          6,
+          7
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_2_from_3_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 2,
+        "anchor": [
+          0,
+          6
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "immediate_win_3_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 3,
+        "destination": [
+          0,
+          6
+        ]
+      }
+    },
+    {
+      "name": "threat_3_from_0_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 3,
+        "anchor": [
+          2,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_3_from_1_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 3,
+        "anchor": [
+          6,
+          7
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "threat_3_from_2_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 3,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 3,
+        "anchor": [
+          7,
+          2
+        ],
+        "orientation": "V"
+      }
+    },
+    {
+      "name": "adjacent_no_walls_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          5,
+          3
+        ],
+        [
+          5,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          2
+        ]
+      }
+    },
+    {
+      "name": "blocked_jump_Challenging",
+      "mode": "Versus",
+      "pawns": [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          3
+        ]
+      ],
+      "walls": [
+        [
+          4,
+          2,
+          "H"
+        ]
+      ],
+      "walls_left": [
+        10,
+        10
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "name": "wall_fallback_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "walls": [
+        [
+          0,
+          5,
+          "V"
+        ],
+        [
+          0,
+          7,
+          "V"
+        ]
+      ],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 0.0,
+      "expected": {
+        "kind": "wall",
+        "player_id": 0,
+        "anchor": [
+          0,
+          0
+        ],
+        "orientation": "H"
+      }
+    },
+    {
+      "name": "no_legal_action_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        [
+          0,
+          8
+        ],
+        [
+          0,
+          7
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "walls": [
+        [
+          0,
+          5,
+          "V"
+        ],
+        [
+          0,
+          7,
+          "V"
+        ]
+      ],
+      "walls_left": [
+        0,
+        5,
+        5,
+        5
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {}
+    },
+    {
+      "name": "eliminated_player_Challenging",
+      "mode": "Battle Royale",
+      "pawns": [
+        null,
+        [
+          4,
+          0
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          8,
+          4
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "current_player": 2,
+      "eliminated": [
+        0
+      ],
+      "difficulty": "Challenging",
+      "time_limit": 10.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 2,
+        "destination": [
+          1,
+          4
+        ]
+      }
+    },
+    {
+      "name": "zero_budget_Challenging",
+      "mode": "Versus",
+      "pawns": [
+        [
+          4,
+          8
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "walls": [],
+      "walls_left": [
+        10,
+        10
+      ],
+      "current_player": 0,
+      "eliminated": [],
+      "difficulty": "Challenging",
+      "time_limit": 0.0,
+      "expected": {
+        "kind": "move",
+        "player_id": 0,
+        "destination": [
+          4,
+          7
+        ]
+      }
+    }
+  ]
+}
