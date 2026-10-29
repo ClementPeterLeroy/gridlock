@@ -34,8 +34,9 @@ var scene_turn: Array = []
 var view = "main_menu"
 var setup_mode = "Versus"
 var settings_return = "main_menu"
-var elapsed_turns: Array = []
-var clock_player = -1
+var live_timing = true
+var elapsed_turns: Array:
+	get: return engine.state.elapsed_turns
 var animations_enabled = true
 var animation_busy = false
 var gameplay_tween: Tween
@@ -71,15 +72,13 @@ func start_match(options = null) -> void:
 		options = MatchConfig.for_mode(board_mode)
 		options.controllers.fill("Human")
 	engine = MatchEngine.new(options)
+	if live_timing:
+		engine.set_time_source(func(): return Time.get_ticks_usec() / 1000000.0)
 	controller = HumanController.new(engine)
 	ai = AIController.new(engine)
 	reset_match_presentation()
 
 func reset_match_presentation() -> void:
-	elapsed_turns = []
-	elapsed_turns.resize(engine.state.players.size())
-	elapsed_turns.fill(0.0)
-	clock_player = engine.state.current_player
 	victory_shown = false
 	view = "game"
 	ui.has_match = true
@@ -100,12 +99,11 @@ func restart_match() -> void:
 func sync_scene(animate: bool = false) -> void:
 	if not animate:
 		cancel_transition()
+		engine.set_timing_active(true)
 	controller.clear_selection()
-	if clock_player != engine.state.current_player:
-		clock_player = engine.state.current_player
-		elapsed_turns[clock_player] = 0.0
 	var tween: Tween = null
 	if animate and animations_enabled:
+		engine.set_timing_active(false)
 		tween = create_tween().set_parallel(true)
 		gameplay_tween = tween
 		animation_busy = true
@@ -160,6 +158,7 @@ func cancel_transition() -> void:
 func finish_transition() -> void:
 	animation_busy = false
 	gameplay_tween = null
+	engine.set_timing_active(true)
 	present_victory()
 
 func present_victory() -> void:
@@ -203,6 +202,11 @@ func _process(delta: float) -> void:
 	if scene_turn != turn_token():
 		sync_scene()
 	update_elapsed(delta)
+	if scene_turn != turn_token():
+		ai.cancel()
+		sync_scene()
+		# The incoming seat must not inherit elapsed time from a timed-out turn.
+		delta = 0.0
 	if view == "game" and not engine.state.paused and not animation_busy:
 		var outcome = ai.update(delta)
 		if outcome.get("accepted", false):
@@ -215,7 +219,10 @@ func _process(delta: float) -> void:
 
 func update_elapsed(delta: float) -> void:
 	if view == "game" and engine.state.status == "running" and not engine.state.paused and not animation_busy:
-		elapsed_turns[engine.state.current_player] += maxf(0.0, delta)
+		if engine.time_source.is_valid():
+			engine.poll_time()
+		else:
+			engine.tick(delta)
 
 func can_interact() -> bool:
 	return controller != null and view == "game" and not ui.menu.visible and not animation_busy and controller.available()
@@ -241,6 +248,11 @@ func target_at_screen(screen_position: Vector2) -> Dictionary:
 	return controller.target_at(Plane(Vector3.UP, 0.12).intersects_ray(origin, direction))
 
 func click_at_screen(screen_position: Vector2) -> bool:
+	engine.poll_time()
+	if scene_turn != turn_token():
+		ai.cancel()
+		sync_scene()
+		return false
 	if not can_interact():
 		return false
 	var target = target_at_screen(screen_position)
@@ -248,6 +260,8 @@ func click_at_screen(screen_position: Vector2) -> bool:
 	if accepted:
 		finish_action({"kind": "wall" if target.get("kind") == "wall" else "move"})
 	else:
+		if scene_turn != turn_token():
+			sync_scene()
 		update_interaction_visuals()
 		update_hud()
 	return accepted
@@ -268,14 +282,18 @@ func update_interaction_visuals() -> void:
 		preview_material.albedo_color = Color(0.35, 0.85, 0.55, 0.4) if data.valid else Color(1.0, 0.18, 0.14, 0.55)
 
 func update_hud() -> void:
-	ui.update_cards(engine.state, elapsed_turns)
+	ui.update_cards(engine.state)
 	var reason = controller.feedback
 	if not controller.preview.is_empty() and not controller.preview.valid:
 		reason = controller.preview.reason_code
 	ui.feedback.text = reason.replace("_", " ").capitalize() if view == "game" else ""
+	if view == "game" and not engine.state.timing_notice.is_empty():
+		ui.feedback.text = engine.state.timing_notice
 	if view == "game" and not animation_busy and ai.is_ai_turn():
 		ui.feedback.text = "%s is thinking..." % engine.state.players[engine.state.current_player].name \
 			if ai.thinking() else ai.feedback
+		if not engine.state.timing_notice.is_empty():
+			ui.feedback.text += "  " + engine.state.timing_notice
 
 func handle_ui_action(action: String) -> void:
 	match action:
@@ -283,15 +301,19 @@ func handle_ui_action(action: String) -> void:
 			ui.menu.visible = not ui.menu.visible
 			controller.clear_selection()
 			update_interaction_visuals()
-		"setup_versus", "setup_battle":
-			setup_mode = "Versus" if action == "setup_versus" else "Battle Royale"
+		"setup_versus", "setup_battle", "setup_blitz":
+			setup_mode = {"setup_versus": "Versus", "setup_battle": "Battle Royale", "setup_blitz": "Blitz"}[action]
 			ui.setup_mode = setup_mode
+			ui.setup_turn_limit = 0
+			ui.setup_blitz_minutes = 3
 			ui.setup_controllers = ["Human", "Human", "Human", "Human"] if setup_mode == "Battle Royale" else ["Human", "Human"]
 			view = "setup"
 			ui.show_page("setup")
 		"start":
 			var options = MatchConfig.for_mode(setup_mode)
 			options.controllers = ui.setup_controllers.duplicate()
+			options.turn_limit = ui.setup_turn_limit
+			options.blitz_minutes = ui.setup_blitz_minutes
 			start_match(options)
 		"pause":
 			pause_match(not engine.state.paused)
@@ -305,10 +327,15 @@ func handle_ui_action(action: String) -> void:
 			settings_return = view
 			if view == "game":
 				set_match_paused(true)
+				if engine.state.status == "finished":
+					sync_scene()
+					return
 			view = "settings"
 			ui.show_page("settings")
 			update_interaction_visuals()
 		"settings_back":
+			if view != "settings":
+				return
 			view = settings_return
 			if view == "game":
 				set_match_paused(false)
@@ -327,6 +354,9 @@ func pause_match(value: bool) -> void:
 	if engine.state.status != "running":
 		return
 	set_match_paused(value)
+	if engine.state.status == "finished":
+		sync_scene()
+		return
 	view = "pause" if value else "game"
 	ui.show_page(view)
 	update_interaction_visuals()
@@ -353,6 +383,7 @@ func set_animations(enabled: bool) -> void:
 	ui.set_animations(enabled)
 	if not enabled and animation_busy:
 		cancel_transition()
+		engine.set_timing_active(true)
 		sync_scene()
 
 func _notification(what: int) -> void:

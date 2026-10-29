@@ -18,6 +18,24 @@ var paused: bool = false
 var turn_number: int = 0
 var result_reason: String = ""
 var history: Array[Dictionary] = []
+var turn_elapsed = 0.0
+var turn_clock_elapsed = 0.0
+var elapsed_turns: Array = []
+var time_left: Array = []
+var penalty_used = false
+var overtime = 0.0
+var timeout_player = -1
+var timing_notice = ""
+var ai_clock_age = 0.0
+
+var is_blitz: bool:
+	get: return config.mode == "Blitz"
+
+var remaining_turn_time: float:
+	get:
+		if is_blitz:
+			return overtime if penalty_used else time_left[current_player]
+		return maxf(0.0, config.turn_limit - turn_clock_elapsed) if config.turn_limit else INF
 
 func _init(options = null) -> void:
 	if options != null:
@@ -28,6 +46,10 @@ func _init(options = null) -> void:
 			"goal": GOALS[player], "position": STARTS[player],
 			"walls_remaining": 5 if config.player_count() == 4 else 10, "eliminated": false})
 	current_player = config.starting_player
+	elapsed_turns.resize(players.size())
+	elapsed_turns.fill(0.0)
+	time_left.resize(players.size())
+	time_left.fill(60.0 * config.blitz_minutes)
 
 func pawn_positions() -> Array:
 	var positions = []
@@ -48,7 +70,11 @@ func snapshot() -> Dictionary:
 	return {"config": config.to_dict(), "board_size": board_size,
 		"players": players.duplicate(true), "walls": walls.duplicate(true),
 		"current_player": current_player, "status": status, "winner": winner,
-		"paused": paused, "turn_number": turn_number, "result_reason": result_reason}
+		"paused": paused, "turn_number": turn_number, "result_reason": result_reason,
+		"turn_elapsed": turn_elapsed, "turn_clock_elapsed": turn_clock_elapsed,
+		"elapsed_turns": elapsed_turns.duplicate(), "time_left": time_left.duplicate(),
+		"penalty_used": penalty_used, "overtime": overtime, "timeout_player": timeout_player,
+		"timing_notice": timing_notice, "ai_clock_age": ai_clock_age}
 
 func restore(snapshot_data: Dictionary) -> void:
 	var data = snapshot_data.duplicate(true)
@@ -64,3 +90,12 @@ func restore(snapshot_data: Dictionary) -> void:
 	paused = data.paused
 	turn_number = data.turn_number
 	result_reason = data.result_reason
+	turn_elapsed = data.turn_elapsed
+	turn_clock_elapsed = data.turn_clock_elapsed
+	elapsed_turns = data.elapsed_turns
+	time_left = data.time_left
+	penalty_used = data.penalty_used
+	overtime = data.overtime
+	timeout_player = data.timeout_player
+	timing_notice = data.timing_notice
+	ai_clock_age = data.ai_clock_age

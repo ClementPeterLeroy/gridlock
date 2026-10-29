@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-alpha.3.1
+Current version: 3.0-alpha.3.2
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -226,6 +226,77 @@ Known limitations and remaining tasks
   certificate-store warning does not prevent tests or rendered startup. Project
   import succeeds; sandbox access prevents saving global Godot editor preferences.
 Next milestone: 3.0-alpha.3.2 - Blitz & Timers
+
+VERSION 3.0-alpha.3.2 - Blitz & Timers
+Completion date: 2026-10-28
+Status: Completed
+
+Features
+- Migrated Classic timing into the scene-independent authoritative engine:
+  elapsed turns, chargeable turn time, optional 15/30/60/120-second limits,
+  per-player Blitz clocks, penalties, overtime, and timeout resolution.
+- Added Blitz to main-menu selection with 1/3/5-minute clocks (default three).
+  Versus and Battle Royale retain Untimed by default and expose turn limits.
+- Preserved the exact Blitz turn-start minimum: raise a clock below ten seconds
+  to ten; leave higher clocks untouched. Never enforce the floor during a turn.
+- At zero main time, lose one inventory wall and receive a fresh 15-second
+  overtime for that turn. Only one penalty per turn; later turns may lose more.
+  Overtime expiration or reaching zero with no walls loses immediately. Penalties
+  never place or remove board walls; rejected proposals do not spend inventory.
+- Standard timeout removes a pawn and skips its stable ID while keeping its walls;
+  the final survivor wins. Blitz losses keep pawns, matching the Classic model.
+- Compact cards read authoritative elapsed/countdown/Blitz values, label overtime,
+  and use amber/red low-time feedback. Timeout victory names the losing player
+  below the existing sticker. Existing identities, highlights and layout remain.
+
+Bug fixes and technical changes
+- Replaced scene-owned elapsed clocks with engine state and snapshot restoration.
+  A monotonic clock adapter polls before actions, making timeout take priority at
+  expiry. Simulated tick() and injectable clock sources support deterministic tests.
+- Pause, Settings, animations, main-menu navigation, and victory freeze clocks.
+  Restart/undo reanchor the live source to prevent stale time being charged.
+- Preserved Classic's large-tick behavior: a new penalty grants a full 15 seconds
+  and discards overshoot; time from an expired turn is not charged to the next seat.
+- AI elapsed timers run immediately; countdowns exempt one presentation second,
+  then charge only that AI's clock. Penalty/undo position changes start a fresh
+  decision as in Classic. Search budgets now also respect remaining time, with
+  existing incremental evaluation, pause/cancellation, and heuristics unchanged.
+- Fixed stale settings-return navigation after timeout/victory and clock text
+  rounding at minute boundaries. Previous tests explicitly use simulated clocks.
+- Snapshot behavior follows Classic: moves, placed walls, and standard forfeits
+  save clocks; automatic Blitz penalties/losses do not create extra undo entries.
+
+Validation
+- Godot 4.7.2: 3359 core, 602 interaction, 232 match-flow, 1736 AI, and 2428 timing
+  checks passed. Existing AI suite completed all 12 matches (842 decisions).
+- Direct Classic timing parity: 25 traces, 163 states, including all limits/clock
+  choices, repeated penalties, overtime, elimination/rotation, pause/resume, undo,
+  explicit AI charges, and victory freeze. No timing state or acceptance mismatch.
+- Fake monotonic clocks verify timeout just before actions, goal/expiry priority,
+  pause/animation freeze, restart/undo anchoring, AI exemptions and cancellation.
+  Actual scene checks cover setup, low-time colors, overtime, timeout victory,
+  eliminated cards, overlays, restart, and main-menu freeze.
+- Existing 48 deterministic AI decisions and core Python parity remain unchanged;
+  all three fixture generators pass --check. All 100 Pygame tests pass on Python
+  3.13.12 / Pygame 2.6.1. No Pygame source, models, scenes, rules, camera positions,
+  camera transitions, materials, lighting, or AI evaluation algorithms changed.
+- Inspected D3D12/Forward+ renders: timed Battle Royale setup at 800 x 600, Blitz
+  setup, overtime and timeout victory at 1280 x 900. Project startup/import succeeds.
+- A rendered live-clock smoke check confirmed monotonic charging of only the
+  active seat and unchanged clocks during pause.
+
+Known limitations and remaining tasks
+- The engine supports clock-restoring undo; no player-facing Undo control is added.
+  Existing Godot pause-preserving undo remains intentional. Classic's larger UI
+  undo grouping is not introduced in this patch.
+- Broader match customization is next. Preferences remain session-only; records,
+  replay storage, later visual polish and final audio remain deferred.
+- AI budgets remain cooperative between candidates; OS scheduling can exceed the
+  requested frame slice. No-move/no-wall positions remain undefined when untimed.
+- Long interactive sessions, timing comfort and audio quality still need manual
+  verification; the README includes a checklist. Existing sandbox certificate-store
+  and global-editor-preference write warnings do not prevent project verification.
+Next milestone: 3.0-alpha.3.3 - Match Customization
 
 Future releases
 Append each completed milestone here with actual dates and test results. Keep

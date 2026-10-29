@@ -2,11 +2,12 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-alpha.3.1 - Rise of the Machines is implemented in `godot/`.
-Versus and Battle Royale support any mix of humans and Pathfinder AI, with Casual
-or Challenging difficulty per seat. Compact HUD, pause/settings, elapsed turn
-timers, animations, audio, and victory/replay remain available.
-Blitz/countdown clocks and the later visual polish remain under development.
+Gridlock v3.0-alpha.3.2 - Blitz & Timers is implemented in `godot/`.
+Versus, Battle Royale, and Blitz support humans and Pathfinder AI, with Casual or
+Challenging difficulty per seat. Optional turn limits and Classic's complete Blitz
+clocks, wall penalties, and overtime run in the gameplay engine. The compact HUD,
+pause/settings, animations, audio, and victory/replay remain available.
+Broader match customization and later visual polish remain under development.
 
 ## Repository layout
 
@@ -72,14 +73,16 @@ python pygame/tests/benchmark_battle_ai.py
 
 ## Godot development
 
-Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus or Battle Royale.
+Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus, Battle Royale, or Blitz.
 Select Human, AI - Casual, or AI - Challenging for each seat before starting.
+Versus/Battle Royale offer Untimed or 15/30/60/120-second turns; Blitz offers
+1/3/5-minute player clocks (default three minutes).
 AI turns show a thinking message and wait at least one second; pause freezes AI work.
 Keys 1, 2, and 3 select Classic, Isometric, and Cinematic views.
 Click the active pawn and a green tile to move, or hover a groove and click to
 place a wall. R / right-click rotates; Esc deselects a selected pawn or pauses.
 The top-left hamburger opens Settings, Pause, Restart Match, and Main Menu.
-Top-right cards show player identity, remaining walls, and elapsed turn time.
+Top-right cards show identity, walls, elapsed/countdown time, and Blitz overtime.
 
 From the repository root, with the Godot executable available as `godot`:
 
@@ -88,8 +91,10 @@ godot --headless --path godot --script res://tests/run_core_tests.gd
 godot --headless --path godot --script res://tests/run_interaction_tests.gd
 godot --headless --path godot --script res://tests/run_match_tests.gd
 godot --headless --path godot --script res://tests/run_ai_tests.gd
+godot --headless --path godot --script res://tests/run_timing_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
+python -B godot/tests/generate_timing_fixtures.py --check
 ```
 
 See the [Godot development guide](godot/README.md) for the engine API, testing,

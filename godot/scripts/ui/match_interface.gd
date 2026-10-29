@@ -9,6 +9,8 @@ const COLORS = [Color("#345B9A"), Color("#A84343"), Color("#3E7955"), Color("#78
 const GOLD = Color("#F9D55E")
 const ART_NAMES = ["sapphire", "crimson", "emerald", "violet"]
 const CONTROL_OPTIONS = ["Human", "AI - Casual", "AI - Challenging"]
+const TURN_LIMITS = [0, 15, 30, 60, 120]
+const BLITZ_MINUTES = [1, 3, 5]
 
 class WallIcon extends Control:
 	func _draw() -> void:
@@ -28,6 +30,10 @@ var feedback: Label
 var setup_mode = "Versus"
 var setup_controllers: Array = ["Human", "Human"]
 var controller_options: Dictionary = {}
+var setup_turn_limit = 0
+var setup_blitz_minutes = 3
+var timing_option: OptionButton
+var timeout_text: Label
 var winner_text: Label
 var victory_art: Control
 var victory_buttons: Array[Button] = []
@@ -148,11 +154,25 @@ func build_cards(state) -> void:
 			"timer": timer, "name": name_label, "active": false}
 	layout_hud()
 
-func update_cards(state, elapsed: Array) -> void:
+func update_cards(state) -> void:
 	for player_id in cards:
 		var card = cards[player_id]
+		card.panel.visible = not state.players[player_id].eliminated
 		card.walls.text = str(state.players[player_id].walls_remaining)
-		card.timer.text = "%.1fs" % elapsed[player_id]
+		var seconds: float = state.elapsed_turns[player_id]
+		var countdown = state.is_blitz or state.config.turn_limit > 0
+		var overtime = state.is_blitz and player_id == state.current_player and state.penalty_used
+		if state.is_blitz:
+			seconds = state.overtime if overtime else state.time_left[player_id]
+		elif state.config.turn_limit:
+			seconds = state.remaining_turn_time if player_id == state.current_player else float(state.config.turn_limit)
+		var tenths = ceili(maxf(0.0, seconds) * 10.0)
+		var clock_text = "%d:%04.1f" % [tenths / 600, (tenths % 600) / 10.0]
+		card.timer.text = ("OT " if overtime else "") + (clock_text if state.is_blitz else "%.1fs" % seconds)
+		card.timer.tooltip_text = "Overtime: one wall lost this turn" if overtime else \
+			("Remaining time" if countdown else "Elapsed turn time; inactive cards retain their last turn")
+		var timer_color = Color("#EF7770") if seconds <= 5 else Color("#F9CD70")
+		card.timer.add_theme_color_override("font_color", timer_color if countdown and seconds <= 10 else Color("#DDDDDD"))
 		var active = state.status == "running" and player_id == state.current_player
 		if active != card.active:
 			card.active = active
@@ -232,6 +252,8 @@ func show_page(value: String, state = null) -> void:
 	victory_art = null
 	volume_sliders.clear()
 	controller_options.clear()
+	timing_option = null
+	timeout_text = null
 	if value == "game":
 		return
 	var center = CenterContainer.new()
@@ -249,12 +271,14 @@ func show_page(value: String, state = null) -> void:
 			column.add_child(label("Local matches · Human or Pathfinder AI", 16))
 			column.add_child(button("Versus", "setup_versus"))
 			column.add_child(button("Battle Royale", "setup_battle"))
+			column.add_child(button("Blitz", "setup_blitz"))
 			column.add_child(button("Settings", "settings"))
 		"setup":
 			column.add_child(label(setup_mode, 26))
 			var text = "2 players · 10 walls each" if setup_mode == "Versus" else "4 players · 5 walls each"
 			column.add_child(label(text, 16))
 			add_controller_options(column)
+			add_timing_option(column)
 			column.add_child(button("Start Match", "start"))
 			column.add_child(button("Main Menu", "main_menu"))
 		"pause":
@@ -274,11 +298,36 @@ func show_page(value: String, state = null) -> void:
 			column.add_child(button("Back", "settings_back"))
 		"victory":
 			add_victory_art(column, state)
+			if state.timeout_player >= 0 and state.result_reason != "goal_reached":
+				timeout_text = label(state.timing_notice, 15)
+				timeout_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				column.add_child(timeout_text)
 			for item in [["Play Again", "restart"], ["Main Menu", "main_menu"]]:
 				var control = button(item[0], item[1])
 				column.add_child(control)
 				victory_buttons.append(control)
 	layout_hud()
+
+func add_timing_option(column: VBoxContainer) -> void:
+	var blitz = setup_mode == "Blitz"
+	var values = BLITZ_MINUTES if blitz else TURN_LIMITS
+	var row = HBoxContainer.new()
+	column.add_child(row)
+	var title = label("Player clock" if blitz else "Turn limit", 16)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(title)
+	timing_option = OptionButton.new()
+	timing_option.name = "Timing"
+	timing_option.custom_minimum_size = Vector2(185, 36)
+	for value in values:
+		timing_option.add_item(("%d minutes" % value) if blitz else ("Untimed" if value == 0 else "%d seconds" % value))
+	timing_option.select(values.find(setup_blitz_minutes if blitz else setup_turn_limit))
+	timing_option.item_selected.connect(func(index):
+		if blitz:
+			setup_blitz_minutes = BLITZ_MINUTES[index]
+		else:
+			setup_turn_limit = TURN_LIMITS[index])
+	row.add_child(timing_option)
 
 func add_controller_options(column: VBoxContainer) -> void:
 	var order = [0, 2, 1, 3] if setup_mode == "Battle Royale" else [0, 1]

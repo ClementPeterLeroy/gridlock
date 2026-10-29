@@ -1,0 +1,7660 @@
+{
+  "reference": "pygame/game.py",
+  "traces": [
+    {
+      "name": "untimed_elapsed_undo",
+      "mode": "Versus",
+      "limit": 0,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": -2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1.25
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.25,
+            "turn_clock_elapsed": 1.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 2.0,
+            "turn_clock_elapsed": 2.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 1.25,
+            "turn_clock_elapsed": 1.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 100001.25,
+            "turn_clock_elapsed": 100001.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": null,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_15_expiry",
+      "mode": "Versus",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 14.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 14.875,
+            "turn_clock_elapsed": 14.875,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_30_expiry",
+      "mode": "Versus",
+      "limit": 30,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 30.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 29.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 29.875,
+            "turn_clock_elapsed": 29.875,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 30.0,
+            "turn_clock_elapsed": 30.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 30.0,
+            "turn_clock_elapsed": 30.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 30.0,
+            "turn_clock_elapsed": 30.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_60_expiry",
+      "mode": "Versus",
+      "limit": 60,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 59.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 59.875,
+            "turn_clock_elapsed": 59.875,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 60.0,
+            "turn_clock_elapsed": 60.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 60.0,
+            "turn_clock_elapsed": 60.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 60.0,
+            "turn_clock_elapsed": 60.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_120_expiry",
+      "mode": "Versus",
+      "limit": 120,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 120.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 119.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 119.875,
+            "turn_clock_elapsed": 119.875,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 120.0,
+            "turn_clock_elapsed": 120.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 120.0,
+            "turn_clock_elapsed": 120.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 120.0,
+            "turn_clock_elapsed": 120.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_15_expiry",
+      "mode": "Battle Royale",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 14.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 14.875,
+            "turn_clock_elapsed": 14.875,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_30_expiry",
+      "mode": "Battle Royale",
+      "limit": 30,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 30.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 29.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 29.875,
+            "turn_clock_elapsed": 29.875,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 30.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 30.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 30.0,
+            "turn_clock_elapsed": 30.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_60_expiry",
+      "mode": "Battle Royale",
+      "limit": 60,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 59.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 59.875,
+            "turn_clock_elapsed": 59.875,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 60.0,
+            "turn_clock_elapsed": 60.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_120_expiry",
+      "mode": "Battle Royale",
+      "limit": 120,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 120.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 119.875
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 119.875,
+            "turn_clock_elapsed": 119.875,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.125,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.125
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 120.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 120.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 120.0,
+            "turn_clock_elapsed": 120.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "four_player_elimination_and_walls",
+      "mode": "Battle Royale",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "wall",
+            "target": [
+              3,
+              3,
+              "H"
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 15
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              null,
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 2
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 15
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 3,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              null,
+              null,
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              3
+            ],
+            "paused": false,
+            "history_size": 3
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 15
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 3,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              null,
+              null,
+              null
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0
+            ],
+            "paused": false,
+            "history_size": 4
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 3,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              null,
+              null,
+              null
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0
+            ],
+            "paused": false,
+            "history_size": 4
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 15.0,
+            "turn_clock_elapsed": 15.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 3,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              null,
+              null,
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              3
+            ],
+            "paused": false,
+            "history_size": 3
+          }
+        },
+        {
+          "op": {
+            "kind": "next"
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              null,
+              null,
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              3
+            ],
+            "paused": false,
+            "history_size": 3
+          }
+        },
+        {
+          "op": {
+            "kind": "next"
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 3,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              null,
+              null,
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              4,
+              5,
+              5,
+              5
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              3
+            ],
+            "paused": false,
+            "history_size": 3
+          }
+        }
+      ]
+    },
+    {
+      "name": "blitz_1_floor_penalty",
+      "mode": "Blitz",
+      "limit": 0,
+      "minutes": 1,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              60.0,
+              60.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "time_left": [
+                60,
+                2
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              60,
+              2
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              60,
+              10.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 10.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 10.0,
+            "turn_clock_elapsed": 10.0,
+            "time_left": [
+              60,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 14.5
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 24.5,
+            "turn_clock_elapsed": 24.5,
+            "time_left": [
+              60,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.5,
+            "remaining": 0.5,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.5
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 25.0,
+            "turn_clock_elapsed": 25.0,
+            "time_left": [
+              60,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 1,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 25.0,
+            "turn_clock_elapsed": 25.0,
+            "time_left": [
+              60,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 1,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              60,
+              2
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 60,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "blitz_3_floor_penalty",
+      "mode": "Blitz",
+      "limit": 0,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "time_left": [
+                180,
+                2
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180,
+              2
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180,
+              10.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 10.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 10.0,
+            "turn_clock_elapsed": 10.0,
+            "time_left": [
+              180,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 14.5
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 24.5,
+            "turn_clock_elapsed": 24.5,
+            "time_left": [
+              180,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.5,
+            "remaining": 0.5,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.5
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 25.0,
+            "turn_clock_elapsed": 25.0,
+            "time_left": [
+              180,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 1,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 25.0,
+            "turn_clock_elapsed": 25.0,
+            "time_left": [
+              180,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 1,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180,
+              2
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "blitz_5_floor_penalty",
+      "mode": "Blitz",
+      "limit": 0,
+      "minutes": 5,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              300.0,
+              300.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 300.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "time_left": [
+                300,
+                2
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              300,
+              2
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 300,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              300,
+              10.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 10.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 10.0,
+            "turn_clock_elapsed": 10.0,
+            "time_left": [
+              300,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 14.5
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 24.5,
+            "turn_clock_elapsed": 24.5,
+            "time_left": [
+              300,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.5,
+            "remaining": 0.5,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.5
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 25.0,
+            "turn_clock_elapsed": 25.0,
+            "time_left": [
+              300,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 1,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 25.0,
+            "turn_clock_elapsed": 25.0,
+            "time_left": [
+              300,
+              0.0
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 1,
+            "winner": 0,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              9
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              300,
+              2
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 300,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "blitz_no_walls",
+      "mode": "Blitz",
+      "limit": 0,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "time_left": [
+                0.5,
+                180
+              ],
+              "walls_left": [
+                0,
+                10
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              0.5,
+              180
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.5,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              0,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              0.0,
+              180
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              0,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              0.0,
+              180
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              0,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "blitz_large_delta_fresh_overtime",
+      "mode": "Blitz",
+      "limit": 0,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "time_left": [
+                1,
+                180
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              1,
+              180
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 1,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1000.0,
+            "turn_clock_elapsed": 1000.0,
+            "time_left": [
+              0.0,
+              180
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              9,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 14
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1014.0,
+            "turn_clock_elapsed": 1014.0,
+            "time_left": [
+              0.0,
+              180
+            ],
+            "penalty_used": true,
+            "overtime": 1.0,
+            "remaining": 1.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              9,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1015.0,
+            "turn_clock_elapsed": 1015.0,
+            "time_left": [
+              0.0,
+              180
+            ],
+            "penalty_used": true,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              9,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "blitz_successive_turn_penalties_and_undo",
+      "mode": "Blitz",
+      "limit": 0,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "time_left": [
+                1,
+                50
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              1,
+              50
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 1,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              0.0,
+              50
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              9,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "wall",
+            "target": [
+              3,
+              3,
+              "H"
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              0.0,
+              50
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 50,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              8,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 2.0,
+            "turn_clock_elapsed": 2.0,
+            "time_left": [
+              0.0,
+              48
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 48,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              8,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              1
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              10.0,
+              48
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 10.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                1
+              ]
+            ],
+            "walls_left": [
+              8,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 2
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 10.0,
+            "turn_clock_elapsed": 10.0,
+            "time_left": [
+              0.0,
+              48
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                1
+              ]
+            ],
+            "walls_left": [
+              7,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 2
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              0.0,
+              48
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 48,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                1
+              ]
+            ],
+            "walls_left": [
+              7,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 3
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 10.0,
+            "turn_clock_elapsed": 10.0,
+            "time_left": [
+              0.0,
+              48
+            ],
+            "penalty_used": true,
+            "overtime": 15.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                1
+              ]
+            ],
+            "walls_left": [
+              7,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 2
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 3
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 13.0,
+            "turn_clock_elapsed": 13.0,
+            "time_left": [
+              0.0,
+              48
+            ],
+            "penalty_used": true,
+            "overtime": 12.0,
+            "remaining": 12.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                1
+              ]
+            ],
+            "walls_left": [
+              7,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 2
+          }
+        },
+        {
+          "op": {
+            "kind": "wall",
+            "target": [
+              3,
+              3,
+              "V"
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 13.0,
+            "turn_clock_elapsed": 13.0,
+            "time_left": [
+              0.0,
+              48
+            ],
+            "penalty_used": true,
+            "overtime": 12.0,
+            "remaining": 12.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                1
+              ]
+            ],
+            "walls_left": [
+              7,
+              10
+            ],
+            "walls": [
+              [
+                3,
+                3,
+                "H"
+              ]
+            ],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 2
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_pause_resume",
+      "mode": "Versus",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "pause",
+            "value": true
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "pause",
+            "value": false
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 3.0,
+            "turn_clock_elapsed": 3.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 3.0,
+            "turn_clock_elapsed": 3.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_AI_charge_reference",
+      "mode": "Versus",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.75,
+            "charge": 0
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.75,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.5,
+            "charge": 0.25
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.25,
+            "turn_clock_elapsed": 0.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2,
+            "charge": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 3.25,
+            "turn_clock_elapsed": 2.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 3.25,
+            "turn_clock_elapsed": 2.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100,
+            "charge": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 103.25,
+            "turn_clock_elapsed": 102.25,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 0.0,
+            "current_player": 0,
+            "winner": 1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versus_victory_freezes_time",
+      "mode": "Versus",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "pawns": [
+                [
+                  2,
+                  1
+                ],
+                [
+                  4,
+                  0
+                ]
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              2,
+              0
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": 0,
+            "pawns": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": 0,
+            "pawns": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_pause_resume",
+      "mode": "Battle Royale",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "pause",
+            "value": true
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "pause",
+            "value": false
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 3.0,
+            "turn_clock_elapsed": 3.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 3.0,
+            "turn_clock_elapsed": 3.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_AI_charge_reference",
+      "mode": "Battle Royale",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.75,
+            "charge": 0
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.75,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.5,
+            "charge": 0.25
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.25,
+            "turn_clock_elapsed": 0.25,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2,
+            "charge": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 3.25,
+            "turn_clock_elapsed": 2.25,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 3.25,
+            "turn_clock_elapsed": 2.25,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 12.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100,
+            "charge": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 2,
+            "winner": -1,
+            "pawns": [
+              null,
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Battle Royale_victory_freezes_time",
+      "mode": "Battle Royale",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "pawns": [
+                [
+                  2,
+                  1
+                ],
+                [
+                  4,
+                  0
+                ],
+                [
+                  0,
+                  4
+                ],
+                [
+                  8,
+                  4
+                ]
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 15.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              2,
+              0
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": 0,
+            "pawns": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              180.0,
+              180.0,
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 14.0,
+            "current_player": 0,
+            "winner": 0,
+            "pawns": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                8,
+                4
+              ]
+            ],
+            "walls_left": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "walls": [],
+            "active": [
+              0,
+              2,
+              1,
+              3
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blitz_pause_resume",
+      "mode": "Blitz",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "pause",
+            "value": true
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": false,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": true,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "pause",
+            "value": false
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 3.0,
+            "turn_clock_elapsed": 3.0,
+            "time_left": [
+              177.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 177.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              177.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 3.0,
+            "turn_clock_elapsed": 3.0,
+            "time_left": [
+              177.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 177.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blitz_AI_charge_reference",
+      "mode": "Blitz",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.75,
+            "charge": 0
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.75,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 0.5,
+            "charge": 0.25
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.25,
+            "turn_clock_elapsed": 0.25,
+            "time_left": [
+              179.75,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 2,
+            "charge": 2
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 3.25,
+            "turn_clock_elapsed": 2.25,
+            "time_left": [
+              177.75,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 177.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              4,
+              7
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              177.75,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 1,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "undo"
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 3.25,
+            "turn_clock_elapsed": 2.25,
+            "time_left": [
+              177.75,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 177.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 100,
+            "charge": 100
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 103.25,
+            "turn_clock_elapsed": 102.25,
+            "time_left": [
+              77.75,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 77.75,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blitz_victory_freezes_time",
+      "mode": "Blitz",
+      "limit": 15,
+      "minutes": 3,
+      "steps": [
+        {
+          "op": {
+            "kind": "initial"
+          },
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "set",
+            "values": {
+              "pawns": [
+                [
+                  2,
+                  1
+                ],
+                [
+                  4,
+                  0
+                ]
+              ]
+            }
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 0.0,
+            "turn_clock_elapsed": 0.0,
+            "time_left": [
+              180.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 180.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 1
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": -1,
+            "pawns": [
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 0
+          }
+        },
+        {
+          "op": {
+            "kind": "move",
+            "target": [
+              2,
+              0
+            ]
+          },
+          "accepted": true,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": 0,
+            "pawns": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        },
+        {
+          "op": {
+            "kind": "tick",
+            "seconds": 10000
+          },
+          "accepted": null,
+          "state": {
+            "turn_elapsed": 1.0,
+            "turn_clock_elapsed": 1.0,
+            "time_left": [
+              179.0,
+              180.0
+            ],
+            "penalty_used": false,
+            "overtime": 0.0,
+            "remaining": 179.0,
+            "current_player": 0,
+            "winner": 0,
+            "pawns": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ],
+            "walls_left": [
+              10,
+              10
+            ],
+            "walls": [],
+            "active": [
+              0,
+              1
+            ],
+            "paused": false,
+            "history_size": 1
+          }
+        }
+      ]
+    }
+  ]
+}

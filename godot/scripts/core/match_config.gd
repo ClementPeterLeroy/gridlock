@@ -1,6 +1,6 @@
 class_name GridlockMatchConfig
 extends RefCounted
-## Match options only. Live clocks and controllers are integrated in later patches.
+## Session match options. Timing values are enforced by the gameplay engine.
 
 const MODES = ["Versus", "Battle Royale", "Blitz", "Rise of the Machines"]
 const IDENTITIES = ["Sapphire", "Crimson", "Emerald", "Violet"]

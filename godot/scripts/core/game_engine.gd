@@ -6,9 +6,80 @@ const Config = preload("res://scripts/core/match_config.gd")
 const State = preload("res://scripts/core/game_state.gd")
 const Rules = preload("res://scripts/core/rules.gd")
 const Paths = preload("res://scripts/core/pathfinding.gd")
+const AI_PRESENTATION_DELAY = 1.0
 
 var state: State
 var rng = RandomNumberGenerator.new()
+var time_source: Callable
+var last_time = 0.0
+var timing_active = true
+
+func set_time_source(source: Callable) -> void:
+	# Callable returns monotonic seconds; absent sources use deterministic tick().
+	time_source = source
+	reset_time_anchor()
+
+func reset_time_anchor() -> void:
+	if time_source.is_valid():
+		last_time = time_source.call()
+
+func set_timing_active(value: bool) -> void:
+	poll_time()
+	timing_active = value
+	reset_time_anchor()
+
+func poll_time() -> void:
+	if not time_source.is_valid():
+		return
+	var now: float = time_source.call()
+	var seconds = maxf(0.0, now - last_time)
+	last_time = now
+	tick(seconds)
+
+func tick(seconds: float, clock_seconds = null) -> void:
+	if not timing_active or state.paused or state.status != "running":
+		return
+	seconds = maxf(0.0, seconds)
+	var charge = seconds if clock_seconds == null else maxf(0.0, float(clock_seconds))
+	if clock_seconds == null and state.players[state.current_player].controller != "Human":
+		charge = maxf(0.0, state.ai_clock_age + seconds - AI_PRESENTATION_DELAY) \
+			- maxf(0.0, state.ai_clock_age - AI_PRESENTATION_DELAY)
+	if state.players[state.current_player].controller != "Human":
+		state.ai_clock_age += seconds
+	state.turn_elapsed += seconds
+	state.elapsed_turns[state.current_player] = state.turn_elapsed
+	state.turn_clock_elapsed += charge
+	if not state.is_blitz:
+		if state.config.turn_limit and state.turn_clock_elapsed >= state.config.turn_limit:
+			resolve_forfeit(state.current_player, true)
+		return
+	var player = state.current_player
+	if state.penalty_used:
+		state.overtime = maxf(0.0, state.overtime - charge)
+		if state.overtime <= 0:
+			finish_timeout(player, "overtime_expired")
+		return
+	state.time_left[player] = maxf(0.0, state.time_left[player] - charge)
+	if state.time_left[player] > 0:
+		return
+	if state.players[player].walls_remaining == 0:
+		finish_timeout(player, "no_walls_timeout")
+		return
+	# Exact Classic behavior: discard excess delta and grant a fresh 15 seconds.
+	state.players[player].walls_remaining -= 1
+	state.penalty_used = true
+	state.overtime = 15.0
+	state.timing_notice = "%s loses a wall! 15 seconds left." % state.players[player].name
+	# The inventory change starts a new AI decision, as in Classic's position key.
+	state.ai_clock_age = 0.0
+
+func finish_timeout(player: int, reason: String) -> void:
+	state.timeout_player = player
+	state.winner = 1 - player
+	state.status = "finished"
+	state.result_reason = reason
+	state.timing_notice = "%s ran out of time%s." % [state.players[player].name,
+		" with no walls" if reason == "no_walls_timeout" else ""]
 
 func _init(options = null, random_source = null) -> void:
 	if random_source != null:
@@ -29,15 +100,19 @@ func start_match(options: Config) -> Dictionary:
 		var active = fresh.active_players()
 		fresh.current_player = active[rng.randi_range(0, active.size() - 1)]
 	state = fresh
+	timing_active = true
+	reset_time_anchor()
 	return result()
 
 func restart() -> Dictionary:
 	return start_match(state.config)
 
 func set_paused(value: bool) -> Dictionary:
+	poll_time()
 	if state.status != "running":
 		return result("match_finished")
 	state.paused = value
+	reset_time_anchor()
 	return result()
 
 func action_error(action: Dictionary) -> String:
@@ -87,6 +162,8 @@ func legal_actions() -> Array[Dictionary]:
 	return actions
 
 func apply_action(action: Dictionary) -> Dictionary:
+	# Settle time before validation: an event arriving at expiry cannot win first.
+	poll_time()
 	var error = action_error(action)
 	if not error.is_empty():
 		return result(error)
@@ -103,6 +180,7 @@ func apply_action(action: Dictionary) -> Dictionary:
 		state.walls[Rules.wall_key(action.anchor, action.orientation)] = true
 		player.walls_remaining -= 1
 	advance_turn()
+	reset_time_anchor()
 	return result()
 
 func advance_turn() -> void:
@@ -115,16 +193,28 @@ func advance_turn() -> void:
 		if not state.players[next_player].eliminated:
 			state.current_player = next_player
 			state.turn_number += 1
+			state.turn_elapsed = 0.0
+			state.turn_clock_elapsed = 0.0
+			state.elapsed_turns[next_player] = 0.0
+			state.ai_clock_age = 0.0
+			state.penalty_used = false
+			state.overtime = 0.0
+			state.timing_notice = ""
+			if state.is_blitz:
+				state.time_left[next_player] = maxf(10.0, state.time_left[next_player])
 			return
 
 func forfeit(player_id: int) -> Dictionary:
-	# Future timeout integration uses the same removal rules as Python Game.forfeit().
+	poll_time()
 	if state.status != "running":
 		return result("match_finished")
 	if state.paused:
 		return result("match_paused")
 	if player_id != state.current_player:
 		return result("not_active_player")
+	return resolve_forfeit(player_id)
+
+func resolve_forfeit(player_id: int, timed_out: bool = false) -> Dictionary:
 	state.history.append(state.snapshot())
 	state.players[player_id].position = null
 	state.players[player_id].eliminated = true
@@ -135,6 +225,12 @@ func forfeit(player_id: int) -> Dictionary:
 		state.result_reason = "last_survivor"
 	else:
 		advance_turn()
+	if timed_out:
+		state.timeout_player = player_id
+		state.timing_notice = "%s ran out of time and forfeited." % state.players[player_id].name
+		if state.status == "finished":
+			state.result_reason = "turn_timeout"
+	reset_time_anchor()
 	return result()
 
 func undo() -> Dictionary:
@@ -144,4 +240,6 @@ func undo() -> Dictionary:
 	var paused = state.paused
 	state.restore(state.history.pop_back())
 	state.paused = paused
+	state.ai_clock_age = 0.0
+	reset_time_anchor()
 	return result()

@@ -1,6 +1,6 @@
-# Gridlock v3.0-alpha.3.1 - Rise of the Machines
+# Gridlock v3.0-alpha.3.2 - Blitz & Timers
 
-Godot 4.7.2 / GDScript. Human and Pathfinder AI matches in Versus and Battle Royale,
+Godot 4.7.2 / GDScript. Human and Pathfinder AI matches in Versus, Battle Royale, and Blitz,
 with the approved Design B compact HUD. The original rules, models, materials,
 lighting, and camera presets are preserved.
 
@@ -11,7 +11,9 @@ then select each seat's controller and confirm Start Match. Each seat independen
 offers Human, AI - Casual, or AI - Challenging, including fully automated matches.
 The default is all Human. Versus uses Sapphire/Crimson and ten walls each.
 Battle Royale uses four players, five walls each, and clockwise turns:
-Sapphire, Emerald, Crimson, Violet. Blitz is not exposed yet.
+Sapphire, Emerald, Crimson, Violet. Versus/Battle Royale offer Untimed (default)
+or 15/30/60/120-second turn limits. Blitz offers 1/3/5-minute player clocks,
+defaulting to three minutes, with two players and ten walls each.
 
 - Left-click the active pawn to select it and show green legal destinations.
 - Click a green tile to move. Click the pawn again or press Esc to deselect.
@@ -24,7 +26,9 @@ Sapphire, Emerald, Crimson, Violet. Blitz is not exposed yet.
 - Keys 1, 2, and 3 select Classic, Isometric, and Cinematic. All existing camera
   positions, sizes, angles, and 0.8-second transitions are retained.
 - Top-right cards display colored identity dots, names, wall icons/counts, and
-  elapsed turn times. The active card has a thin golden border, matching the
+  elapsed times, turn countdowns, or Blitz clocks with an OT prefix for overtime.
+  Countdown text turns amber at ten seconds and red at five. The active card has
+  a thin golden border, matching the
   golden ring on the board. Cards wrap into two columns in narrow logical viewports.
 - The top-left hamburger opens Settings, Pause/Resume, Restart Match, and Main Menu.
   While expanded, it blocks board input. Opening it alone does not pause the timer;
@@ -35,12 +39,31 @@ Sapphire, Emerald, Crimson, Violet. Blitz is not exposed yet.
   artwork. A single dynamic banner identifies the winner; the two buttons are
   Play Again and Main Menu. Play Again preserves the match configuration.
 - Restart Match or N starts a fresh board with the same configuration and resets
-  every elapsed timer. N is available during play, pause, and victory.
+  all clocks. N is available during play, pause, and victory.
 
-The active player's elapsed timer advances only during playable turn time.
-Incoming players start a fresh timer; inactive cards retain their last turn time.
-Pause, in-match Settings, gameplay transitions, main-menu pages, and victory stop
-timer advancement. There are no countdowns, penalties, or timeouts.
+All timing comes from the authoritative engine. Pause, in-match Settings, gameplay
+transitions, main-menu pages, and victory freeze clocks. Untimed cards retain each
+seat's last elapsed turn time; incoming turns reset elapsed/countdown turn time.
+Standard timeout removes the active pawn, preserves its placed walls and stable ID,
+skips it in rotation, and awards victory to the final survivor. A timeout victory
+names the losing player below the existing sticker.
+
+Blitz clock consumption and penalties follow `../pygame/game.py` exactly:
+
+- At turn start, raise that player's clock to ten seconds only if it is lower.
+  There is no continuously enforced floor and no time added above ten seconds.
+- Running out of main time consumes one inventory wall and starts a fresh
+  15-second overtime period for that turn. This does not place a wall on the board.
+- Only one penalty is allowed per turn. Expiring overtime loses immediately;
+  expiring main time with no walls also loses. Making a move or placing a legal
+  wall ends overtime; another penalty is possible on a later turn.
+- A large tick reaching zero starts a full 15 seconds; excess delta is discarded,
+  matching Classic. Tick-driven Blitz penalties/losses do not add undo snapshots;
+  undo restores the last action snapshot, including its clocks and inventory.
+- AI elapsed time starts immediately. Countdown charging exempts the first second
+  of each decision, then charges thinking to that AI's clock. A wall penalty changes
+  the decision position and restarts this exemption, as in Classic's UI scheduler.
+  Human turns have no exemption; inactive clocks never consume another seat's time.
 
 Pawn movement takes 0.22 seconds, wall settling 0.20 seconds, and the golden
 highlight transition 0.24 seconds. The engine accepts an action immediately; only
@@ -73,7 +96,8 @@ permanent walls, inventory, active player, and winner from GameState.
 
 `scripts/ui/match_interface.gd` owns the compact HUD and modal pages, emitting user
 intent to `game.gd`. Modal pages, menu expansion, HUD hit regions, and transition
-locks block board input. `game.gd` owns session timing and presentation tweens;
+locks block board input. `game.gd` owns presentation tweens and clock suspension;
+the engine owns clock values and timing decisions, and the HUD only reads them.
 `scripts/match_audio.gd` owns persistent music and effect players. Reused audio,
 stickers, and the licensed Cinzel font live inside the project for portable imports
 and exports. See [asset provenance](assets/ASSETS.md).
@@ -95,10 +119,13 @@ heuristic, with no minimax or neural network.
 `scripts/ai/ai_controller.gd` schedules candidates on the main thread, targeting
 4 ms of work per update. This is a cooperative budget checked between candidates,
 so a single candidate or OS scheduling can exceed it. Search stops at approximately
-10 seconds of active turn time and retains a legal fallback. The minimum one-second
-presentation delay overlaps search; neither search nor delay advances while paused.
+the lesser of 10 seconds and the starting remaining clock, retaining a legal
+fallback. The minimum one-second presentation delay overlaps search; neither search
+nor delay advances while paused.
 Edit `presentation_delay`, `thinking_limit`, or the `update()` frame-budget argument
 in this controller for experiments (the search clamps its limit to ten seconds).
+The countdown exemption is separately defined by the engine's
+`AI_PRESENTATION_DELAY`, fixed at one second to match Classic timing rules.
 
 Every chosen action goes through `GameEngine.apply_action()` and the same animation
 and sound path as human input. Restart, navigation, and victory cancel pending work;
@@ -113,9 +140,9 @@ All five scripts in `scripts/core/` extend `RefCounted`:
 
 | Script | Responsibility |
 | --- | --- |
-| `match_config.gd` | Mode, names, controllers, starting player, future timing options |
-| `game_state.gd` | Stable player records, walls, turns, status, independent snapshots |
-| `game_engine.gd` | Validated actions, initialization, turns, victory, forfeit, restart, undo |
+| `match_config.gd` | Mode, names, controllers, starting player, timing options |
+| `game_state.gd` | Stable player records, board, turns, clocks, overtime, snapshots |
+| `game_engine.gd` | Validated actions, timing/timeout rules, turns, victory, restart, undo |
 | `rules.gd` | Pawn moves, jumps, sidesteps, wall validation |
 | `pathfinding.gd` | Permanent board graph, BFS reachability and shortest distance |
 
@@ -152,8 +179,9 @@ var outcome = engine.apply_action({
 
 `apply_action()` and `validate_action()` return `{accepted: bool, reason_code: String}`.
 Wall proposals use `kind: "wall"`, `player_id`, `anchor: Vector2i`, and
-`orientation: "H"` or `"V"`. Validation and rejected actions leave state and
-history untouched. Controllers should never change live state directly.
+`orientation: "H"` or `"V"`. Pure validation leaves state untouched. Action submission
+settles live time first: a rejected proposal cannot spend inventory, but real elapsed
+time can legitimately trigger a penalty/timeout. Controllers never change live state.
 
 `legal_moves()` returns current destinations. `legal_actions()` returns all legal
 move/wall proposals. Both return no actions while paused or after victory.
@@ -178,14 +206,35 @@ The engine records a snapshot before each accepted move, wall, or forfeit.
 `undo()` restores that position while retaining the current pause state.
 It undoes one action; future human/AI controllers may group multiple undo operations.
 
-`set_paused(bool)` changes the engine's existing pause flag through an explicit
-API and rejects finished matches. Rule validation and state transitions are otherwise
-unchanged. Elapsed presentation clocks live in the application, separately from
-future countdown/Blitz rules; there is no Undo UI for these clocks.
+`set_paused(bool)` settles active time, changes the engine pause flag, and reanchors
+the live clock on resume. It rejects finished matches. There is no player-facing
+Undo button yet; engine undo restores clock snapshots and preserves current pause.
 
 `forfeit(player_id)` provides the existing timeout-removal transition: remove the
 active pawn, keep placed walls, skip the seat, and declare the final survivor.
-It does not run a clock or introduce a new player-facing surrender control.
+Standard turn expiry invokes this same removal transition. Blitz timeout instead
+awards victory without removing the pawn, matching Classic.
+
+Before alpha.3.2, Godot kept elapsed timers in `game.gd`; countdown options were
+metadata and no clock penalties ran. Classic already owned elapsed time, chargeable
+time, Blitz clocks, penalties/overtime, and history in its model, with AI exemption
+calculated by its UI. Godot now owns these rules and AI charging in the engine.
+
+Use `engine.tick(seconds, clock_seconds = null)` for deterministic simulation.
+Elapsed and chargeable time are separate; passing an explicit charge reproduces
+Classic's `Game.tick()`. With no explicit charge, the engine applies the Classic
+AI exemption automatically. Live games install `set_time_source(callable)` with
+`Time.get_ticks_usec() / 1000000.0`; `poll_time()` advances from monotonic seconds.
+Choose one driver for a match. The engine polls before action submission and pause,
+so expiry wins over an action at the exact deadline. A goal accepted earlier freezes
+all clocks. One tick resolves only the old seat, discarding excess time rather than
+charging a newly active player. `set_timing_active(false)` suspends clock charging
+during presentation transitions; it does not introduce a gameplay pause rule.
+
+Snapshots include elapsed values, player clocks, penalty/overtime, and timeout
+feedback. Restart and undo reanchor the live source so stale wall-clock intervals
+are discarded. Undo starts a fresh AI decision/exemption, matching Classic's UI
+invalidation; it retains Godot's pre-existing pause-preserving undo behavior.
 
 ## Tests
 
@@ -196,8 +245,10 @@ godot --headless --path godot --script res://tests/run_core_tests.gd
 godot --headless --path godot --script res://tests/run_interaction_tests.gd
 godot --headless --path godot --script res://tests/run_match_tests.gd
 godot --headless --path godot --script res://tests/run_ai_tests.gd
+godot --headless --path godot --script res://tests/run_timing_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
+python -B godot/tests/generate_timing_fixtures.py --check
 python -B -m unittest discover -s pygame/tests -v
 ```
 
@@ -218,16 +269,27 @@ ordering, all four victory stickers, responsive layouts, and complete opening-to
 matches with replay. Existing board regression checks run with animations disabled
 to isolate targeting/synchronization; match tests also verify enabled transitions.
 
-Validation for alpha.3.1: 3359 core checks, 602 interaction checks, 232 match checks,
-and 1736 AI checks passed on Godot 4.7.2. Python parity fixtures matched the unchanged
-Classic implementation. The Pygame suite passed all 100 tests on Python 3.13.12 /
+Validation for alpha.3.2: 3359 core checks, 602 interaction checks, 232 match checks,
+1736 AI checks, and 2428 timing checks passed on Godot 4.7.2. Python parity fixtures
+matched the unchanged Classic implementation. The Pygame suite passed all 100 tests on Python 3.13.12 /
 Pygame 2.6.1.
 The AI suite includes 12 complete automated matches (both modes, both difficulties
 and mixed levels, two seeds), 842 decisions, all 90 controller combinations,
 engine rejection, pause, restart, cancellation, undo, elimination, and safe handling
 of no-action positions. Full-match timing excludes presentation and animation waits.
-See the current release entry for measured timing. D3D12/Forward+ captures were
-inspected for AI setup at 1280 x 900 and 800 x 600, thinking HUD, and pause.
+The timing suite compares 25 Classic traces / 163 states directly: elapsed/countdown
+time, all turn limits and Blitz clock choices, minimum time, repeated penalties,
+overtime, elimination, pause/resume, undo, and goal freeze. Fake monotonic clocks
+test action/timeout ordering, AI charging and cancellation, and restart/undo anchors.
+Scene checks exercise setup, countdown colors, overtime, timeout victory, and lifecycle
+freeze. No real-time sleeps are used for timing assertions. D3D12/Forward+ captures
+were inspected for timed four-seat setup at 800 x 600 and Blitz setup, overtime,
+and timeout victory at 1280 x 900.
+
+`tests/core/python_timing_parity.json` is generated by the unchanged Classic
+`Game` model. Regenerate with `python -B godot/tests/generate_timing_fixtures.py`.
+All representative timing states and action acceptance match; the live Godot
+monotonic adapter and restrained HUD countdown colors are integration additions.
 
 `tests/ai/python_ai_parity.json` adds 48 decisions from the unchanged Classic
 Pathfinder: openings, every identity's immediate win, threats from each other seat,
@@ -256,6 +318,12 @@ Manual verification before wider release:
 7. Try Human/AI, AI/Human, AI/AI, and mixed four-player seats with both difficulties.
    While an AI thinks, switch cameras, open Settings, pause/resume, restart, and
    return to the menu. Confirm no stale move executes and replay retains controllers.
+8. Try each turn limit and Blitz clock choice. Let main time expire, act during
+   overtime, return to that seat, and check the ten-second minimum and repeated
+   penalty. Let overtime expire and check the named loser and replay. In Battle
+   Royale, time out multiple seats and confirm their placed walls remain.
+9. Pause/open Settings during a low clock and an AI turn, wait, then resume.
+   Check clocks and AI stay frozen behind overlays, and animations consume no time.
 
 `tests/core/python_parity.json` is generated from the unchanged Pygame rules/state
 and BFS distance implementation. It covers 20 reference positions, all 128 wall
@@ -270,8 +338,6 @@ python -B godot/tests/generate_python_fixtures.py
 
 ## Limitations and next milestones
 
-- Countdown turn limits and Blitz options remain engine configuration metadata;
-  their clocks and penalties do not execute. Only elapsed timers run in this patch.
 - Match customization, persistent Godot preferences, replay storage, records, and
   the broader UI/texture polish remain deferred. Settings are session-only.
 - Audio remains placeholder material, including the reused wall sound. Auditory
@@ -279,12 +345,13 @@ python -B godot/tests/generate_python_fixtures.py
 - A pawn can have no legal move while every permanent route still exists. If it
   also has no legal wall action, the engine returns an empty action list and keeps
   the match running, matching the unresolved legacy situation. No pass, draw, or
-  automatic loss rule has been invented; this needs a future rules decision.
+  automatic loss rule has been invented. Configured timeouts can resolve this
+  situation; untimed matches still need a future rules decision.
 - Existing visual audit findings remain untouched: `wall.gd` creates an unused
   material, and `Wall.tscn` contains a null wall-color override. Review separately
   without changing the imported ivory/walnut appearance.
 
-Next: **v3.0-alpha.3.2 - Blitz & Timers**. Neural AI remains reserved for v3.1.
+Next: **v3.0-alpha.3.3 - Match Customization**. Neural AI remains reserved for v3.1.
 
 ## Version workflow
 

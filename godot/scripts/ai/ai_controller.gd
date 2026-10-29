@@ -48,6 +48,7 @@ func thinking() -> bool:
 	return is_ai_turn() and not blocked
 
 func update(delta: float, frame_budget_ms: float = 4.0) -> Dictionary:
+	engine.poll_time()
 	if engine.state.paused:
 		return {}
 	if not is_ai_turn():
@@ -58,7 +59,7 @@ func update(delta: float, frame_budget_ms: float = 4.0) -> Dictionary:
 		cancel()
 		token = current
 		var level: String = engine.state.players[engine.state.current_player].controller.trim_prefix("AI - ")
-		search = Pathfinder.new(engine.state, level, rng, thinking_limit)
+		search = Pathfinder.new(engine.state, level, rng, minf(thinking_limit, engine.state.remaining_turn_time))
 	if blocked:
 		return {}
 	age += maxf(0.0, delta)
