@@ -176,18 +176,21 @@ func update_cards(state) -> void:
 		card.walls.text = str(state.players[player_id].walls_remaining)
 		var seconds: float = state.elapsed_turns[player_id]
 		var countdown = state.config.timing_mode != "Untimed"
-		var overtime = state.is_blitz and player_id == state.current_player and state.penalty_used
-		if state.is_blitz or state.config.timing_mode == "Per Game":
+		var overtime = state.uses_blitz_clock and player_id == state.current_player and state.penalty_used
+		if state.config.timing_mode == "Per Game":
 			seconds = state.overtime if overtime else state.time_left[player_id]
 		elif state.config.timing_mode == "Per Turn":
-			seconds = state.remaining_turn_time if player_id == state.current_player else float(state.config.turn_limit)
+			seconds = state.remaining_turn_time if player_id == state.current_player and state.players[player_id].controller == "Human" else float(state.config.turn_limit)
 		var tenths = ceili(maxf(0.0, seconds) * 10.0)
 		var clock_text = "%d:%04.1f" % [tenths / 600, (tenths % 600) / 10.0]
-		card.timer.text = ("OT " if overtime else "") + (clock_text if state.is_blitz or state.config.timing_mode == "Per Game" else "%.1fs" % seconds)
+		card.timer.text = ("OT " if overtime else "") + (clock_text if state.config.timing_mode == "Per Game" else "%.1fs" % seconds)
+		var exempt = countdown and state.players[player_id].controller != "Human"
+		if exempt: card.timer.text = "Exempt"
 		card.timer.tooltip_text = "Overtime: one wall lost this turn" if overtime else \
 			("Remaining time" if countdown else "Elapsed turn time; inactive cards retain their last turn")
+		if exempt: card.timer.tooltip_text = "AI turns do not consume countdown time"
 		var timer_color = Color("#EF7770") if seconds <= 5 else Color("#F9CD70")
-		card.timer.add_theme_color_override("font_color", timer_color if countdown and seconds <= 10 else Color("#DDDDDD"))
+		card.timer.add_theme_color_override("font_color", timer_color if countdown and not exempt and seconds <= 10 else Color("#DDDDDD"))
 		var active = state.status == "running" and player_id == state.current_player
 		if active != card.active:
 			card.active = active
@@ -351,28 +354,29 @@ func show_page(value: String, state = null) -> void:
 
 func add_timing_option(column: VBoxContainer) -> void:
 	if setup_mode == "Versus": return
-	if setup_mode == "Battle Royale":
+	if setup_mode in ["Battle Royale", "Blitz"]:
 		timer_type_option = setup_dropdown(column, "Timer Type", Config.TIMER_TYPES)
 		timer_type_option.select(Config.TIMER_TYPES.find(setup_config.timer_type))
 		timer_type_option.item_selected.connect(func(index):
 			setup_config.timer_type = Config.TIMER_TYPES[index]
 			refresh_durations())
-	timing_option = setup_dropdown(column, "Player clock" if setup_mode == "Blitz" else "Time Limit", [])
+	timing_option = setup_dropdown(column, "Time Limit", [])
 	timing_option.item_selected.connect(func(index):
-		if setup_mode == "Blitz": setup_config.blitz_minutes = BLITZ_MINUTES[index]
+		if setup_mode == "Blitz" and setup_config.timer_type == "Per Game": setup_config.blitz_minutes = BLITZ_MINUTES[index]
 		elif setup_config.timer_type == "Per Game": setup_config.game_limit = Config.GAME_SECONDS[index]
 		else: setup_config.turn_limit = Config.TURN_SECONDS[index])
 	refresh_durations()
 
 func refresh_durations() -> void:
-	var values = BLITZ_MINUTES if setup_mode == "Blitz" else (Config.GAME_SECONDS if setup_config.timer_type == "Per Game" else Config.TURN_SECONDS)
-	var selected = setup_blitz_minutes if setup_mode == "Blitz" else (setup_config.game_limit if setup_config.timer_type == "Per Game" else setup_turn_limit)
+	var blitz_global = setup_mode == "Blitz" and setup_config.timer_type == "Per Game"
+	var values = BLITZ_MINUTES if blitz_global else (Config.GAME_SECONDS if setup_config.timer_type == "Per Game" else Config.TURN_SECONDS)
+	var selected = setup_blitz_minutes if blitz_global else (setup_config.game_limit if setup_config.timer_type == "Per Game" else setup_turn_limit)
 	timing_option.clear()
 	for value in values:
-		timing_option.add_item(("%d minutes" % value) if setup_mode == "Blitz" else ("%d seconds" % value if value < 60 else "%d minutes" % (value / 60)))
+		timing_option.add_item(("%d minutes" % value) if blitz_global else ("%d seconds" % value if value < 60 else "%d minutes" % (value / 60)))
 	if selected not in values:
-		selected = 3 if setup_mode == "Blitz" else (180 if setup_config.timer_type == "Per Game" else 30)
-		if setup_mode == "Blitz": setup_config.blitz_minutes = selected
+		selected = 3 if blitz_global else (180 if setup_config.timer_type == "Per Game" else 30)
+		if blitz_global: setup_config.blitz_minutes = selected
 		elif setup_config.timer_type == "Per Game": setup_config.game_limit = selected
 		else: setup_config.turn_limit = selected
 	timing_option.select(values.find(selected))

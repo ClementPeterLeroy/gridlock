@@ -135,7 +135,7 @@ func test_timing() -> bool:
 	config.controllers.fill("AI - Casual")
 	engine = MatchEngine.new(config)
 	engine.tick(1.25)
-	check(engine.state.time_left[0] == 179.75 and engine.state.time_left[1] == 180.0, "Per Game AI exemption charges only active seat")
+	check(engine.state.time_left[0] == 180.0 and engine.state.time_left[1] == 180.0, "Per Game AI turns consume neither player's clock")
 	return true
 
 func test_preferences() -> bool:
@@ -259,7 +259,7 @@ func test_lifecycle() -> bool:
 	game.handle_ui_action("play_again")
 	check(game.engine.state.current_player == [0, 2, 1, 3][control.randi_range(0, 3)], "Play Again draws random starter through engine")
 	check(game.engine.state.players[0].name == "abcdefghijkl" and game.engine.state.config.controllers == config.controllers, "Play Again retains names and mixed difficulties")
-	check(game.engine.state.remaining_turn_time == 30 and game.engine.state.players.all(func(p): return p.walls_remaining == 5), "Play Again restores clocks and inventories")
+	check(game.engine.state.config.turn_limit == 30 and game.engine.state.turn_clock_elapsed == 0 and game.engine.state.players.all(func(p): return p.walls_remaining == 5), "Play Again restores clocks and inventories")
 	game.ui.setup_config.names[0] = "Changed"
 	check(game.engine.state.players[0].name == "abcdefghijkl", "draft edits cannot mutate live match")
 	game.show_main_menu()

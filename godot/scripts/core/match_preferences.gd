@@ -24,6 +24,8 @@ func load_preferences() -> void:
 	if path.is_empty(): return
 	var file = ConfigFile.new()
 	if file.load(path) != OK: return
+	var version = file.get_value("preferences", "version", 0)
+	var blitz_timer_supported = version is int and version >= 2
 	for mode in MODES:
 		var config = configs[mode]
 		var names = file.get_value(mode, "names", config.names)
@@ -39,8 +41,10 @@ func load_preferences() -> void:
 					config.controllers[id] = controls[id]
 		var random = file.get_value(mode, "random_start", false)
 		config.random_start = random if random is bool else false
-		var timer = file.get_value(mode, "timer_type", "Per Turn")
-		config.timer_type = timer if timer in Config.TIMER_TYPES else "Per Turn"
+		var timer = file.get_value(mode, "timer_type", config.timer_type)
+		# In v1, Blitz saved an unused Per Turn field but always ran global clocks.
+		if mode != "Blitz" or blitz_timer_supported:
+			config.timer_type = timer if timer in Config.TIMER_TYPES else config.timer_type
 		var turn = file.get_value(mode, "turn_limit", config.turn_limit)
 		if (turn is int or turn is float) and turn in Config.TURN_SECONDS:
 			config.turn_limit = int(turn)
@@ -60,7 +64,7 @@ func remember(config) -> void:
 func save() -> Error:
 	if path.is_empty(): return OK
 	var file = ConfigFile.new()
-	file.set_value("preferences", "version", 1)
+	file.set_value("preferences", "version", 2)
 	for mode in MODES:
 		var values = configs[mode].to_dict()
 		values.erase("starting_player")

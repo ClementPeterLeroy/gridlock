@@ -6,7 +6,6 @@ const Config = preload("res://scripts/core/match_config.gd")
 const State = preload("res://scripts/core/game_state.gd")
 const Rules = preload("res://scripts/core/rules.gd")
 const Paths = preload("res://scripts/core/pathfinding.gd")
-const AI_PRESENTATION_DELAY = 1.0
 
 var state: State
 var rng = RandomNumberGenerator.new()
@@ -41,15 +40,15 @@ func tick(seconds: float, clock_seconds = null) -> void:
 		return
 	seconds = maxf(0.0, seconds)
 	var charge = seconds if clock_seconds == null else maxf(0.0, float(clock_seconds))
-	if clock_seconds == null and state.players[state.current_player].controller != "Human":
-		charge = maxf(0.0, state.ai_clock_age + seconds - AI_PRESENTATION_DELAY) \
-			- maxf(0.0, state.ai_clock_age - AI_PRESENTATION_DELAY)
-	if state.players[state.current_player].controller != "Human":
-		state.ai_clock_age += seconds
 	state.turn_elapsed += seconds
 	state.elapsed_turns[state.current_player] = state.turn_elapsed
+	# AI has no countdown deadline, even when a caller supplies explicit charging.
+	# Elapsed informational time still runs; search/presentation scheduling is separate.
+	if state.players[state.current_player].controller != "Human":
+		state.ai_clock_age += seconds
+		return
 	state.turn_clock_elapsed += charge
-	if not state.is_blitz:
+	if not state.uses_blitz_clock:
 		if state.config.timing_mode == "Per Game":
 			var player = state.current_player
 			state.time_left[player] = maxf(0.0, state.time_left[player] - charge)
@@ -212,7 +211,7 @@ func advance_turn() -> void:
 			state.penalty_used = false
 			state.overtime = 0.0
 			state.timing_notice = ""
-			if state.is_blitz:
+			if state.uses_blitz_clock:
 				state.time_left[next_player] = maxf(10.0, state.time_left[next_player])
 			return
 

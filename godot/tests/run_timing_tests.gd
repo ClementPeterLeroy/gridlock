@@ -185,24 +185,29 @@ func test_ai_clocks() -> void:
 		var engine = MatchEngine.new(config)
 		engine.tick(0.75)
 		engine.tick(0.5)
-		check(engine.state.turn_elapsed == 1.25 and engine.state.turn_clock_elapsed == 0.25, "AI exempts only first second across frame boundary")
+		check(engine.state.turn_elapsed == 1.25 and engine.state.turn_clock_elapsed == 0, "AI elapsed advances without countdown charging")
 		if mode == "Blitz":
-			check(engine.state.time_left[0] == 179.75, "AI thinking charges its own Blitz clock")
+			check(engine.state.time_left[0] == 180.0, "AI thinking leaves its Blitz clock unchanged")
 			check(engine.state.time_left[1] == 180.0, "AI thinking never charges the other player's clock")
 		else:
-			check(engine.state.remaining_turn_time == 14.75, "AI countdown live after presentation")
+			check(is_inf(engine.state.remaining_turn_time), "AI has no countdown deadline")
 		var scheduler = AI.new(engine)
 		scheduler.update(0.0, 0.001)
 		check(scheduler.search.time_limit <= minf(10.0, engine.state.remaining_turn_time), "search budget bounded by remaining clock")
 		var pending = scheduler.search
+		engine.tick(1000)
+		check(engine.state.status == "running" and not engine.state.players[0].eliminated and engine.state.turn_clock_elapsed == 0, "AI cannot expire during long thinking")
+		# Retain stale-work cancellation coverage: an external change to a human
+		# seat followed by its timeout must invalidate the pending AI proposal.
+		engine.state.players[0].controller = "Human"
 		if mode == "Blitz":
 			engine.state.players[0].walls_remaining = 0
 		engine.tick(1000)
 		var position = engine.state.snapshot()
 		scheduler.update(0.0, 0.001)
-		check(pending.cancelled and engine.state.snapshot() == position, "timeout invalidates pending AI before it can act")
+		check(pending.cancelled and engine.state.snapshot() == position, "human timeout invalidates stale AI before it can act")
 		if mode == "Battle Royale":
-			check(engine.state.current_player == 2, "four-player AI timeout retains clockwise IDs")
+			check(engine.state.current_player == 2, "four-player timeout retains clockwise IDs")
 		engine.restart()
 		engine.state.players[0].controller = "Human"
 		engine.tick(0.5)

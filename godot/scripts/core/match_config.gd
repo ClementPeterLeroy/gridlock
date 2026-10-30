@@ -23,14 +23,16 @@ var game_limit: int = 180
 var timing_mode: String:
 	get:
 		if mode == "Versus": return "Untimed"
-		if mode == "Blitz": return "Blitz"
-		return timer_type if mode == "Battle Royale" else ("Per Turn" if turn_limit else "Untimed")
+		return timer_type if mode in ["Battle Royale", "Blitz"] else ("Per Turn" if turn_limit else "Untimed")
 
 static func for_mode(value: String) -> GridlockMatchConfig:
 	var config = new()
 	config.mode = value
 	if value == "Battle Royale":
 		config.controllers = ["Human", "AI - Casual", "AI - Casual", "AI - Casual"]
+		config.turn_limit = 30
+	elif value == "Blitz":
+		config.timer_type = "Per Game"
 		config.turn_limit = 30
 	elif value == "Rise of the Machines":
 		config.controllers = ["Human", "AI - Casual"]
@@ -55,6 +57,8 @@ func validation_error() -> String:
 		if clean_name(names[player]).is_empty():
 			return "invalid_name"
 	if mode == "Battle Royale" and ((timer_type == "Per Turn" and turn_limit == 0) or (timer_type == "Per Game" and game_limit == 0)):
+		return "invalid_config"
+	if mode == "Blitz" and timer_type == "Per Turn" and turn_limit == 0:
 		return "invalid_config"
 	for value in controllers:
 		if value not in CONTROLLERS:
@@ -86,6 +90,10 @@ func resolved() -> GridlockMatchConfig:
 			config.turn_limit = 0
 		else:
 			config.game_limit = 0
+	elif mode == "Blitz":
+		config.game_limit = 0
+		if timer_type == "Per Game":
+			config.turn_limit = 0
 	return config
 
 func to_dict() -> Dictionary:

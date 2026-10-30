@@ -31,9 +31,14 @@ var ai_clock_age = 0.0
 var is_blitz: bool:
 	get: return config.mode == "Blitz"
 
+var uses_blitz_clock: bool:
+	get: return is_blitz and config.timing_mode == "Per Game"
+
 var remaining_turn_time: float:
 	get:
-		if is_blitz:
+		if players[current_player].controller != "Human":
+			return INF
+		if uses_blitz_clock:
 			return overtime if penalty_used else time_left[current_player]
 		if config.timing_mode == "Per Game":
 			return time_left[current_player]
@@ -53,7 +58,7 @@ func _init(options = null) -> void:
 	elapsed_turns.resize(players.size())
 	elapsed_turns.fill(0.0)
 	time_left.resize(players.size())
-	time_left.fill(float(config.game_limit) if config.timing_mode == "Per Game" else 60.0 * config.blitz_minutes)
+	time_left.fill(float(config.game_limit) if config.mode == "Battle Royale" and config.timing_mode == "Per Game" else 60.0 * config.blitz_minutes)
 
 func pawn_positions() -> Array:
 	var positions = []

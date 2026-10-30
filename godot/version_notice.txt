@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-alpha.3.3
+Current version: 3.0-alpha.3.4
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -369,6 +369,72 @@ Known limitations and next milestone
 - Deferred requirement for beta.1: hide the 3D board on Main Menu and Match Setup;
   retain visibility during active matches, Pause and Victory. Do not implement this
   requirement in alpha.3.3; current board visibility is preserved.
+Next milestone: 3.0-beta.1 - UI & Menu Polish
+
+VERSION 3.0-alpha.3.4 - Blitz Edit
+Completion date: 2026-10-30
+Status: Completed
+
+Features
+- Added shared Timer Type / Time Limit dropdowns to Blitz setup, matching Battle
+  Royale styling. Per Turn offers 15/30/60/120/180 seconds (default 30); Per Game
+  preserves 1/3/5-minute clocks. Default remains Per Game / three minutes.
+- Per Turn human countdowns reset each turn. Expiry uses standard forfeit:
+  remove the pawn and award victory to the surviving opponent. No global-clock
+  ten-second floor, wall penalty, or overtime applies to Per Turn.
+- Per Game preserves the original human global-clock mechanics: cumulative balance,
+  ten-second turn-start minimum only below ten, one inventory-wall penalty per
+  turn, fresh 15-second overtime, repeat penalties on later turns and original losses.
+- Made all AI turns fully exempt from countdown consumption in every timing mode,
+  including thinking/presentation and explicit charge inputs. AI elapsed time still
+  advances immediately; AI cannot lose solely through its own clock or overtime.
+- Timed AI cards show Exempt with explanatory tooltips and neutral clock colors.
+  Thinking feedback, active-player highlight, human clocks and compact HUD remain.
+- Persisted Blitz timer type and independent Per Turn / Per Game duration choices.
+  Preference format v2 migrates v1 Blitz settings to Per Game while retaining their
+  1/3/5-minute duration. Invalid stored types/durations fall back safely.
+
+Technical changes and fixes
+- Separated the Blitz mode identity from uses_blitz_clock (Per Game mechanics).
+  Derived timing mode and resolved config disable the unselected clock branch.
+- Prevented AI expiry even at zero main clock, zero overtime or zero inventory.
+  The engine reports no AI countdown deadline; existing one-second presentation,
+  ten-second search cap, frame budgeting, cancellation and evaluator code are unchanged.
+- Avoided formatting an infinite effective AI deadline as a numeric HUD countdown.
+- Kept Versus untimed, Battle Royale timing exclusive and its stable-ID elimination
+  unchanged. Names, preferences, starter/restart/replay behavior, pause, undo,
+  clocks, animations, audio, camera code and authored scene presentation are retained.
+
+Validation and timing parity
+- Godot 4.7.2: 3367 core, 602 interaction, 232 match-flow, 1736 AI, 2426 timing,
+  575 customization and 382 Blitz Edit checks passed. All 12 AI matches completed.
+- New deterministic coverage includes both Blitz types, all presets, every AI
+  seat/difficulty, full exemption (including explicit charges and zero clocks),
+  human consumption/handoff, reset/cumulative clocks, exclusivity, timeout,
+  original wall penalties/overtime, dropdown memory, preference migration/repair,
+  pause/settings, restart, Play Again and main-menu clock freeze.
+- Retained 25 Classic supplied-charge timing traces / 163 states and unchanged
+  Per Game human-clock behavior. Historical AI-named arithmetic traces use human
+  reference seats. Actual AI policy intentionally differs: Classic UI exempts only
+  one presentation second, while alpha.3.4 exempts the complete AI turn as requested.
+- Existing core parity and 48 deterministic AI decisions remain unchanged; all
+  three fixture generators pass --check. All 100 Pygame tests pass on Python 3.13.12
+  / Pygame 2.6.1. Classic files and pygame/version_notice.txt remain untouched.
+- Inspected D3D12/Forward+ captures of both Blitz setup types, Per Turn AI Exempt
+  cards/thinking feedback, and original human Per Game overtime, including 800 x 600.
+  Blitz type and both durations also survived reload in a separate Godot process
+  using an isolated test file.
+  No models, materials, lighting, camera positions/transitions, movement/wall rules,
+  AI decision algorithms or beta-stage board-visibility behavior changed.
+
+Known limitations and next milestone
+- Audio/animation preferences remain session-only. Records/replays, player-facing
+  undo, final audio and beta graphical/menu polish remain deferred.
+- An exempt AI with no legal action can stall even a timed match; no automatic
+  pass/draw/loss rule is introduced. AI frame budgets remain cooperative.
+- Extended interactive play, saved-preference restart checks and device-specific
+  input still need the README manual checklist. Existing sandbox certificate-store
+  and global editor-preference warnings do not prevent project verification.
 Next milestone: 3.0-beta.1 - UI & Menu Polish
 
 Future releases
