@@ -35,6 +35,10 @@ var remaining_turn_time: float:
 	get:
 		if is_blitz:
 			return overtime if penalty_used else time_left[current_player]
+		if config.timing_mode == "Per Game":
+			return time_left[current_player]
+		if config.timing_mode == "Untimed":
+			return INF
 		return maxf(0.0, config.turn_limit - turn_clock_elapsed) if config.turn_limit else INF
 
 func _init(options = null) -> void:
@@ -49,7 +53,7 @@ func _init(options = null) -> void:
 	elapsed_turns.resize(players.size())
 	elapsed_turns.fill(0.0)
 	time_left.resize(players.size())
-	time_left.fill(60.0 * config.blitz_minutes)
+	time_left.fill(float(config.game_limit) if config.timing_mode == "Per Game" else 60.0 * config.blitz_minutes)
 
 func pawn_positions() -> Array:
 	var positions = []

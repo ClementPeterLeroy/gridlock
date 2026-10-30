@@ -1,4 +1,4 @@
-# Gridlock v3.0-alpha.3.2 - Blitz & Timers
+# Gridlock v3.0-alpha.3.3 - Match Customization
 
 Godot 4.7.2 / GDScript. Human and Pathfinder AI matches in Versus, Battle Royale, and Blitz,
 with the approved Design B compact HUD. The original rules, models, materials,
@@ -11,9 +11,40 @@ then select each seat's controller and confirm Start Match. Each seat independen
 offers Human, AI - Casual, or AI - Challenging, including fully automated matches.
 The default is all Human. Versus uses Sapphire/Crimson and ten walls each.
 Battle Royale uses four players, five walls each, and clockwise turns:
-Sapphire, Emerald, Crimson, Violet. Versus/Battle Royale offer Untimed (default)
-or 15/30/60/120-second turn limits. Blitz offers 1/3/5-minute player clocks,
-defaulting to three minutes, with two players and ten walls each.
+Sapphire, Emerald, Crimson, Violet. Every seat, including AI, accepts a custom name
+of up to twelve printable characters. Empty names block Start; control characters
+and markup delimiters are filtered. Duplicate names are allowed: IDs, color dots,
+and identity tooltips distinguish seats. Controller changes never rename a seat.
+
+Versus is always untimed, including when obsolete countdown preferences are loaded.
+Battle Royale offers exactly one timing system:
+
+- Per Turn: 15/30/60/120/180 seconds, default 30 seconds, reset for each turn.
+- Per Game: 1/3/5/10/15 minutes per seat, default three minutes, retained across turns.
+
+The timer dropdown remembers each type's preferred duration independently. Per Game
+zero balance eliminates the pawn and retains placed walls, like Per Turn expiry.
+Battle Royale never grants Blitz's minimum time, wall penalties, or overtime.
+Blitz retains 1/3/5-minute clocks, default three minutes, with two players and ten walls.
+
+Starting player offers Default (Sapphire) and Random (uniform participating-seat draw).
+Start Match draws a starter when Random is selected. Restart Match / N restores the
+same chosen starter, names/controllers, clocks and inventories. Play Again preserves
+configuration and draws a fresh starter when Random is selected. Cyclic turn order
+and starting positions never change.
+
+Setup preferences persist per mode in `user://match_preferences.cfg`, using Godot's
+local user-data directory. Names, controllers/difficulties, random-start preference,
+both Battle Royale durations, and Blitz duration are saved after valid Start or
+leaving setup. Reset to Defaults restores all mode preferences without restarting
+an active match. Audio and animation settings remain session-only.
+
+`scripts/core/match_preferences.gd` uses ConfigFile and repairs missing/invalid
+fields to safe defaults; older timed Versus and unsupported duration values cannot
+restore removed behavior. There was no previous persistent Godot match file to
+migrate; compatible older field values are accepted. Actual starter draws, board
+positions, clocks, history and results are never stored as setup preferences.
+Disk failures leave current session choices available and emit a warning.
 
 - Left-click the active pawn to select it and show green legal destinations.
 - Click a green tile to move. Click the pawn again or press Esc to deselect.
@@ -37,7 +68,7 @@ defaulting to three minutes, with two players and ten walls each.
   The pause page offers Resume, Restart Match, and Main Menu. Cameras remain available.
 - Victory preserves the final board behind the existing color-specific trophy
   artwork. A single dynamic banner identifies the winner; the two buttons are
-  Play Again and Main Menu. Play Again preserves the match configuration.
+  Play Again and Main Menu. Play Again preserves configuration and redraws Random.
 - Restart Match or N starts a fresh board with the same configuration and resets
   all clocks. N is available during play, pause, and victory.
 
@@ -136,11 +167,12 @@ and difficulty without expanding the compact cards. Cameras remain usable.
 
 ## Core modules
 
-All five scripts in `scripts/core/` extend `RefCounted`:
+All six scripts in `scripts/core/` extend `RefCounted`:
 
 | Script | Responsibility |
 | --- | --- |
 | `match_config.gd` | Mode, names, controllers, starting player, timing options |
+| `match_preferences.gd` | Validated local setup preferences, independent of live state |
 | `game_state.gd` | Stable player records, board, turns, clocks, overtime, snapshots |
 | `game_engine.gd` | Validated actions, timing/timeout rules, turns, victory, restart, undo |
 | `rules.gd` | Pawn moves, jumps, sidesteps, wall validation |
@@ -157,8 +189,8 @@ the final route of any active player. BFS ignores temporary pawn occupancy.
 
 Player records contain identity, display name, controller, goal, position,
 remaining walls, and elimination status. An eliminated pawn has a null position.
-Custom human names retain the legacy printable-character filtering and 12-character
-limit; AI seats use their color identity.
+Human and AI names use printable-character filtering and a twelve-character limit.
+Names are presentation only; no movement, wall, timing, or AI logic uses them as IDs.
 
 ## Engine API
 
@@ -187,7 +219,7 @@ time can legitimately trigger a penalty/timeout. Controllers never change live s
 move/wall proposals. Both return no actions while paused or after victory.
 Queries do not change the match. Always revalidate when committing a proposal.
 
-Stable result codes are `ok`, `invalid_config`, `invalid_action`,
+Stable result codes are `ok`, `invalid_config`, `invalid_name`, `invalid_action`,
 `not_active_player`, `player_eliminated`, `match_paused`, `match_finished`,
 `illegal_move`, `no_walls_remaining`, `wall_outside_board`,
 `wall_overlap_or_crossing`, `wall_overlap`, `path_blocked`, and `nothing_to_undo`.
@@ -195,10 +227,17 @@ Stable result codes are `ok`, `invalid_config`, `invalid_action`,
 `start_match(config)` validates configuration before replacing state. Construct an
 engine with a valid config; for untrusted configuration, construct the default
 engine first and inspect the result of `start_match(config)`.
-`restart()` preserves configuration and rerolls a random starter when enabled.
+`restart()` preserves configuration and the actual chosen starter.
+`play_again()` preserves configuration and rerolls a random starter when enabled.
 An optional `RandomNumberGenerator` constructor argument makes starting-player tests
 deterministic. The default fixed starter is Sapphire; `starting_player` permits
-an explicitly configured seat.
+an explicitly configured seat. The resolved live config records the actual starter.
+
+Setup edits one MatchConfig draft. Preferences hold independent copies, and the
+engine resolves a copy before validation: Versus disables both clock limits; Battle
+Royale disables its unselected limit. `timing_mode` derives from mode/type, so there
+is no separate UI clock policy. Saved setup copies retain each timer type's preferred
+duration; resolved live configs contain only the selected active deadline.
 
 `state.snapshot()` deep-copies configuration and live position data, excluding
 history to avoid recursive copies. `state.restore(snapshot)` also copies its input.
@@ -246,6 +285,7 @@ godot --headless --path godot --script res://tests/run_interaction_tests.gd
 godot --headless --path godot --script res://tests/run_match_tests.gd
 godot --headless --path godot --script res://tests/run_ai_tests.gd
 godot --headless --path godot --script res://tests/run_timing_tests.gd
+godot --headless --path godot --script res://tests/run_customization_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
 python -B godot/tests/generate_timing_fixtures.py --check
@@ -269,22 +309,34 @@ ordering, all four victory stickers, responsive layouts, and complete opening-to
 matches with replay. Existing board regression checks run with animations disabled
 to isolate targeting/synchronization; match tests also verify enabled transitions.
 
-Validation for alpha.3.2: 3359 core checks, 602 interaction checks, 232 match checks,
-1736 AI checks, and 2428 timing checks passed on Godot 4.7.2. Python parity fixtures
+Validation for alpha.3.3: 3367 core checks, 602 interaction checks, 232 match checks,
+1736 AI checks, 2423 timing checks, and 575 customization checks passed on Godot 4.7.2. Python parity fixtures
 matched the unchanged Classic implementation. The Pygame suite passed all 100 tests on Python 3.13.12 /
 Pygame 2.6.1.
 The AI suite includes 12 complete automated matches (both modes, both difficulties
 and mixed levels, two seeds), 842 decisions, all 90 controller combinations,
 engine rejection, pause, restart, cancellation, undo, elimination, and safe handling
 of no-action positions. Full-match timing excludes presentation and animation waits.
-The timing suite compares 25 Classic traces / 163 states directly: elapsed/countdown
+The timing suite retains all 25 Classic traces / 163 states: elapsed/countdown
 time, all turn limits and Blitz clock choices, minimum time, repeated penalties,
-overtime, elimination, pause/resume, undo, and goal freeze. Fake monotonic clocks
+overtime, elimination, pause/resume, undo, and goal freeze. Historical timed Versus
+traces now run through the existing two-player countdown engine mode (Rise of the
+Machines); current Versus is tested separately as untimed. Fixtures and Blitz rules
+are unchanged. This intentional product change is not a claim of timed Versus parity.
+Fake monotonic clocks
 test action/timeout ordering, AI charging and cancellation, and restart/undo anchors.
 Scene checks exercise setup, countdown colors, overtime, timeout victory, and lifecycle
 freeze. No real-time sleeps are used for timing assertions. D3D12/Forward+ captures
 were inspected for timed four-seat setup at 800 x 600 and Blitz setup, overtime,
-and timeout victory at 1280 x 900.
+and timeout victory at 1280 x 900. Alpha.3.3 captures additionally cover custom setup
+at 1280 x 900, 800 x 600 and 640 x 480, Per Game HUD and long-name victory.
+
+The customization suite checks name validation/duplicates, every seat's identities,
+controller choices, seeded starter selection/restart/replay, every duration preset,
+Per Game accumulation/undo/elimination, timer exclusivity, saved duration switching,
+invalid/older preference repair, reset, and live-state isolation. File round trips
+use an isolated `.godot/` test path; separate Godot processes also verified a saved
+configuration reload. Production storage uses the Godot user-data path above.
 
 `tests/core/python_timing_parity.json` is generated by the unchanged Classic
 `Game` model. Regenerate with `python -B godot/tests/generate_timing_fixtures.py`.
@@ -324,6 +376,10 @@ Manual verification before wider release:
    Royale, time out multiple seats and confirm their placed walls remain.
 9. Pause/open Settings during a low clock and an AI turn, wait, then resume.
    Check clocks and AI stay frozen behind overlays, and animations consume no time.
+10. Edit human/AI names, switch controllers, try blank/duplicate/long names, and
+    check HUD/victory text. Select Random, compare Restart with Play Again, then
+    close/reopen the application to check preferences. Switch Battle Royale timer
+    types and verify both duration choices return. Reset all defaults.
 
 `tests/core/python_parity.json` is generated from the unchanged Pygame rules/state
 and BFS distance implementation. It covers 20 reference positions, all 128 wall
@@ -338,8 +394,8 @@ python -B godot/tests/generate_python_fixtures.py
 
 ## Limitations and next milestones
 
-- Match customization, persistent Godot preferences, replay storage, records, and
-  the broader UI/texture polish remain deferred. Settings are session-only.
+- Replay storage, records, and broader UI/texture polish remain deferred. Match
+  preferences persist; audio/animation settings remain session-only.
 - Audio remains placeholder material, including the reused wall sound. Auditory
   quality and long human play sessions need manual verification.
 - A pawn can have no legal move while every permanent route still exists. If it
@@ -351,7 +407,10 @@ python -B godot/tests/generate_python_fixtures.py
   material, and `Wall.tscn` contains a null wall-color override. Review separately
   without changing the imported ivory/walnut appearance.
 
-Next: **v3.0-alpha.3.3 - Match Customization**. Neural AI remains reserved for v3.1.
+Next: **v3.0-beta.1 - UI & Menu Polish**. Record for that milestone: hide the 3D
+board on Main Menu and Match Setup; keep it visible in active, paused and completed
+matches. This board-visibility change is deliberately not implemented in alpha.3.3.
+Neural AI remains reserved for v3.1.
 
 ## Version workflow
 

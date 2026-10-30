@@ -30,6 +30,7 @@ func run() -> void:
 	test_ai_clocks()
 	game = Scene.instantiate()
 	game.live_timing = false
+	game.preferences_path = ""
 	root.add_child(game)
 	await process_frame
 	game.set_process(false)
@@ -88,7 +89,10 @@ func test_python_parity() -> void:
 		return
 	var states = 0
 	for trace in data.traces:
-		var config = options(trace.mode, int(trace.limit))
+		# Versus is now expressly untimed. Retain every legacy countdown check
+		# through the existing two-player engine mode, without changing fixtures.
+		var mode = "Rise of the Machines" if trace.mode == "Versus" and trace.limit > 0 else trace.mode
+		var config = options(mode, int(trace.limit))
 		config.blitz_minutes = int(trace.minutes)
 		var engine = MatchEngine.new(config)
 		for step in trace.steps:
@@ -151,7 +155,7 @@ func test_live_boundaries() -> void:
 		engine.restart()
 		check(engine.state.time_left.all(func(t): return t == 180.0) and engine.state.turn_elapsed == 0, "restart resets clocks")
 	for goal_first in [false, true]:
-		var engine = MatchEngine.new(options("Versus", 15))
+		var engine = MatchEngine.new(options("Rise of the Machines", 15))
 		var clock = FakeClock.new()
 		engine.set_time_source(clock.now)
 		engine.state.players[0].position = Vector2i(2, 1)
@@ -175,7 +179,7 @@ func test_live_boundaries() -> void:
 	check(not blitz.apply_action(move(0, Vector2i(4, 7))).accepted and blitz.state.winner == 1, "overtime expiry beats player event")
 
 func test_ai_clocks() -> void:
-	for mode in ["Versus", "Battle Royale", "Blitz"]:
+	for mode in ["Rise of the Machines", "Battle Royale", "Blitz"]:
 		var config = options(mode, 15)
 		config.controllers.fill("AI - Challenging")
 		var engine = MatchEngine.new(config)
@@ -197,7 +201,7 @@ func test_ai_clocks() -> void:
 		var position = engine.state.snapshot()
 		scheduler.update(0.0, 0.001)
 		check(pending.cancelled and engine.state.snapshot() == position, "timeout invalidates pending AI before it can act")
-		if engine.state.status == "running":
+		if mode == "Battle Royale":
 			check(engine.state.current_player == 2, "four-player AI timeout retains clockwise IDs")
 		engine.restart()
 		engine.state.players[0].controller = "Human"
@@ -218,7 +222,8 @@ func test_setup_and_hud() -> void:
 	for mode in ["Versus", "Battle Royale", "Blitz"]:
 		game.handle_ui_action({"Versus": "setup_versus", "Battle Royale": "setup_battle", "Blitz": "setup_blitz"}[mode])
 		await process_frame
-		var values = [1, 3, 5] if mode == "Blitz" else [0, 15, 30, 60, 120]
+		var values = [1, 3, 5] if mode == "Blitz" else ([15, 30, 60, 120, 180] if mode == "Battle Royale" else [])
+		if mode == "Versus": check(game.ui.timing_option == null, "Versus exposes no countdown")
 		for index in range(values.size()):
 			game.ui.timing_option.select(index)
 			game.ui.timing_option.item_selected.emit(index)
@@ -233,15 +238,18 @@ func test_setup_and_hud() -> void:
 			game._process(1.0)
 			check(game.ui.cards[0].timer.text == "OT 0:15.0" and game.ui.cards[0].walls.text == "9", "overtime and penalty displayed compactly")
 			game._process(15.0)
+		elif mode == "Battle Royale":
+			check(game.ui.cards[0].timer.text == "178.0s", "standard card displays countdown")
+			game._process(178.0)
 		else:
-			check(game.ui.cards[0].timer.text == "118.0s", "standard card displays countdown")
-			game._process(118.0)
-		if mode != "Battle Royale":
+			game._process(10000.0)
+			check(game.engine.state.status == "running" and is_inf(game.engine.state.remaining_turn_time), "Versus cannot expire")
+		if mode == "Blitz":
 			check(game.view == "victory" and game.ui.timeout_text != null and game.ui.timeout_text.text.contains("ran out of time"), "timeout victory names losing player")
-		else:
+		elif mode == "Battle Royale":
 			check(not game.ui.cards[0].panel.visible and game.engine.state.current_player == 2, "eliminated card removed without renumbering")
 		game.show_main_menu()
-	game.start_match(options("Versus", 15))
+	game.start_match(options("Battle Royale", 15))
 	game._process(5)
 	check(game.ui.cards[0].timer.get_theme_color("font_color") == Color("#F9CD70"), "low time amber")
 	game._process(5)

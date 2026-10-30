@@ -6,6 +6,7 @@ const HumanController = preload("res://scripts/controllers/human_controller.gd")
 const AIController = preload("res://scripts/ai/ai_controller.gd")
 const MatchInterface = preload("res://scripts/ui/match_interface.gd")
 const MatchAudio = preload("res://scripts/match_audio.gd")
+const MatchPreferences = preload("res://scripts/core/match_preferences.gd")
 const WallScene = preload("res://scenes/Wall.tscn")
 
 @export_enum("Versus", "Battle Royale") var board_mode: String = "Battle Royale"
@@ -32,7 +33,8 @@ var preview_material: StandardMaterial3D
 var shown_moves: Array = []
 var scene_turn: Array = []
 var view = "main_menu"
-var setup_mode = "Versus"
+var preferences_path = MatchPreferences.DEFAULT_PATH
+var preferences
 var settings_return = "main_menu"
 var live_timing = true
 var elapsed_turns: Array:
@@ -43,6 +45,7 @@ var gameplay_tween: Tween
 var victory_shown = false
 
 func _ready() -> void:
+	preferences = MatchPreferences.new(preferences_path)
 	get_tree().auto_accept_quit = false
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.current = true
@@ -87,10 +90,11 @@ func reset_match_presentation() -> void:
 	ui.show_page("game")
 	sync_scene()
 
-func restart_match() -> void:
+func restart_match(replay: bool = false) -> void:
 	ai.cancel()
 	cancel_transition()
-	engine.restart()
+	if replay: engine.play_again()
+	else: engine.restart()
 	controller.clear_selection()
 	controller.feedback = ""
 	controller.suppressed_target = {}
@@ -302,25 +306,27 @@ func handle_ui_action(action: String) -> void:
 			controller.clear_selection()
 			update_interaction_visuals()
 		"setup_versus", "setup_battle", "setup_blitz":
-			setup_mode = {"setup_versus": "Versus", "setup_battle": "Battle Royale", "setup_blitz": "Blitz"}[action]
-			ui.setup_mode = setup_mode
-			ui.setup_turn_limit = 0
-			ui.setup_blitz_minutes = 3
-			ui.setup_controllers = ["Human", "Human", "Human", "Human"] if setup_mode == "Battle Royale" else ["Human", "Human"]
+			var mode = {"setup_versus": "Versus", "setup_battle": "Battle Royale", "setup_blitz": "Blitz"}[action]
+			ui.setup_config = preferences.configs[mode].copy()
 			view = "setup"
 			ui.show_page("setup")
 		"start":
-			var options = MatchConfig.for_mode(setup_mode)
-			options.controllers = ui.setup_controllers.duplicate()
-			options.turn_limit = ui.setup_turn_limit
-			options.blitz_minutes = ui.setup_blitz_minutes
-			start_match(options)
+			if not ui.validate_setup(): return
+			persist_setup()
+			start_match(ui.setup_config)
+		"reset_preferences":
+			preferences.reset()
+			save_preferences()
+			ui.setup_config = preferences.configs[ui.setup_mode].copy()
+			if view == "setup": ui.show_page("setup")
 		"pause":
 			pause_match(not engine.state.paused)
 		"resume":
 			pause_match(false)
 		"restart":
 			restart_match()
+		"play_again":
+			restart_match(true)
 		"main_menu":
 			show_main_menu()
 		"settings":
@@ -363,6 +369,7 @@ func pause_match(value: bool) -> void:
 	update_hud()
 
 func show_main_menu() -> void:
+	if view == "setup": persist_setup()
 	ai.cancel()
 	cancel_transition()
 	view = "main_menu"
@@ -370,6 +377,15 @@ func show_main_menu() -> void:
 	sync_scene()
 	ui.has_match = false
 	ui.show_page("main_menu")
+
+func persist_setup() -> void:
+	if ui.validate_setup():
+		preferences.remember(ui.setup_config)
+		save_preferences()
+
+func save_preferences() -> void:
+	if preferences.save() != OK:
+		push_warning("Match preferences could not be saved; current session settings remain available.")
 
 func set_volume(category: String, value: float) -> void:
 	audio.set_volume(category, value)
@@ -388,6 +404,7 @@ func set_animations(enabled: bool) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST and view != "closing":
+		if view == "setup": persist_setup()
 		view = "closing"
 		set_process(false)
 		cancel_transition()

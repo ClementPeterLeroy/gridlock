@@ -50,7 +50,12 @@ func tick(seconds: float, clock_seconds = null) -> void:
 	state.elapsed_turns[state.current_player] = state.turn_elapsed
 	state.turn_clock_elapsed += charge
 	if not state.is_blitz:
-		if state.config.turn_limit and state.turn_clock_elapsed >= state.config.turn_limit:
+		if state.config.timing_mode == "Per Game":
+			var player = state.current_player
+			state.time_left[player] = maxf(0.0, state.time_left[player] - charge)
+			if state.time_left[player] <= 0:
+				resolve_forfeit(player, true)
+		elif state.config.timing_mode == "Per Turn" and state.config.turn_limit and state.turn_clock_elapsed >= state.config.turn_limit:
 			resolve_forfeit(state.current_player, true)
 		return
 	var player = state.current_player
@@ -91,20 +96,27 @@ func _init(options = null, random_source = null) -> void:
 static func result(reason: String = "") -> Dictionary:
 	return {"accepted": reason.is_empty(), "reason_code": "ok" if reason.is_empty() else reason}
 
-func start_match(options: Config) -> Dictionary:
+func start_match(options: Config, retained_starter: int = -1) -> Dictionary:
+	options = options.resolved()
 	var error = options.validation_error()
 	if not error.is_empty():
 		return result(error)
 	var fresh = State.new(options)
-	if options.random_start:
+	if retained_starter >= 0:
+		fresh.current_player = retained_starter
+	elif options.random_start:
 		var active = fresh.active_players()
 		fresh.current_player = active[rng.randi_range(0, active.size() - 1)]
+	fresh.config.starting_player = fresh.current_player
 	state = fresh
 	timing_active = true
 	reset_time_anchor()
 	return result()
 
 func restart() -> Dictionary:
+	return start_match(state.config, state.config.starting_player)
+
+func play_again() -> Dictionary:
 	return start_match(state.config)
 
 func set_paused(value: bool) -> Dictionary:

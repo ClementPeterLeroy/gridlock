@@ -26,6 +26,7 @@ func run() -> void:
 	root.size = Vector2i(1280, 900)
 	game = Scene.instantiate()
 	game.live_timing = false
+	game.preferences_path = ""
 	root.add_child(game)
 	await process_frame
 	await process_frame

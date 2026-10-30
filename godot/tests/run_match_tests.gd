@@ -26,6 +26,7 @@ func run() -> void:
 	root.size = Vector2i(1280, 900)
 	game = Scene.instantiate()
 	game.live_timing = false
+	game.preferences_path = ""
 	root.add_child(game)
 	await process_frame
 	await process_frame
@@ -107,7 +108,7 @@ func test_cards_and_timer() -> bool:
 	game.update_elapsed(1.25)
 	game.update_hud()
 	check(is_equal_approx(game.elapsed_turns[0], 1.25), "active timer advances")
-	check(game.ui.cards[0].timer.text == "1.3s", "elapsed time displayed")
+	check(game.ui.cards[0].timer.text == "28.8s", "default Battle Royale countdown displayed; engine retains elapsed time")
 	check(game.ui.cards[0].active and game.ui.cards[0].style.border_color == game.ui.GOLD, "gold active border")
 	for id in [2, 1, 3]:
 		check(not game.ui.cards[id].active and game.elapsed_turns[id] == 0.0, "inactive cards stay idle")

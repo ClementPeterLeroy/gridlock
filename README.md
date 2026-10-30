@@ -2,12 +2,14 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-alpha.3.2 - Blitz & Timers is implemented in `godot/`.
+Gridlock v3.0-alpha.3.3 - Match Customization is implemented in `godot/`.
 Versus, Battle Royale, and Blitz support humans and Pathfinder AI, with Casual or
-Challenging difficulty per seat. Optional turn limits and Classic's complete Blitz
-clocks, wall penalties, and overtime run in the gameplay engine. The compact HUD,
+Challenging difficulty per seat. Names, controller choices, and starting-player
+preferences are customizable and saved locally. Versus is untimed; Battle Royale
+offers Per Turn or Per Game clocks. Classic's Blitz penalties and overtime remain.
+The compact HUD,
 pause/settings, animations, audio, and victory/replay remain available.
-Broader match customization and later visual polish remain under development.
+UI/menu polish is the next milestone.
 
 ## Repository layout
 
@@ -75,8 +77,11 @@ python pygame/tests/benchmark_battle_ai.py
 
 Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus, Battle Royale, or Blitz.
 Select Human, AI - Casual, or AI - Challenging for each seat before starting.
-Versus/Battle Royale offer Untimed or 15/30/60/120-second turns; Blitz offers
-1/3/5-minute player clocks (default three minutes).
+Edit player names and choose Default or Random starter. Versus is always untimed.
+Battle Royale offers 15/30/60/120/180-second turns or 1/3/5/10/15-minute player
+budgets. Blitz retains 1/3/5-minute clocks (default three minutes).
+Match preferences persist in Godot's `user://match_preferences.cfg`.
+Restart keeps the chosen starter; Play Again redraws it when Random is selected.
 AI turns show a thinking message and wait at least one second; pause freezes AI work.
 Keys 1, 2, and 3 select Classic, Isometric, and Cinematic views.
 Click the active pawn and a green tile to move, or hover a groove and click to
@@ -92,6 +97,7 @@ godot --headless --path godot --script res://tests/run_interaction_tests.gd
 godot --headless --path godot --script res://tests/run_match_tests.gd
 godot --headless --path godot --script res://tests/run_ai_tests.gd
 godot --headless --path godot --script res://tests/run_timing_tests.gd
+godot --headless --path godot --script res://tests/run_customization_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
 python -B godot/tests/generate_timing_fixtures.py --check

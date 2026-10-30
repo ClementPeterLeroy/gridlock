@@ -37,6 +37,7 @@ func run() -> void:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
 	game.live_timing = false
+	game.preferences_path = ""
 	root.add_child(game)
 	await process_frame
 	await process_frame

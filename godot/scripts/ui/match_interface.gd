@@ -9,7 +9,8 @@ const COLORS = [Color("#345B9A"), Color("#A84343"), Color("#3E7955"), Color("#78
 const GOLD = Color("#F9D55E")
 const ART_NAMES = ["sapphire", "crimson", "emerald", "violet"]
 const CONTROL_OPTIONS = ["Human", "AI - Casual", "AI - Challenging"]
-const TURN_LIMITS = [0, 15, 30, 60, 120]
+const Config = preload("res://scripts/core/match_config.gd")
+const TURN_LIMITS = Config.TURN_SECONDS
 const BLITZ_MINUTES = [1, 3, 5]
 
 class WallIcon extends Control:
@@ -27,12 +28,26 @@ var overlay: ColorRect
 var page_panel: PanelContainer
 var page = "main_menu"
 var feedback: Label
-var setup_mode = "Versus"
-var setup_controllers: Array = ["Human", "Human"]
+var setup_config = Config.for_mode("Versus")
+var setup_mode: String:
+	get: return setup_config.mode
+var setup_controllers: Array:
+	get: return setup_config.controllers
+	set(value): setup_config.controllers = value
 var controller_options: Dictionary = {}
-var setup_turn_limit = 0
-var setup_blitz_minutes = 3
+var setup_turn_limit: int:
+	get: return setup_config.turn_limit
+	set(value): setup_config.turn_limit = value
+var setup_blitz_minutes: int:
+	get: return setup_config.blitz_minutes
+	set(value): setup_config.blitz_minutes = value
 var timing_option: OptionButton
+var timer_type_option: OptionButton
+var starter_option: OptionButton
+var name_inputs: Dictionary = {}
+var setup_error: Label
+var start_button: Button
+var setup_scroll: ScrollContainer
 var timeout_text: Label
 var winner_text: Label
 var victory_art: Control
@@ -160,15 +175,15 @@ func update_cards(state) -> void:
 		card.panel.visible = not state.players[player_id].eliminated
 		card.walls.text = str(state.players[player_id].walls_remaining)
 		var seconds: float = state.elapsed_turns[player_id]
-		var countdown = state.is_blitz or state.config.turn_limit > 0
+		var countdown = state.config.timing_mode != "Untimed"
 		var overtime = state.is_blitz and player_id == state.current_player and state.penalty_used
-		if state.is_blitz:
+		if state.is_blitz or state.config.timing_mode == "Per Game":
 			seconds = state.overtime if overtime else state.time_left[player_id]
-		elif state.config.turn_limit:
+		elif state.config.timing_mode == "Per Turn":
 			seconds = state.remaining_turn_time if player_id == state.current_player else float(state.config.turn_limit)
 		var tenths = ceili(maxf(0.0, seconds) * 10.0)
 		var clock_text = "%d:%04.1f" % [tenths / 600, (tenths % 600) / 10.0]
-		card.timer.text = ("OT " if overtime else "") + (clock_text if state.is_blitz else "%.1fs" % seconds)
+		card.timer.text = ("OT " if overtime else "") + (clock_text if state.is_blitz or state.config.timing_mode == "Per Game" else "%.1fs" % seconds)
 		card.timer.tooltip_text = "Overtime: one wall lost this turn" if overtime else \
 			("Remaining time" if countdown else "Elapsed turn time; inactive cards retain their last turn")
 		var timer_color = Color("#EF7770") if seconds <= 5 else Color("#F9CD70")
@@ -203,6 +218,9 @@ func layout_hud() -> void:
 	feedback.size = Vector2(maxf(0, size.x - 32), 24)
 	if page_panel != null:
 		page_panel.custom_minimum_size.x = minf(500, size.x - 32)
+	if setup_scroll != null:
+		var content_height = setup_scroll.get_child(0).get_combined_minimum_size().y
+		setup_scroll.custom_minimum_size.y = minf(content_height, maxf(160, size.y - 64))
 	if victory_art != null:
 		var art_width = minf(480, minf(size.x - 72, maxf(80, size.y - 150) * 900.0 / 520.0))
 		victory_art.custom_minimum_size = Vector2(art_width, art_width * 520.0 / 900.0)
@@ -252,6 +270,12 @@ func show_page(value: String, state = null) -> void:
 	victory_art = null
 	volume_sliders.clear()
 	controller_options.clear()
+	name_inputs.clear()
+	starter_option = null
+	timer_type_option = null
+	start_button = null
+	setup_error = null
+	setup_scroll = null
 	timing_option = null
 	timeout_text = null
 	if value == "game":
@@ -264,7 +288,15 @@ func show_page(value: String, state = null) -> void:
 	center.add_child(page_panel)
 	var column = VBoxContainer.new()
 	column.add_theme_constant_override("separation", 12)
-	page_panel.add_child(column)
+	if value == "setup":
+		setup_scroll = ScrollContainer.new()
+		setup_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		page_panel.add_child(setup_scroll)
+		setup_scroll.add_child(column)
+		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		column.add_theme_constant_override("separation", 4)
+	else:
+		page_panel.add_child(column)
 	match value:
 		"main_menu":
 			column.add_child(label("GRIDLOCK", 32))
@@ -275,12 +307,21 @@ func show_page(value: String, state = null) -> void:
 			column.add_child(button("Settings", "settings"))
 		"setup":
 			column.add_child(label(setup_mode, 26))
-			var text = "2 players · 10 walls each" if setup_mode == "Versus" else "4 players · 5 walls each"
+			var text = "4 players · 5 walls each" if setup_mode == "Battle Royale" else "2 players · 10 walls each"
 			column.add_child(label(text, 16))
 			add_controller_options(column)
+			starter_option = setup_dropdown(column, "Starting player", ["Default", "Random"])
+			starter_option.select(1 if setup_config.random_start else 0)
+			starter_option.item_selected.connect(func(index): setup_config.random_start = index == 1)
 			add_timing_option(column)
-			column.add_child(button("Start Match", "start"))
+			setup_error = label("", 13)
+			setup_error.add_theme_color_override("font_color", Color("#EF7770"))
+			column.add_child(setup_error)
+			start_button = button("Start Match", "start")
+			column.add_child(start_button)
+			column.add_child(button("Reset to Defaults", "reset_preferences"))
 			column.add_child(button("Main Menu", "main_menu"))
+			validate_setup()
 		"pause":
 			column.add_child(label("Paused", 26))
 			column.add_child(button("Resume", "resume"))
@@ -302,32 +343,60 @@ func show_page(value: String, state = null) -> void:
 				timeout_text = label(state.timing_notice, 15)
 				timeout_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				column.add_child(timeout_text)
-			for item in [["Play Again", "restart"], ["Main Menu", "main_menu"]]:
+			for item in [["Play Again", "play_again"], ["Main Menu", "main_menu"]]:
 				var control = button(item[0], item[1])
 				column.add_child(control)
 				victory_buttons.append(control)
 	layout_hud()
 
 func add_timing_option(column: VBoxContainer) -> void:
-	var blitz = setup_mode == "Blitz"
-	var values = BLITZ_MINUTES if blitz else TURN_LIMITS
+	if setup_mode == "Versus": return
+	if setup_mode == "Battle Royale":
+		timer_type_option = setup_dropdown(column, "Timer Type", Config.TIMER_TYPES)
+		timer_type_option.select(Config.TIMER_TYPES.find(setup_config.timer_type))
+		timer_type_option.item_selected.connect(func(index):
+			setup_config.timer_type = Config.TIMER_TYPES[index]
+			refresh_durations())
+	timing_option = setup_dropdown(column, "Player clock" if setup_mode == "Blitz" else "Time Limit", [])
+	timing_option.item_selected.connect(func(index):
+		if setup_mode == "Blitz": setup_config.blitz_minutes = BLITZ_MINUTES[index]
+		elif setup_config.timer_type == "Per Game": setup_config.game_limit = Config.GAME_SECONDS[index]
+		else: setup_config.turn_limit = Config.TURN_SECONDS[index])
+	refresh_durations()
+
+func refresh_durations() -> void:
+	var values = BLITZ_MINUTES if setup_mode == "Blitz" else (Config.GAME_SECONDS if setup_config.timer_type == "Per Game" else Config.TURN_SECONDS)
+	var selected = setup_blitz_minutes if setup_mode == "Blitz" else (setup_config.game_limit if setup_config.timer_type == "Per Game" else setup_turn_limit)
+	timing_option.clear()
+	for value in values:
+		timing_option.add_item(("%d minutes" % value) if setup_mode == "Blitz" else ("%d seconds" % value if value < 60 else "%d minutes" % (value / 60)))
+	if selected not in values:
+		selected = 3 if setup_mode == "Blitz" else (180 if setup_config.timer_type == "Per Game" else 30)
+		if setup_mode == "Blitz": setup_config.blitz_minutes = selected
+		elif setup_config.timer_type == "Per Game": setup_config.game_limit = selected
+		else: setup_config.turn_limit = selected
+	timing_option.select(values.find(selected))
+	validate_setup()
+
+func setup_dropdown(column: VBoxContainer, text: String, choices: Array) -> OptionButton:
 	var row = HBoxContainer.new()
 	column.add_child(row)
-	var title = label("Player clock" if blitz else "Turn limit", 16)
+	var title = label(text, 16)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title)
-	timing_option = OptionButton.new()
-	timing_option.name = "Timing"
-	timing_option.custom_minimum_size = Vector2(185, 36)
-	for value in values:
-		timing_option.add_item(("%d minutes" % value) if blitz else ("Untimed" if value == 0 else "%d seconds" % value))
-	timing_option.select(values.find(setup_blitz_minutes if blitz else setup_turn_limit))
-	timing_option.item_selected.connect(func(index):
-		if blitz:
-			setup_blitz_minutes = BLITZ_MINUTES[index]
-		else:
-			setup_turn_limit = TURN_LIMITS[index])
-	row.add_child(timing_option)
+	var choice = OptionButton.new()
+	choice.custom_minimum_size = Vector2(165, 32)
+	for value in choices: choice.add_item(value)
+	row.add_child(choice)
+	return choice
+
+func validate_setup() -> bool:
+	var error = setup_config.validation_error()
+	if setup_error != null:
+		setup_error.text = "Enter a name for every player." if error == "invalid_name" else ("Invalid match settings." if not error.is_empty() else "")
+		setup_error.visible = not error.is_empty()
+	if start_button != null: start_button.disabled = not error.is_empty()
+	return error.is_empty()
 
 func add_controller_options(column: VBoxContainer) -> void:
 	var order = [0, 2, 1, 3] if setup_mode == "Battle Royale" else [0, 1]
@@ -336,11 +405,23 @@ func add_controller_options(column: VBoxContainer) -> void:
 		column.add_child(row)
 		var identity = label(ART_NAMES[player_id].capitalize(), 16)
 		identity.add_theme_color_override("font_color", COLORS[player_id].lightened(0.25))
-		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		identity.custom_minimum_size.x = 76
 		row.add_child(identity)
+		var name = LineEdit.new()
+		name.name = "Name%d" % player_id
+		name.text = setup_config.names[player_id]
+		name.max_length = Config.NAME_LIMIT
+		name.custom_minimum_size.x = 125
+		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name.tooltip_text = "%s · up to %d characters" % [Config.IDENTITIES[player_id], Config.NAME_LIMIT]
+		name.text_changed.connect(func(value):
+			setup_config.names[player_id] = Config.clean_name(value)
+			validate_setup())
+		row.add_child(name)
+		name_inputs[player_id] = name
 		var choice = OptionButton.new()
 		choice.name = "Controller%d" % player_id
-		choice.custom_minimum_size = Vector2(185, 36)
+		choice.custom_minimum_size = Vector2(165, 32)
 		for option in CONTROL_OPTIONS:
 			choice.add_item(option)
 		choice.select(CONTROL_OPTIONS.find(setup_controllers[player_id]))

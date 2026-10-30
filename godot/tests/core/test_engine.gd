@@ -51,7 +51,7 @@ func config_names() -> void:
 	config.names = ["abcdefghijklmnop", "ignored", " \t\n ", "A\u200bB"]
 	config.controllers = ["Human", "AI - Challenging", "Human", "Human"]
 	check(config.display_name(0) == "abcdefghijkl", "12 character names")
-	check(config.display_name(1) == "Crimson", "AI identity ignores custom name")
+	check(config.display_name(1) == "ignored", "AI custom name is independent of controller")
 	check(config.display_name(2) == "Emerald", "blank name fallback")
 	check(config.display_name(3) == "AB", "nonprintable name filtering")
 	var copy = config.copy()
@@ -195,8 +195,11 @@ func test_history_and_restart() -> bool:
 	var random_engine = GameEngine.new(random_config, random_source)
 	check(random_engine.state.current_player == order[control.randi_range(0, 3)], "random starter uses injected RNG")
 	for index in range(8):
+		var retained = random_engine.state.config.starting_player
 		random_engine.restart()
-		check(random_engine.state.current_player == order[control.randi_range(0, 3)], "restart rerolls starter")
+		check(random_engine.state.current_player == retained, "restart preserves chosen starter")
+		random_engine.play_again()
+		check(random_engine.state.current_player == order[control.randi_range(0, 3)], "Play Again rerolls starter")
 	engine.apply_action(move_action(0, Vector2i(4, 7)))
 	check(engine.set_paused(true).accepted, "pause through engine API")
 	check(engine.undo().accepted and engine.state.paused, "undo preserves current pause state")
