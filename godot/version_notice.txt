@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-beta.1
+Current version: 3.0-beta.2
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -493,6 +493,83 @@ Known limitations and next milestone
   not block import, rendering or regression verification.
 - No beta.2 graphical redesign was started.
 Next milestone: 3.0-beta.2 - Visual Overhaul
+
+VERSION 3.0-beta.2 - The Final Countdown
+Completion date: 2026-10-30
+Status: Implementation complete; Windows executable verification pending export templates
+
+Features
+- Added the official 5.8-second startup storyboard, converted to Godot-native Ogg
+  Theora without a runtime video dependency. Plays once per launch before Main Menu,
+  without Skip, with input blocked and music paused until completion. Missing or
+  failed playback uses a brief native logo fallback and an eight-second watchdog.
+- Versus setup is exactly Sapphire versus Crimson, two humans, editable names,
+  Default/Random starter and no countdown. Removed all controller/difficulty controls
+  there and normalize obsolete saved AI seats. Two-player AI remains in the engine.
+- Rise of the Machines uses independent saved preferences over the existing Versus
+  rules engine, initially migrating beta.1 shared Versus choices without losing AI. Blitz and Battle Royale retain all AI and timing choices unchanged.
+- Replaced scrolling setup with two-column player cards. Main, all setups, Settings,
+  How to Play, Pause and Victory fit a single page at supported sizes. Battle Royale
+  arranges Sapphire/Crimson above Emerald/Violet, with rules/actions always visible.
+- Added Display settings: Windowed, exclusive Fullscreen and Borderless Fullscreen;
+  monitor-filtered window sizes, Automatic/100/125/150 percent UI scale and VSync.
+  Window changes require Keep Changes within ten seconds or revert automatically.
+  Lost/minimized confirmation also reverts. Unconfirmed values are never saved.
+- UI scaling affects menus and HUD consistently, caps effective scale to fit a
+  1280 x 720 baseline, and preserves the selected preference. Windowed mode centers
+  within usable desktop space and fits missing/smaller monitor configurations safely.
+- Added concise How to Play covering jumps/diagonals, legal walls, goals, modes,
+  AI clock exemption and both Blitz timing branches. Added About/credits in Settings.
+- Application identity is Gridlock, with the existing official icon in PNG/ICO form.
+  First-launch camera is Classic; audio enabled, AI defaults Casual, Blitz Per Game
+  three minutes, scale Automatic and a suitable centered Windowed resolution.
+- Extended validated user settings with display preferences; retain the beta.1 file
+  location as a read-only migration source after the application-name correction.
+- Enabled rotating local Godot error logs with version/startup diagnostics and no
+  telemetry. Invalid match initialization logs an error and preserves the current game.
+
+Windows release preparation
+- Added Windows Desktop x86-64 preset, official icon, separate companion PCK,
+  excluded tests/Blender sources/tools, export helper, player README and notices.
+  The helper collects full third-party notices from the installed engine build and
+  packages the executable, resource pack and companion files into a ZIP only after
+  successful export. No blanket game license or invented credit was added.
+- Windows executable export was attempted but matching Godot 4.7.2 templates are
+  absent. No executable or playable Windows ZIP was generated or claimed tested.
+  See WINDOWS_RELEASE.md for exact build instructions and current validation status.
+
+Validation
+- Godot 4.7.2: 3367 core, 602 interaction, 232 match, 1736 AI, 2426 timing,
+  576 customization, 382 Blitz Edit, 294 beta UI and 525 release checks passed
+  (10140 total). All 12 AI matches completed. All three Classic fixture generators
+  pass --check. All 100 Pygame tests passed on Python 3.13.12 / Pygame 2.6.1.
+- D3D12/Forward+ renders cover all primary menus, game, pause, match Settings and
+  custom-name Victory at 1280 x 720, 1366 x 768, 1600 x 900, 1920 x 1080 and
+  native 2560 x 1440 fullscreen. All four UI scale choices were exercised.
+- All nine application settings survived reload in a separate Godot process.
+- Native exclusive/borderless fullscreen, window sizes, confirmation timeout rollback
+  and scaled pawn clicks/wall targeting in all three camera views passed. The
+  official intro completed automatically without skipping.
+- Generated dist/verification/Gridlock.pck and launched a smoke test against it
+  outside the project directory using the installed engine: intro, menu, human
+  match, models, audio, fonts and clean exit passed. Tests/Blender sources were
+  excluded. This verifies packaged resources, not a generated release executable.
+- Missing/corrupt startup media and invalid match initialization intentionally log
+  errors/warnings during negative tests; recovery and retained state passed.
+- Classic source/history, core gameplay/timing, Pathfinder algorithms, authored 3D
+  models/materials/lighting and camera positions remain unchanged.
+
+Known limitations and next milestone
+- Install matching Windows export templates, build and launch the executable outside
+  Godot before public distribution. Signing, SmartScreen behavior and clean-machine
+  driver/audio compatibility remain manual release checks.
+- Official minimum window size is 1280 x 720; smaller monitors get a fitted fallback
+  outside official UI support. Window resolution choices allow native decorations.
+- Placeholder audio and the existing exempt-AI no-legal-action stall remain. No new
+  pass/draw rule, online mode, records, neural AI or graphical overhaul was introduced.
+- Sandbox certificate, user-data and global editor-preference warnings can occur
+  during local verification; they do not indicate missing exported game resources.
+Next milestone: 3.0-rc.1 - Release Candidate
 
 Future releases
 Append each completed milestone here with actual dates and test results. Keep

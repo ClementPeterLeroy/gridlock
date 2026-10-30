@@ -24,6 +24,8 @@ func run() -> void:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
@@ -195,8 +197,11 @@ func test_setup() -> bool:
 		check(game.engine.state.snapshot() == before, "invalid setup cannot replace match")
 		game.ui.name_inputs[0].text = "Nova"
 		game.ui.name_inputs[0].text_changed.emit("Nova")
-		game.ui.controller_options[0].select(2)
-		game.ui.controller_options[0].item_selected.emit(2)
+		if mode == "Versus":
+			check(game.ui.controller_options.is_empty(), "Versus has no AI selectors")
+		else:
+			game.ui.controller_options[0].select(2)
+			game.ui.controller_options[0].item_selected.emit(2)
 		check(game.ui.setup_config.names[0] == "Nova" and not game.ui.start_button.disabled, "controller switch retains edited name")
 		game.ui.starter_option.select(1)
 		game.ui.starter_option.item_selected.emit(1)
@@ -219,7 +224,7 @@ func test_setup() -> bool:
 			game.ui.refresh_durations()
 			check(game.ui.setup_config.game_limit == 180 and not game.ui.start_button.disabled, "invalid remembered duration falls back and revalidates Start")
 		game.handle_ui_action("start")
-		check(game.engine.state.players[0].name == "Nova" and game.engine.state.players[0].controller == "AI - Challenging", "complete setup reaches authoritative engine")
+		check(game.engine.state.players[0].name == "Nova" and game.engine.state.players[0].controller == ("Human" if mode == "Versus" else "AI - Challenging"), "complete setup reaches authoritative engine")
 		check(game.ui.cards[0].name.text == "Nova", "custom AI name appears in compact HUD")
 		var active = game.engine.state.snapshot()
 		game.handle_ui_action("reset_preferences")

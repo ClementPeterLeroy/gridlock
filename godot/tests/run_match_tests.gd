@@ -26,6 +26,8 @@ func run() -> void:
 	root.size = Vector2i(1280, 900)
 	game = Scene.instantiate()
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
@@ -287,6 +289,8 @@ func test_responsive_cameras() -> bool:
 	root.add_child(viewport)
 	game = Scene.instantiate()
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.screen_transitions_enabled = false
 	viewport.add_child(game)
 	game.set_process(false)

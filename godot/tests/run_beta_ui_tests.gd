@@ -8,6 +8,8 @@ func run() -> void:
 	game = Scene.instantiate()
 	game.preferences_path = ""
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.live_timing = false
 	root.add_child(game)
 	await process_frame
@@ -112,7 +114,7 @@ func test_screen_transitions() -> bool:
 func test_settings_file() -> bool:
 	if FileAccess.file_exists(TEST_PATH): DirAccess.remove_absolute(TEST_PATH)
 	var settings = Settings.new(TEST_PATH)
-	check(settings.music_volume == 0.2 and settings.camera_view == "isometric", "missing settings file uses defaults")
+	check(settings.music_volume == 0.2 and settings.camera_view == "classic", "missing settings file uses defaults")
 	settings.music_volume = 0.73
 	settings.effects_volume = 0.12
 	settings.camera_transitions = false
@@ -131,7 +133,7 @@ func test_settings_file() -> bool:
 	file.set_value("settings", "camera_view", "invalid")
 	file.save(TEST_PATH)
 	loaded = Settings.new(TEST_PATH)
-	check(loaded.music_volume == 0.2 and loaded.effects_volume == 0.5 and loaded.camera_transitions and loaded.gameplay_animations and loaded.camera_view == "isometric", "invalid preferences safely fall back")
+	check(loaded.music_volume == 0.2 and loaded.effects_volume == 0.5 and loaded.camera_transitions and loaded.gameplay_animations and loaded.camera_view == "classic", "invalid preferences safely fall back")
 	settings.reset()
 	settings.save()
 	check(Settings.new(TEST_PATH).music_volume == 0.2, "Reset to Defaults persists")
@@ -154,7 +156,7 @@ func test_settings_controls() -> bool:
 	check(loaded.camera_view == "cinematic" and not loaded.camera_transitions and loaded.music_volume == 0.73, "UI changes persist to application file")
 	navigate("reset_settings")
 	check(game.audio.music_volume == 0.2 and game.audio.effects_volume == 0.5 and game.user_settings.camera_transitions and game.animations_enabled, "settings reset applies all defaults")
-	check(game.camera.position == game.camera_positions.isometric and game.preferences.path.is_empty(), "settings reset preserves match preference separation")
+	check(game.camera.position == game.camera_positions.classic and game.preferences.path.is_empty(), "settings reset preserves match preference separation")
 	game.user_settings.path = ""
 	navigate("settings_back")
 	return true
@@ -210,13 +212,15 @@ func test_resolutions() -> bool:
 	root.add_child(viewport)
 	game = Scene.instantiate()
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.preferences_path = ""
 	game.live_timing = false
 	game.screen_transitions_enabled = false
 	viewport.add_child(game)
 	game.set_process(false)
 	game.set_animations(false)
-	for size in [Vector2i(800, 600), Vector2i(1280, 720), Vector2i(1920, 1080)]:
+	for size in [Vector2i(1280, 720), Vector2i(1366, 768), Vector2i(1600, 900), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
 		viewport.size = size
 		var bounds = Rect2(Vector2.ZERO, Vector2(size))
 		game.show_main_menu()
@@ -231,9 +235,8 @@ func test_resolutions() -> bool:
 			for control in game.ui.setup_actions.find_children("*", "Button", true, false):
 				check(bounds.encloses(control.get_global_rect()), "setup actions always accessible " + str(size))
 			for control in game.ui.controller_options.values():
-				game.ui.setup_scroll.ensure_control_visible(control)
 				await process_frame
-				check(bounds.encloses(control.get_global_rect()), "scroll reveals complete controller selector " + str(size))
+				check(bounds.encloses(control.get_global_rect()), "complete controller selector visible without scrolling " + str(size))
 			navigate("main_menu")
 			navigate("settings")
 			await process_frame

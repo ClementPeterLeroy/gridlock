@@ -2,9 +2,10 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-beta.1 - UI & Menu Polish is implemented in `godot/`.
-Versus, Battle Royale, and Blitz support humans and Pathfinder AI, with Casual or
-Challenging difficulty per seat. Names, controller choices, and starting-player
+Gridlock v3.0-beta.2 - The Final Countdown is implemented in `godot/`.
+Versus is exclusively two local human players without a countdown. Battle Royale,
+Blitz and Rise of the Machines support Pathfinder AI with Casual or Challenging
+difficulty per seat. Rise reuses the existing two-player engine with separate preferences. Names, controller choices, and starting-player
 preferences are customizable and saved locally. Versus is untimed; Battle Royale
 offers Per Turn or Per Game clocks. Blitz also offers both timer types; its Per Game
 penalties and overtime preserve Classic behavior. AI turns consume no countdown time.
@@ -12,7 +13,10 @@ The compact HUD,
 pause/settings, animations, audio, and victory/replay remain available.
 The graphite/gold main menu uses the official logo and hides the 3D board outside
 matches. Application settings now persist separately from match preferences.
-The next milestone is v3.0-beta.2 - Visual Overhaul.
+The official startup storyboard plays once per launch. Menus fit without scrolling
+at 1280 x 720 and above. Settings includes display modes, resolution, UI scale,
+VSync and a ten-second confirmation/rollback. How to Play explains the rules.
+Next: v3.0-rc.1 - Release Candidate; the graphical overhaul remains deferred.
 
 ## Repository layout
 
@@ -79,7 +83,8 @@ python pygame/tests/benchmark_battle_ai.py
 ## Godot development
 
 Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus, Battle Royale, Blitz, or Rise of the Machines.
-Rise opens the existing Versus setup with an AI seat; it adds no new rules.
+Versus has editable human names and no AI controls. Rise opens an AI-oriented
+two-player setup with separate preferences; it adds no new rules.
 Select Human, AI - Casual, or AI - Challenging for each seat before starting.
 Edit player names and choose Default or Random starter. Versus is always untimed.
 Battle Royale offers 15/30/60/120/180-second turns or 1/3/5/10/15-minute player
@@ -95,7 +100,9 @@ place a wall. R / right-click rotates; Esc pauses, including when a pawn is sele
 The top-left hamburger opens Settings, Pause, Restart Match, and Main Menu.
 Top-right cards show identity, walls, elapsed/countdown time, and Blitz overtime.
 Settings saves music/effects volumes, gameplay animations, camera transitions, and
-camera perspective in `user://user_settings.cfg`. Reset restores safe defaults.
+camera perspective, display mode, window resolution, UI scale and VSync in
+`user://user_settings.cfg`. Reset restores safe defaults. Display changes need
+confirmation before saving. First launch uses Classic camera and Windowed mode.
 Tab/arrows navigate menu controls; Enter activates; Escape returns or resumes.
 
 From the repository root, with the Godot executable available as `godot`:
@@ -109,6 +116,7 @@ godot --headless --path godot --script res://tests/run_timing_tests.gd
 godot --headless --path godot --script res://tests/run_customization_tests.gd
 godot --headless --path godot --script res://tests/run_blitz_edit_tests.gd
 godot --headless --path godot --script res://tests/run_beta_ui_tests.gd
+godot --headless --path godot --script res://tests/run_release_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
 python -B godot/tests/generate_timing_fixtures.py --check
@@ -118,3 +126,9 @@ See the [Godot development guide](godot/README.md) for the engine API, testing,
 known limitations, and roadmap. Godot release history lives in
 [`godot/version_notice.txt`](godot/version_notice.txt); Classic history remains
 in [`pygame/version_notice.txt`](pygame/version_notice.txt).
+
+Windows distribution: the x86-64 preset and packaging helper are ready. Matching
+Godot 4.7.2 export templates were unavailable during beta.2 verification, so no
+Windows executable or playable ZIP has been generated/tested here. See
+[Windows release instructions](godot/WINDOWS_RELEASE.md) for the exact command,
+companion-file layout, checks and outstanding release gates.

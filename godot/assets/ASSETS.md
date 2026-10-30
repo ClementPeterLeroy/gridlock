@@ -30,3 +30,22 @@ recording at a lower pitch; it is not a final bespoke wall-placement sound.
   SIL Open Font License. Cinzel and all existing victory artwork remain unchanged.
 
 Original Classic assets remain untouched. No new external dependency was added.
+
+## Beta.2 startup and application icon
+
+- `branding/gridlock_intro.ogv` converts the existing 960 x 540, 20 fps, 5.8-second
+  `pygame/content/px/gridlock_startup_storyboard.mp4` to Ogg Theora (`libtheora`,
+  quality 8, no audio). This preserves the official storyboard and uses Godot's
+  built-in decoder. No FFmpeg/Python runtime dependency ships with the game.
+- `branding/gridlock_icon.png` is an unmodified copy of the official Classic icon.
+  `gridlock_icon.ico` contains standard 16/32/48/64/128/256 pixel sizes converted
+  from that artwork for Windows resource branding. No replacement logo was drawn.
+
+Reproduce the development conversion with FFmpeg:
+
+```powershell
+ffmpeg -i pygame/content/px/gridlock_startup_storyboard.mp4 -an -c:v libtheora -q:v 8 godot/assets/branding/gridlock_intro.ogv
+```
+
+The Windows export helper packages the complete engine notices from the installed
+Godot build and the unchanged font licenses. No blanket game license is added.

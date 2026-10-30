@@ -8,6 +8,8 @@ const MatchInterface = preload("res://scripts/ui/match_interface.gd")
 const MatchAudio = preload("res://scripts/match_audio.gd")
 const MatchPreferences = preload("res://scripts/core/match_preferences.gd")
 const UserSettings = preload("res://scripts/user_settings.gd")
+const DisplaySettings = preload("res://scripts/display_settings.gd")
+const StartupSequence = preload("res://scripts/ui/startup_sequence.gd")
 const WallScene = preload("res://scenes/Wall.tscn")
 
 @export_enum("Versus", "Battle Royale") var board_mode: String = "Battle Royale"
@@ -40,6 +42,12 @@ var settings_path = UserSettings.DEFAULT_PATH
 var user_settings
 var applying_settings = false
 var screen_transitions_enabled = true
+var display
+var display_enabled = true
+var intro_enabled = true
+var intro_played = false
+var intro
+var intro_video_path = "res://assets/branding/gridlock_intro.ogv"
 var settings_return = "main_menu"
 var live_timing = true
 var elapsed_turns: Array:
@@ -50,6 +58,7 @@ var gameplay_tween: Tween
 var victory_shown = false
 
 func _ready() -> void:
+	if not settings_path.is_empty(): print("Gridlock ", ProjectSettings.get_setting("application/config/version"), " startup")
 	preferences = MatchPreferences.new(preferences_path)
 	user_settings = UserSettings.new(settings_path)
 	get_tree().auto_accept_quit = false
@@ -71,15 +80,28 @@ func _ready() -> void:
 	ui.animations_changed.connect(set_animations)
 	ui.camera_transitions_changed.connect(set_camera_transitions)
 	ui.camera_view_changed.connect(set_camera_view)
+	ui.display_changed.connect(change_display)
 	ui.transition_started.connect(refresh_timing_gate)
 	ui.transition_finished.connect(refresh_timing_gate)
 	audio = MatchAudio.new()
 	add_child(audio)
+	display = DisplaySettings.new()
+	add_child(display)
+	display.initialize(user_settings, get_window(), display_enabled and get_viewport() == get_tree().root)
+	ui.display_manager = display
+	display.changed.connect(func(): ui.show_display_confirmation(display.remaining))
+	display.confirmation_finished.connect(func(_kept):
+		ui.hide_display_confirmation()
+		if view == "settings": ui.show_page("settings"))
 	apply_user_settings()
 	start_match()
 	show_main_menu()
+	if intro_enabled: play_intro()
 
 func start_match(options = null) -> void:
+	if options != null and not options.resolved().validation_error().is_empty():
+		push_error("Match initialization rejected invalid configuration; keeping current match.")
+		return
 	if ai != null:
 		ai.cancel()
 	cancel_transition()
@@ -226,6 +248,9 @@ func apply_preview_material(node: Node) -> void:
 		apply_preview_material(child)
 
 func _process(delta: float) -> void:
+	if display != null and display.pending:
+		if ui.confirmation_overlay == null or not ui.confirmation_overlay.is_visible_in_tree(): display.revert()
+		else: ui.show_display_confirmation(display.remaining)
 	if controller == null:
 		return
 	if scene_turn != turn_token():
@@ -325,7 +350,8 @@ func update_hud() -> void:
 			ui.feedback.text += "  " + engine.state.timing_notice
 
 func handle_ui_action(action: String) -> void:
-	if view == "closing" or ui.transitioning: return
+	if view in ["closing", "intro"] or ui.transitioning: return
+	if display.pending and action not in ["keep_display", "revert_display", "exit"]: return
 	match action:
 		"menu":
 			ui.menu.visible = not ui.menu.visible
@@ -333,19 +359,22 @@ func handle_ui_action(action: String) -> void:
 			update_interaction_visuals()
 		"setup_versus", "setup_battle", "setup_blitz", "setup_ai":
 			var mode = {"setup_versus": "Versus", "setup_battle": "Battle Royale", "setup_blitz": "Blitz", "setup_ai": "Versus"}[action]
-			ui.setup_config = preferences.configs[mode].copy()
+			ui.setup_entry = "Rise of the Machines" if action == "setup_ai" else mode
+			ui.setup_config = preferences.configs[ui.setup_entry].copy()
 			ui.setup_heading = "Rise of the Machines" if action == "setup_ai" else ""
+			if action == "setup_versus": ui.setup_config.controllers.fill("Human")
 			if action == "setup_ai" and ui.setup_config.controllers.all(func(c): return c == "Human"):
 				ui.setup_config.controllers[1] = "AI - Casual"
 			show_screen("setup")
 		"start":
 			if not ui.validate_setup(): return
+			if ui.setup_entry == "Versus": ui.setup_config.controllers.fill("Human")
 			persist_setup()
 			start_match(ui.setup_config)
 		"reset_preferences":
 			preferences.reset()
 			save_preferences()
-			ui.setup_config = preferences.configs[ui.setup_mode].copy()
+			ui.setup_config = preferences.configs[ui.setup_entry].copy()
 			if view == "setup": ui.show_page("setup")
 		"pause":
 			pause_match(not engine.state.paused)
@@ -373,10 +402,19 @@ func handle_ui_action(action: String) -> void:
 				set_match_paused(false)
 			show_screen(settings_return)
 		"reset_settings":
+			var old_mode = user_settings.display_mode
+			var old_resolution = user_settings.window_resolution
 			user_settings.reset()
+			user_settings.display_mode = old_mode
+			user_settings.window_resolution = old_resolution
 			apply_user_settings()
+			display.apply_window()
 			save_user_settings()
 			ui.show_page("settings")
+			display.propose("Windowed", Vector2i(1280, 720))
+		"how_to_play": show_screen("how_to_play")
+		"keep_display": display.confirm()
+		"revert_display": display.revert()
 		"exit":
 			_notification(NOTIFICATION_WM_CLOSE_REQUEST)
 
@@ -411,7 +449,7 @@ func show_main_menu() -> void:
 
 func persist_setup() -> void:
 	if ui.validate_setup():
-		preferences.remember(ui.setup_config)
+		preferences.remember(ui.setup_config, ui.setup_entry)
 		save_preferences()
 
 func save_preferences() -> void:
@@ -462,9 +500,16 @@ func handle_escape() -> void:
 		"game": pause_match(true)
 		"pause": pause_match(false)
 		"settings": handle_ui_action("settings_back")
-		"setup": show_main_menu()
+		"setup", "how_to_play": show_main_menu()
 
 func _input(event) -> void:
+	if view == "intro":
+		get_viewport().set_input_as_handled()
+		return
+	if display != null and display.pending and event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		display.revert()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if not ui.transitioning: handle_escape()
 		get_viewport().set_input_as_handled()
@@ -484,7 +529,7 @@ func _notification(what: int) -> void:
 		get_tree().quit()
 
 func _unhandled_input(event) -> void:
-	if ui.transitioning: return
+	if view == "intro" or ui.transitioning or display.pending: return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_1, KEY_2, KEY_3:
@@ -569,3 +614,31 @@ func set_camera_view(view_name: String, animate: bool = true):
 		target_rotation,
 		0.8
 	)
+
+func play_intro() -> void:
+	if intro_played: return
+	intro_played = true
+	show_screen("intro")
+	ui.finish_screen_transition()
+	intro = StartupSequence.new()
+	intro.video_path = intro_video_path
+	ui.add_child(intro)
+	audio.music.stream_paused = true
+	intro.completed.connect(func():
+		intro = null
+		audio.music.stream_paused = false
+		if view != "closing": show_main_menu())
+
+func change_display(field: String, value) -> void:
+	if display.pending: return
+	match field:
+		"mode": display.propose(value, display.current.resolution)
+		"resolution": display.propose(display.current.mode, value)
+		"scale":
+			user_settings.ui_scale = value
+			display.update_scale()
+			save_user_settings()
+		"vsync":
+			user_settings.vsync = value
+			display.apply_vsync()
+			save_user_settings()

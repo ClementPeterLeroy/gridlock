@@ -9,6 +9,8 @@ func run() -> void:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""

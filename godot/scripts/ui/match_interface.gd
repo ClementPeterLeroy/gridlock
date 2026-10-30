@@ -6,6 +6,7 @@ signal volume_changed(category: String, value: float)
 signal animations_changed(enabled: bool)
 signal camera_transitions_changed(enabled: bool)
 signal camera_view_changed(view: String)
+signal display_changed(field: String, value)
 signal transition_started
 signal transition_finished
 
@@ -51,7 +52,12 @@ var starter_option: OptionButton
 var name_inputs: Dictionary = {}
 var setup_error: Label
 var start_button: Button
-var setup_scroll: ScrollContainer
+var setup_scroll: ScrollContainer # Kept null; primary menus no longer scroll.
+var setup_entry = "Versus"
+var display_manager
+var display_options: Dictionary = {}
+var confirmation_overlay: ColorRect
+var confirmation_label: Label
 var setup_actions: VBoxContainer
 var timeout_text: Label
 var winner_text: Label
@@ -85,7 +91,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hamburger = button("☰", "menu")
+	hamburger = button("\u2630", "menu")
 	hamburger.tooltip_text = "Match menu (Esc pauses)"
 	hamburger.position = Vector2(14, 14)
 	hamburger.custom_minimum_size = Vector2(44, 40)
@@ -193,7 +199,7 @@ func build_cards(state) -> void:
 		var name_label = label(player.name, 15)
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		name_label.tooltip_text = player.name + " · " + player.identity + " · " + player.controller
+		name_label.tooltip_text = player.name + "  |  " + player.identity + "  |  " + player.controller
 		row.add_child(name_label)
 		var details = HBoxContainer.new()
 		column.add_child(details)
@@ -263,13 +269,9 @@ func layout_hud() -> void:
 	feedback.position = Vector2(16, size.y - 32)
 	feedback.size = Vector2(maxf(0, size.x - 32), 24)
 	if page_panel != null:
-		page_panel.custom_minimum_size.x = minf(500, size.x - 32)
-	if setup_scroll != null:
-		var content_height = setup_scroll.get_child(0).get_combined_minimum_size().y
-		var footer_height = setup_actions.get_combined_minimum_size().y if setup_actions != null else 0.0
-		setup_scroll.custom_minimum_size.y = minf(content_height, maxf(120, size.y - 80 - footer_height))
+		page_panel.custom_minimum_size.x = minf(1000 if page in ["setup", "settings", "how_to_play"] else 540, size.x - 32)
 	if logo != null:
-		logo.custom_minimum_size = Vector2(minf(380, size.x - 80), minf(180, size.y * 0.24))
+		logo.custom_minimum_size = Vector2(minf(380, size.x - 80), minf(150, size.y * 0.21))
 	if victory_art != null:
 		var art_width = minf(480, minf(size.x - 72, maxf(80, size.y - 150) * 900.0 / 520.0))
 		victory_art.custom_minimum_size = Vector2(art_width, art_width * 520.0 / 900.0)
@@ -348,18 +350,8 @@ func show_page(value: String, state = null) -> void:
 	center.add_child(page_panel)
 	var column = VBoxContainer.new()
 	column.add_theme_constant_override("separation", 12)
-	if value == "setup":
-		var stack = VBoxContainer.new()
-		page_panel.add_child(stack)
-		setup_scroll = ScrollContainer.new()
-		setup_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		setup_scroll.follow_focus = true
-		stack.add_child(setup_scroll)
-		setup_scroll.add_child(column)
-		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		column.add_theme_constant_override("separation", 4)
-	else:
-		page_panel.add_child(column)
+	page_panel.add_child(column)
+	column.add_theme_constant_override("separation", 8)
 	match value:
 		"main_menu":
 			logo = TextureRect.new()
@@ -381,7 +373,7 @@ func show_page(value: String, state = null) -> void:
 			var secondary = HBoxContainer.new()
 			secondary.add_theme_constant_override("separation", 12)
 			column.add_child(secondary)
-			for item in [["Settings", "settings"], ["Exit Game", "exit"]]:
+			for item in [["Settings", "settings"], ["How to Play", "how_to_play"], ["Exit Game", "exit"]]:
 				var control = button(item[0], item[1])
 				control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				secondary.add_child(control)
@@ -390,21 +382,29 @@ func show_page(value: String, state = null) -> void:
 			column.add_child(version)
 		"setup":
 			column.add_child(label(setup_heading if not setup_heading.is_empty() else setup_mode, 26))
-			var text = "4 players · 5 walls each" if setup_mode == "Battle Royale" else "2 players · 10 walls each"
-			if not setup_heading.is_empty(): text = setup_mode + " · " + text
+			var text = "4 players  |  5 walls each" if setup_mode == "Battle Royale" else "2 players  |  10 walls each"
+			if not setup_heading.is_empty(): text = setup_mode + "  |  " + text
 			column.add_child(label(text, 16))
 			column.add_child(section_label("Players"))
 			add_controller_options(column)
 			column.add_child(section_label("Match Rules"))
-			starter_option = setup_dropdown(column, "Starting player", ["Default", "Random"])
+			var rules = HBoxContainer.new()
+			column.add_child(rules)
+			var starter_column = VBoxContainer.new()
+			starter_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			rules.add_child(starter_column)
+			starter_option = setup_dropdown(starter_column, "Starting player", ["Default", "Random"])
 			starter_option.select(1 if setup_config.random_start else 0)
 			starter_option.item_selected.connect(func(index): setup_config.random_start = index == 1)
-			add_timing_option(column)
+			var timer_column = VBoxContainer.new()
+			timer_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			rules.add_child(timer_column)
+			add_timing_option(timer_column)
 			setup_error = label("", 13)
 			setup_error.add_theme_color_override("font_color", Color("#EF7770"))
 			setup_actions = VBoxContainer.new()
 			setup_actions.add_theme_constant_override("separation", 8)
-			setup_scroll.get_parent().add_child(setup_actions)
+			column.add_child(setup_actions)
 			setup_actions.add_child(section_label("Actions"))
 			setup_actions.add_child(setup_error)
 			start_button = button("Start Match", "start")
@@ -424,16 +424,27 @@ func show_page(value: String, state = null) -> void:
 			column.add_child(button("Restart Match", "restart"))
 			column.add_child(button("Main Menu", "main_menu"))
 		"settings":
-			column.add_child(label("Settings", 26))
-			add_volume(column, "Music", "music", music_volume)
-			add_volume(column, "Sound Effects", "effects", effects_volume)
-			add_toggle(column, "Gameplay animations", "animations", animations_enabled, animations_changed.emit)
-			add_toggle(column, "Camera transitions", "camera_transitions", camera_transitions_enabled, camera_transitions_changed.emit)
-			camera_option = setup_dropdown(column, "Camera perspective", ["Classic", "Isometric", "Cinematic"])
-			camera_option.select(["classic", "isometric", "cinematic"].find(preferred_camera))
-			camera_option.item_selected.connect(func(index): camera_view_changed.emit(["classic", "isometric", "cinematic"][index]))
-			column.add_child(button("Reset to Defaults", "reset_settings"))
-			column.add_child(button("Back", "settings_back"))
+			build_settings(column)
+		"how_to_play":
+			column.add_child(label("How to Play", 28))
+			var sections = GridContainer.new()
+			sections.columns = 2
+			sections.add_theme_constant_override("h_separation", 24)
+			sections.add_theme_constant_override("v_separation", 12)
+			column.add_child(sections)
+			for entry in [
+				["Objective & victory", "Reach your opposite edge first. Turns proceed clockwise.\nTimeouts use the selected mode's existing elimination rules."],
+				["Movement", "Click your pawn, then a green tile. Move orthogonally.\nJump an adjacent pawn if the landing and steps are clear.\nIf a wall, edge or pawn blocks the landing, step diagonally\nto a free, unblocked side of that pawn."],
+				["Walls", "Place a wall instead of moving. R / right-click rotates.\nWalls cannot overlap, cross, or remove any player's last\npath to their goal. Click your pawn to see legal moves."],
+				["Versus & Rise of the Machines", "Versus: two local humans, no countdown.\nRise of the Machines: two-player AI-focused setup,\nusing the same movement and wall rules."],
+				["Battle Royale", "Four players, optional AI, five walls each. Choose a\nPer Turn or Per Game clock. Timed-out seats are removed;\ntheir placed walls remain. AI countdowns are exempt."],
+				["Blitz", "Two players, optional AI. Per Turn resets each turn.\nPer Game grants a 10s turn-start minimum; clock expiry\ncosts a wall and grants one 15s overtime per turn.\nExpiry with no walls, or overtime expiry, loses.\nAI countdowns are exempt."]]:
+				var section = VBoxContainer.new()
+				sections.add_child(section)
+				section.add_child(section_label(entry[0]))
+				section.add_child(label(entry[1], 16))
+			column.add_child(label("Esc: pause / back   |   1 / 2 / 3: camera   |   Tab / arrows / Enter: menu navigation", 15))
+			column.add_child(button("Back", "main_menu"))
 		"victory":
 			add_victory_art(column, state)
 			if state.timeout_player >= 0 and state.result_reason != "goal_reached":
@@ -546,34 +557,42 @@ func validate_setup() -> bool:
 	return error.is_empty()
 
 func add_controller_options(column: VBoxContainer) -> void:
-	var order = [0, 2, 1, 3] if setup_mode == "Battle Royale" else [0, 1]
+	var grid = GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 16)
+	grid.add_theme_constant_override("v_separation", 10)
+	column.add_child(grid)
+	var order = [0, 1, 2, 3] if setup_mode == "Battle Royale" else [0, 1]
 	for player_id in order:
-		var row = HBoxContainer.new()
-		column.add_child(row)
+		var panel = PanelContainer.new()
+		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		panel.custom_minimum_size.x = 460
+		panel.add_theme_stylebox_override("panel", panel_style())
+		grid.add_child(panel)
+		var fields = VBoxContainer.new()
+		panel.add_child(fields)
 		var identity = label(ART_NAMES[player_id].capitalize(), 16)
-		identity.add_theme_color_override("font_color", COLORS[player_id].lightened(0.25))
-		identity.custom_minimum_size.x = 76
-		row.add_child(identity)
+		identity.add_theme_color_override("font_color", COLORS[player_id].lightened(0.4))
+		fields.add_child(identity)
 		var name = LineEdit.new()
 		name.name = "Name%d" % player_id
 		name.text = setup_config.names[player_id]
 		name.max_length = Config.NAME_LIMIT
-		name.custom_minimum_size.x = 125
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name.tooltip_text = "%s · up to %d characters" % [Config.IDENTITIES[player_id], Config.NAME_LIMIT]
+		name.custom_minimum_size = Vector2(125, 38)
+		name.tooltip_text = "%s ? up to %d characters" % [Config.IDENTITIES[player_id], Config.NAME_LIMIT]
 		name.text_changed.connect(func(value):
 			setup_config.names[player_id] = Config.clean_name(value)
 			validate_setup())
-		row.add_child(name)
+		fields.add_child(name)
 		name_inputs[player_id] = name
+		if setup_entry == "Versus": continue
 		var choice = OptionButton.new()
 		choice.name = "Controller%d" % player_id
-		choice.custom_minimum_size = Vector2(165, 32)
-		for option in CONTROL_OPTIONS:
-			choice.add_item(option)
+		choice.custom_minimum_size = Vector2(165, 36)
+		for option in CONTROL_OPTIONS: choice.add_item(option)
 		choice.select(CONTROL_OPTIONS.find(setup_controllers[player_id]))
 		choice.item_selected.connect(func(index): setup_controllers[player_id] = CONTROL_OPTIONS[index])
-		row.add_child(choice)
+		fields.add_child(choice)
 		controller_options[player_id] = choice
 
 func add_volume(column: VBoxContainer, text: String, category: String, value: float) -> void:
@@ -610,3 +629,87 @@ func add_victory_art(column: VBoxContainer, state) -> void:
 	winner_text.position = Vector2(width * 172.0 / 540.0, art.custom_minimum_size.y * 256.0 / 312.0)
 	winner_text.size = Vector2(width * 196.0 / 540.0, art.custom_minimum_size.y * 29.0 / 312.0)
 	art.add_child(winner_text)
+
+func build_settings(column: VBoxContainer) -> void:
+	column.add_child(label("Settings", 28))
+	var grid = HBoxContainer.new()
+	grid.add_theme_constant_override("separation", 30)
+	column.add_child(grid)
+	var audio_column = VBoxContainer.new()
+	var display_column = VBoxContainer.new()
+	for side in [audio_column, display_column]:
+		side.custom_minimum_size.x = 465
+		side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(side)
+	audio_column.add_child(section_label("Audio & presentation"))
+	add_volume(audio_column, "Music", "music", music_volume)
+	add_volume(audio_column, "Sound Effects", "effects", effects_volume)
+	add_toggle(audio_column, "Gameplay animations", "animations", animations_enabled, animations_changed.emit)
+	add_toggle(audio_column, "Camera transitions", "camera_transitions", camera_transitions_enabled, camera_transitions_changed.emit)
+	camera_option = setup_dropdown(audio_column, "Camera", ["Classic", "Isometric", "Cinematic"])
+	camera_option.select(["classic", "isometric", "cinematic"].find(preferred_camera))
+	camera_option.item_selected.connect(func(index): camera_view_changed.emit(["classic", "isometric", "cinematic"][index]))
+	display_column.add_child(section_label("Display"))
+	display_options.clear()
+	if display_manager != null:
+		var settings = display_manager.settings
+		var modes = settings.DISPLAY_MODES
+		var mode = setup_dropdown(display_column, "Mode", modes)
+		mode.select(modes.find(display_manager.current.mode))
+		mode.item_selected.connect(func(index): display_changed.emit("mode", modes[index]))
+		display_options.mode = mode
+		var values = display_manager.available_resolutions()
+		var names = values.map(func(size): return "%d x %d" % [size.x, size.y])
+		var resolution = setup_dropdown(display_column, "Resolution", names)
+		resolution.select(values.find(display_manager.current.resolution))
+		resolution.disabled = display_manager.current.mode != "Windowed"
+		resolution.item_selected.connect(func(index): display_changed.emit("resolution", values[index]))
+		display_options.resolution = resolution
+		var scale = setup_dropdown(display_column, "UI Scale", settings.SCALES)
+		scale.select(settings.SCALES.find(settings.ui_scale))
+		scale.item_selected.connect(func(index): display_changed.emit("scale", settings.SCALES[index]))
+		display_options.scale = scale
+		var vsync = setup_dropdown(display_column, "VSync", ["On", "Off"])
+		vsync.select(0 if settings.vsync else 1)
+		vsync.item_selected.connect(func(index): display_changed.emit("vsync", index == 0))
+		display_options.vsync = vsync
+		display_column.add_child(label("Scale is capped to keep every menu on screen.\nThe selected preference is retained.", 14))
+	column.add_child(section_label("About"))
+	column.add_child(label("Gridlock | " + str(ProjectSettings.get_setting("application/config/version")) + " | ClementPeterLeroy\nGodot Engine (MIT) | Lato / Cinzel (SIL OFL). See bundled third-party notices.", 14))
+	var actions = HBoxContainer.new()
+	column.add_child(actions)
+	for entry in [["Reset to Defaults", "reset_settings"], ["Back", "settings_back"]]:
+		var control = button(entry[0], entry[1])
+		control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		actions.add_child(control)
+
+func show_display_confirmation(seconds: float) -> void:
+	if confirmation_overlay == null:
+		confirmation_overlay = ColorRect.new()
+		confirmation_overlay.color = Color(0, 0, 0, 0.85)
+		confirmation_overlay.theme = ui_theme
+		add_child(confirmation_overlay)
+		confirmation_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var center = CenterContainer.new()
+		confirmation_overlay.add_child(center)
+		center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var panel = PanelContainer.new()
+		panel.add_theme_stylebox_override("panel", panel_style())
+		center.add_child(panel)
+		var column = VBoxContainer.new()
+		panel.add_child(column)
+		confirmation_label = label("", 22)
+		column.add_child(confirmation_label)
+		var keep = button("Keep Changes", "keep_display")
+		column.add_child(keep)
+		var revert = button("Revert", "revert_display")
+		column.add_child(revert)
+		revert.grab_focus()
+	confirmation_label.text = "Keep this display configuration? Reverting in %d seconds." % ceili(seconds)
+
+func hide_display_confirmation() -> void:
+	if confirmation_overlay != null:
+		remove_child(confirmation_overlay)
+		confirmation_overlay.queue_free()
+		confirmation_overlay = null
+		confirmation_label = null

@@ -37,6 +37,8 @@ func run() -> void:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
 	game.settings_path = ""
+	game.intro_enabled = false
+	game.display_enabled = false
 	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
@@ -226,7 +228,7 @@ func test_complete_matches() -> bool:
 
 func test_setup() -> bool:
 	for mode in ["Versus", "Battle Royale"]:
-		game.handle_ui_action("setup_versus" if mode == "Versus" else "setup_battle")
+		game.handle_ui_action("setup_ai" if mode == "Versus" else "setup_battle")
 		await process_frame
 		var count = 2 if mode == "Versus" else 4
 		check(game.ui.controller_options.size() == count, "one controller selector per participating seat")

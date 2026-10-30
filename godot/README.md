@@ -1,17 +1,22 @@
-# Gridlock v3.0-beta.1 - UI & Menu Polish
+# Gridlock v3.0-beta.2 - The Final Countdown
 
-Godot 4.7.2 / GDScript. Human and Pathfinder AI matches in Versus, Battle Royale, and Blitz,
+Godot 4.7.2 / GDScript. Human Versus and configurable Pathfinder AI matches in
+Battle Royale, Blitz and Rise of the Machines,
 with the approved Design B compact HUD. The original rules, models, materials,
 lighting, and camera presets are preserved.
 
 ## Play a match
 
 Open `project.godot` in Godot and run the project. Choose a mode in the main menu,
-then select each seat's controller and confirm Start Match. Each seat independently
-offers Human, AI - Casual, or AI - Challenging, including fully automated matches.
-Direct mode setup defaults to all Human. Rise of the Machines opens the existing
-Versus preferences and seeds a Casual AI opponent if every seat is Human; existing
-AI selections are retained. Battle Royale AI remains configurable per seat. Versus uses Sapphire/Crimson and ten walls each.
+then edit names and confirm Start Match. The official 5.8-second startup storyboard
+plays once before Main Menu, with no Skip and no input until completion. Missing or
+corrupt video falls back to a native logo animation with bounded recovery.
+Versus is human-only: Sapphire and Crimson, no controller/difficulty dropdowns and
+no countdown. Obsolete saved Versus AI seats are normalized. Blitz and Battle Royale
+independently offer Human, AI - Casual or AI - Challenging per seat, including fully
+automated matches. Rise of the Machines uses the existing two-player rules with
+independent saved names/controllers and defaults to a Casual AI opponent; it does
+not create another rules engine. Direct other-mode setups default to all Human. Versus uses Sapphire/Crimson and ten walls each.
 Battle Royale uses four players, five walls each, and clockwise turns:
 Sapphire, Emerald, Crimson, Violet. Every seat, including AI, accepts a custom name
 of up to twelve printable characters. Empty names block Start; control characters
@@ -125,9 +130,12 @@ Settings provides Music and Sound Effects volume sliders, separate Gameplay
 animations and Camera transitions toggles, a Camera perspective dropdown, Reset to
 Defaults, and Back. Changes apply immediately and persist in
 `user://user_settings.cfg` through `scripts/user_settings.gd`. Defaults are 20% music,
-50% effects, both animation toggles enabled, and Isometric camera. Missing, malformed,
+50% effects, both animation toggles enabled, and Classic camera. Missing, malformed,
 out-of-range or unsupported fields fall back independently to defaults. This file
-contains only application settings, never match setup, clocks or live state. Reset
+also stores display mode, window resolution, UI scale and VSync, never match setup,
+clocks or live state. When the application name changes from GridLock_3D to Gridlock,
+the old user-data folder is read only as a migration source if the new file is absent;
+the source is never overwritten. Other modes retain their AI preferences. Reset
 does not change match preferences. Music loops quietly across screens and matches. Movement, wall placement, and victory reuse Classic placeholder audio;
 the wall effect is the move recording at a lower pitch. Audio is not final.
 The Dummy audio backend stays silent during headless runs or when no device is
@@ -141,8 +149,11 @@ only walls in the authoritative state are rendered as permanent walls.
 
 `game.gd` centrally owns screen changes and timing/input gates. The main menu and
 match setup use opaque graphite pages with the official transparent logo and gold
-focus accents. Setup groups Players, Match Rules and Actions: fields scroll and
-follow keyboard focus, while Start/Back/Reset remain outside the scroll area.
+focus accents. Setup groups Players, Match Rules and Actions without scrolling. Compact player
+cards use two columns; four-seat order is Sapphire/Crimson over Emerald/Violet.
+All names, controller selectors, rules and Start/Back/Reset are visible together.
+Settings uses two columns for presentation/audio and Display. How to Play is a
+single-page rules reference available from Main Menu; About credits are in Settings.
 
 The scene's existing Node3D root hides the entire 3D presentation in Main Menu, Setup,
 and main-menu Settings. Its separate CanvasLayer remains visible. Game, Pause,
@@ -152,10 +163,31 @@ activation and clock consumption until completion, with only one page tree alive
 It is independent of the gameplay-animation preference. Victory keeps the existing
 sticker/custom banner and exactly Play Again / Main Menu.
 
-The responsive UI uses an 800 x 600 logical baseline and opens at 1280 x 720.
-Canvas-item stretching preserves proportions with expanding aspect; compact HUD
-cards wrap into two columns at narrow sizes. Native fullscreen rendering was checked
-at 2560 x 1440; this patch does not add a fullscreen settings control.
+The responsive UI uses a 1280 x 720 logical baseline and minimum officially supported
+window. Supported target sizes: 1280 x 720, 1366 x 768, 1600 x 900, 1920 x 1080,
+2560 x 1440. Smaller desktops receive a safe fitted fallback outside UI support.
+Windowed sizes are filtered by usable monitor area with room for native decorations.
+Full-screen modes use the monitor; their resolution dropdown is disabled.
+
+`scripts/display_settings.gd` owns native Windowed, exclusive Fullscreen and
+Borderless Fullscreen modes with non-conflicting flags, centering, resolution
+filtering and VSync. Each mode/resolution proposal shows Keep Changes / Revert with
+a ten-second countdown. Expiry, minimized/hidden window or loss of the confirmation
+automatically restores the last confirmed configuration. Only Keep writes those
+preferences. Reset also requires confirmation when it changes the display.
+
+UI Scale offers Automatic, 100%, 125%, 150%. Automatic scales proportionally from
+1280 x 720; fixed percentages apply to all CanvasItems, including HUD and text.
+The effective scale is capped to preserve the minimum logical workspace, keeping
+the requested preference unchanged. Existing 3D camera positions/rendering are
+preserved. Display changes do not restart the game, clocks or AI.
+
+Godot writes rotating local logs to `user://logs/gridlock.log` with version/startup,
+resource errors and rejected critical initialization, without telemetry or player
+names in added diagnostics. Tests inject blank/isolated settings paths and disable
+native window changes and startup except where those systems are under test.
+
+See [Windows release guide](WINDOWS_RELEASE.md) for export status and instructions.
 
 ## Interaction architecture
 
@@ -331,6 +363,7 @@ godot --headless --path godot --script res://tests/run_timing_tests.gd
 godot --headless --path godot --script res://tests/run_customization_tests.gd
 godot --headless --path godot --script res://tests/run_blitz_edit_tests.gd
 godot --headless --path godot --script res://tests/run_beta_ui_tests.gd
+godot --headless --path godot --script res://tests/run_release_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
 python -B godot/tests/generate_timing_fixtures.py --check
@@ -354,8 +387,8 @@ ordering, all four victory stickers, responsive layouts, and complete opening-to
 matches with replay. Existing board regression checks run with animations disabled
 to isolate targeting/synchronization; match tests also verify enabled transitions.
 
-Validation for beta.1: 3367 core checks, 602 interaction checks, 232 match checks,
-1736 AI checks, 2426 timing checks, 575 customization checks, 382 Blitz Edit checks, and 226 beta UI checks (9546 total)
+Validation for beta.2: 3367 core checks, 602 interaction checks, 232 match checks,
+1736 AI checks, 2426 timing checks, 576 customization checks, 382 Blitz Edit checks, 294 beta UI checks and 525 release checks (10140 total)
 passed on Godot 4.7.2. Python parity fixtures
 matched the unchanged Classic implementation. The Pygame suite passed all 100 tests on Python 3.13.12 /
 Pygame 2.6.1.
@@ -412,7 +445,7 @@ are preserved. Regenerate with `python -B godot/tests/generate_ai_fixtures.py`.
 `run_beta_ui_tests.gd` checks real scene visibility, transition locks and timing
 gates, single-page navigation, settings validation/reset/persistence and live-state
 isolation, actual Tab/arrow/Enter/Escape events, selected-pawn pause, AI-oriented
-setup, victory actions, and layout at 800 x 600, 1280 x 720, and 1920 x 1080.
+setup, victory actions, and layout at all five supported resolutions.
 Older scene suites disable only page fades and disk writes for isolation; the beta
 suite exercises enabled fades deterministically. Separate processes verified all
 five saved settings reload; Exit Game completed a clean process shutdown.
@@ -453,8 +486,8 @@ Manual verification before wider release:
     saved durations. Let a human Per Turn clock expire (no penalty/overtime), then
     test Per Game penalties and overtime. Confirm AI shows Exempt throughout thinking
     in both types while the opposing human clock works normally.
-12. Navigate every page with Tab/arrows/Enter/Escape; scroll Setup dropdowns at
-    800 x 600, and check focus, hover and pointer placement at your display/DPI.
+12. Navigate every page with Tab/arrows/Enter/Escape; open all Setup dropdowns at
+    1280 x 720, and check focus, hover and pointer placement at your display/DPI.
     Visit Settings from Main Menu, Pause and gameplay, then return to each caller.
     Change both animation toggles, volumes and perspective, close/reopen, and reset.
     Check clean Exit Game and native fullscreen/windowed layouts on your monitor.
@@ -472,7 +505,7 @@ python -B godot/tests/generate_python_fixtures.py
 
 ## Limitations and next milestones
 
-- Replay storage, records, player-facing undo and the beta.2 visual overhaul remain
+- Replay storage, records, player-facing undo and the future visual overhaul remain
   deferred. Match preferences and application settings now persist separately.
 - Audio remains placeholder material, including the reused wall sound. Auditory
   quality and long human play sessions need manual verification.
@@ -486,7 +519,7 @@ python -B godot/tests/generate_python_fixtures.py
   material, and `Wall.tscn` contains a null wall-color override. Review separately
   without changing the imported ivory/walnut appearance.
 
-Next: **v3.0-beta.2 - Visual Overhaul**. This release does not begin that redesign.
+Next: **v3.0-rc.1 - Release Candidate**. The graphical overhaul remains deferred.
 Neural AI remains reserved for v3.1.
 
 ## Version workflow
@@ -497,3 +530,15 @@ must update its current-version line and release entry, then synchronize
 or a missing current release entry. Include completion date, features, fixes,
 limitations, actual verification, and next milestone. Do not rewrite the independent
 Classic history in `../pygame/version_notice.txt`.
+
+Beta.2 release verification: `run_release_tests.gd` covers startup/one-shot/fallback/
+corrupt video recovery, human-only Versus with retained AI engine support, separate
+Machines preferences, all single-page controls, confirmed display persistence,
+rollback/timeout/lost-dialog recovery, scale constraints, VSync, invalid preferences,
+smaller-monitor fallback, icon/version/resources and the Windows preset. Deliberate
+corrupt-media and invalid-match cases produce expected error/warning diagnostics.
+Native D3D12/Forward+ captures cover all primary screens at all five target sizes,
+all UI scales, exclusive/borderless fullscreen and timeout rollback. The official
+video completed automatically. The Windows executable export is blocked by missing
+matching templates; resource-pack export and outside-project smoke verification
+are separate checks and are not executable certification. See WINDOWS_RELEASE.md.
