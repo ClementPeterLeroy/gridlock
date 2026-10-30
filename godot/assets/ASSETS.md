@@ -19,3 +19,14 @@ The original models and their materials remain in `models/` unchanged.
 
 Audio remains development placeholder material. The wall sound reuses the move
 recording at a lower pitch; it is not a final bespoke wall-placement sound.
+
+## Beta.1 branding and interface font
+
+- `branding/gridlock_logo.png`: the original PNG payload extracted without pixel
+  changes from `pygame/content/px/gridlock_logo_transparent.svg`. Its alpha channel
+  is preserved; this is the official repository logo, not newly generated artwork.
+- `fonts/Lato-Regular.ttf` and `fonts/Lato-OFL.txt`: unmodified copies from
+  `pygame/content/fonts/`, used for readable menu and HUD text under their included
+  SIL Open Font License. Cinzel and all existing victory artwork remain unchanged.
+
+Original Classic assets remain untouched. No new external dependency was added.

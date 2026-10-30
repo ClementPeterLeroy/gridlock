@@ -4,6 +4,10 @@ extends CanvasLayer
 signal action_requested(action: String)
 signal volume_changed(category: String, value: float)
 signal animations_changed(enabled: bool)
+signal camera_transitions_changed(enabled: bool)
+signal camera_view_changed(view: String)
+signal transition_started
+signal transition_finished
 
 const COLORS = [Color("#345B9A"), Color("#A84343"), Color("#3E7955"), Color("#78529A")]
 const GOLD = Color("#F9D55E")
@@ -48,6 +52,7 @@ var name_inputs: Dictionary = {}
 var setup_error: Label
 var start_button: Button
 var setup_scroll: ScrollContainer
+var setup_actions: VBoxContainer
 var timeout_text: Label
 var winner_text: Label
 var victory_art: Control
@@ -58,9 +63,25 @@ var music_volume = 0.2
 var effects_volume = 0.5
 var animations_enabled = true
 var has_match = false
+var match_background_visible = false
+var screen_transitions_enabled = true
+var transitioning = false
+var screen_tween: Tween
+var transition_count = 0
+var input_shield: ColorRect
+var page_content: Control
+var logo: TextureRect
+var setup_heading = ""
+var camera_transitions_enabled = true
+var preferred_camera = "isometric"
+var settings_toggles: Dictionary = {}
+var camera_option: OptionButton
+var ui_theme: Theme
 
 func _ready() -> void:
+	ui_theme = make_theme()
 	hud = Control.new()
+	hud.theme = ui_theme
 	add_child(hud)
 	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -89,16 +110,37 @@ func _ready() -> void:
 	feedback.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(feedback)
 	overlay = ColorRect.new()
+	overlay.theme = ui_theme
 	overlay.color = Color(0.035, 0.03, 0.025, 0.76)
 	add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	input_shield = ColorRect.new()
+	input_shield.color = Color.TRANSPARENT
+	add_child(input_shield)
+	input_shield.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	input_shield.mouse_filter = Control.MOUSE_FILTER_STOP
+	input_shield.hide()
 	get_viewport().size_changed.connect(layout_hud)
-	show_page("main_menu")
+
+func make_theme() -> Theme:
+	var theme = Theme.new()
+	theme.default_font = load("res://assets/fonts/Lato-Regular.ttf")
+	theme.default_font_size = 16
+	for kind in ["Button", "OptionButton", "LineEdit"]:
+		theme.set_color("font_color", kind, Color("#E5E7EA"))
+		theme.set_color("font_hover_color", kind, Color("#FFF1C2"))
+		for state in ["normal", "hover", "pressed", "focus"]:
+			var style = panel_style()
+			style.bg_color = Color("#272C33") if state == "normal" else Color("#343A42")
+			style.border_color = Color("#BAA36B") if state in ["hover", "focus"] else Color("#42474E")
+			if state == "focus": style.set_border_width_all(2)
+			theme.set_stylebox(state, kind, style)
+	return theme
 
 func panel_style() -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.065, 0.06, 0.055, 0.86)
+	style.bg_color = Color(0.065, 0.075, 0.09, 0.94)
 	style.set_corner_radius_all(8)
 	style.set_content_margin_all(10)
 	style.set_border_width_all(1)
@@ -116,6 +158,7 @@ func button(text: String, action: String) -> Button:
 	item.name = action.to_pascal_case()
 	item.text = text
 	item.custom_minimum_size.y = 38
+	item.focus_mode = Control.FOCUS_ALL
 	item.pressed.connect(func(): action_requested.emit(action))
 	return item
 
@@ -223,7 +266,10 @@ func layout_hud() -> void:
 		page_panel.custom_minimum_size.x = minf(500, size.x - 32)
 	if setup_scroll != null:
 		var content_height = setup_scroll.get_child(0).get_combined_minimum_size().y
-		setup_scroll.custom_minimum_size.y = minf(content_height, maxf(160, size.y - 64))
+		var footer_height = setup_actions.get_combined_minimum_size().y if setup_actions != null else 0.0
+		setup_scroll.custom_minimum_size.y = minf(content_height, maxf(120, size.y - 80 - footer_height))
+	if logo != null:
+		logo.custom_minimum_size = Vector2(minf(380, size.x - 80), minf(180, size.y * 0.24))
 	if victory_art != null:
 		var art_width = minf(480, minf(size.x - 72, maxf(80, size.y - 150) * 900.0 / 520.0))
 		victory_art.custom_minimum_size = Vector2(art_width, art_width * 520.0 / 900.0)
@@ -238,7 +284,7 @@ func layout_hud() -> void:
 		winner_text.size = bounds
 
 func blocks_board(point: Vector2) -> bool:
-	if page != "game" or menu.visible:
+	if transitioning or page != "game" or menu.visible:
 		return true
 	if hamburger.get_global_rect().has_point(point):
 		return true
@@ -258,8 +304,11 @@ func set_animations(enabled: bool) -> void:
 			card.style.border_color = GOLD if card.active else Color(1, 1, 1, 0.07)
 
 func show_page(value: String, state = null) -> void:
+	var same_page = page == value and page_content != null
+	finish_screen_transition(false)
 	page = value
 	menu.hide()
+	overlay.color = Color(0.025, 0.03, 0.04, 0.74) if match_background_visible else Color("#15191F")
 	overlay.visible = value != "game"
 	hud.visible = value in ["game", "pause", "settings", "victory"] and has_match
 	hamburger.visible = value == "game"
@@ -279,22 +328,33 @@ func show_page(value: String, state = null) -> void:
 	start_button = null
 	setup_error = null
 	setup_scroll = null
+	setup_actions = null
 	timing_option = null
 	timeout_text = null
+	logo = null
+	settings_toggles.clear()
+	camera_option = null
 	if value == "game":
+		page_content = hud
+		begin_screen_transition(same_page)
 		return
 	var center = CenterContainer.new()
 	overlay.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	page_panel = PanelContainer.new()
 	page_panel.add_theme_stylebox_override("panel", panel_style())
+	if value == "main_menu":
+		page_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	center.add_child(page_panel)
 	var column = VBoxContainer.new()
 	column.add_theme_constant_override("separation", 12)
 	if value == "setup":
+		var stack = VBoxContainer.new()
+		page_panel.add_child(stack)
 		setup_scroll = ScrollContainer.new()
 		setup_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		page_panel.add_child(setup_scroll)
+		setup_scroll.follow_focus = true
+		stack.add_child(setup_scroll)
 		setup_scroll.add_child(column)
 		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		column.add_theme_constant_override("separation", 4)
@@ -302,43 +362,77 @@ func show_page(value: String, state = null) -> void:
 		page_panel.add_child(column)
 	match value:
 		"main_menu":
-			column.add_child(label("GRIDLOCK", 32))
-			column.add_child(label("Local matches · Human or Pathfinder AI", 16))
-			column.add_child(button("Versus", "setup_versus"))
-			column.add_child(button("Battle Royale", "setup_battle"))
-			column.add_child(button("Blitz", "setup_blitz"))
-			column.add_child(button("Settings", "settings"))
+			logo = TextureRect.new()
+			logo.texture = load("res://assets/branding/gridlock_logo.png")
+			logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			column.add_child(logo)
+			var modes = GridContainer.new()
+			modes.columns = 2
+			modes.add_theme_constant_override("h_separation", 12)
+			modes.add_theme_constant_override("v_separation", 12)
+			column.add_child(modes)
+			for item in [["Versus", "setup_versus"], ["Battle Royale", "setup_battle"], ["Blitz", "setup_blitz"], ["Rise of the Machines", "setup_ai"]]:
+				var choice = button(item[0], item[1])
+				choice.custom_minimum_size.y = 56
+				choice.custom_minimum_size.x = 230
+				choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				modes.add_child(choice)
+			var secondary = HBoxContainer.new()
+			secondary.add_theme_constant_override("separation", 12)
+			column.add_child(secondary)
+			for item in [["Settings", "settings"], ["Exit Game", "exit"]]:
+				var control = button(item[0], item[1])
+				control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				secondary.add_child(control)
+			var version = label(ProjectSettings.get_setting("application/config/version", ""), 12)
+			version.add_theme_color_override("font_color", Color("#939BA6"))
+			column.add_child(version)
 		"setup":
-			column.add_child(label(setup_mode, 26))
+			column.add_child(label(setup_heading if not setup_heading.is_empty() else setup_mode, 26))
 			var text = "4 players · 5 walls each" if setup_mode == "Battle Royale" else "2 players · 10 walls each"
+			if not setup_heading.is_empty(): text = setup_mode + " · " + text
 			column.add_child(label(text, 16))
+			column.add_child(section_label("Players"))
 			add_controller_options(column)
+			column.add_child(section_label("Match Rules"))
 			starter_option = setup_dropdown(column, "Starting player", ["Default", "Random"])
 			starter_option.select(1 if setup_config.random_start else 0)
 			starter_option.item_selected.connect(func(index): setup_config.random_start = index == 1)
 			add_timing_option(column)
 			setup_error = label("", 13)
 			setup_error.add_theme_color_override("font_color", Color("#EF7770"))
-			column.add_child(setup_error)
+			setup_actions = VBoxContainer.new()
+			setup_actions.add_theme_constant_override("separation", 8)
+			setup_scroll.get_parent().add_child(setup_actions)
+			setup_actions.add_child(section_label("Actions"))
+			setup_actions.add_child(setup_error)
 			start_button = button("Start Match", "start")
-			column.add_child(start_button)
-			column.add_child(button("Reset to Defaults", "reset_preferences"))
-			column.add_child(button("Main Menu", "main_menu"))
+			setup_actions.add_child(start_button)
+			var secondary = HBoxContainer.new()
+			secondary.add_theme_constant_override("separation", 12)
+			setup_actions.add_child(secondary)
+			for item in [["Back to Main Menu", "main_menu"], ["Reset to Defaults", "reset_preferences"]]:
+				var control = button(item[0], item[1])
+				control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				secondary.add_child(control)
 			validate_setup()
 		"pause":
 			column.add_child(label("Paused", 26))
 			column.add_child(button("Resume", "resume"))
+			column.add_child(button("Settings", "settings"))
 			column.add_child(button("Restart Match", "restart"))
 			column.add_child(button("Main Menu", "main_menu"))
 		"settings":
 			column.add_child(label("Settings", 26))
 			add_volume(column, "Music", "music", music_volume)
 			add_volume(column, "Sound Effects", "effects", effects_volume)
-			var toggle = CheckButton.new()
-			toggle.text = "Animations"
-			toggle.button_pressed = animations_enabled
-			toggle.toggled.connect(func(enabled): animations_changed.emit(enabled))
-			column.add_child(toggle)
+			add_toggle(column, "Gameplay animations", "animations", animations_enabled, animations_changed.emit)
+			add_toggle(column, "Camera transitions", "camera_transitions", camera_transitions_enabled, camera_transitions_changed.emit)
+			camera_option = setup_dropdown(column, "Camera perspective", ["Classic", "Isometric", "Cinematic"])
+			camera_option.select(["classic", "isometric", "cinematic"].find(preferred_camera))
+			camera_option.item_selected.connect(func(index): camera_view_changed.emit(["classic", "isometric", "cinematic"][index]))
+			column.add_child(button("Reset to Defaults", "reset_settings"))
 			column.add_child(button("Back", "settings_back"))
 		"victory":
 			add_victory_art(column, state)
@@ -351,6 +445,55 @@ func show_page(value: String, state = null) -> void:
 				column.add_child(control)
 				victory_buttons.append(control)
 	layout_hud()
+	page_content = page_panel
+	begin_screen_transition(same_page)
+
+func section_label(text: String) -> Label:
+	var title = label(text.to_upper(), 12)
+	title.add_theme_color_override("font_color", Color("#C6B785"))
+	return title
+
+func add_toggle(column: VBoxContainer, text: String, key: String, enabled: bool, callback: Callable) -> void:
+	var toggle = CheckButton.new()
+	toggle.text = text
+	toggle.button_pressed = enabled
+	toggle.toggled.connect(callback)
+	column.add_child(toggle)
+	settings_toggles[key] = toggle
+
+func begin_screen_transition(skip: bool = false) -> void:
+	if skip or not screen_transitions_enabled:
+		focus_page.call_deferred()
+		transition_finished.emit()
+		return
+	transitioning = true
+	transition_count += 1
+	input_shield.show()
+	page_content.modulate.a = 0.0
+	transition_started.emit()
+	screen_tween = create_tween()
+	screen_tween.tween_property(page_content, "modulate:a", 1.0, 0.22).set_trans(Tween.TRANS_SINE)
+	screen_tween.finished.connect(finish_screen_transition)
+
+func finish_screen_transition(notify: bool = true) -> void:
+	if screen_tween != null and screen_tween.is_valid(): screen_tween.kill()
+	screen_tween = null
+	transitioning = false
+	if input_shield != null: input_shield.hide()
+	if is_instance_valid(page_content): page_content.modulate.a = 1.0
+	if notify:
+		focus_page.call_deferred()
+		transition_finished.emit()
+
+func focus_page() -> void:
+	if transitioning or page == "game" or page_panel == null: return
+	if page == "setup" and name_inputs.has(0):
+		name_inputs[0].grab_focus()
+		return
+	for control in page_panel.find_children("*", "Button", true, false):
+		if control.is_visible_in_tree() and not control.disabled:
+			control.grab_focus()
+			return
 
 func add_timing_option(column: VBoxContainer) -> void:
 	if setup_mode == "Versus": return

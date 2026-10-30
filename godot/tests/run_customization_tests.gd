@@ -23,6 +23,8 @@ func run() -> void:
 	for method in ["test_names", "test_starters", "test_timing", "test_preferences"]:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
+	game.settings_path = ""
+	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
 	root.add_child(game)

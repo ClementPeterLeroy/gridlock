@@ -7,6 +7,7 @@ const AIController = preload("res://scripts/ai/ai_controller.gd")
 const MatchInterface = preload("res://scripts/ui/match_interface.gd")
 const MatchAudio = preload("res://scripts/match_audio.gd")
 const MatchPreferences = preload("res://scripts/core/match_preferences.gd")
+const UserSettings = preload("res://scripts/user_settings.gd")
 const WallScene = preload("res://scenes/Wall.tscn")
 
 @export_enum("Versus", "Battle Royale") var board_mode: String = "Battle Royale"
@@ -35,6 +36,10 @@ var scene_turn: Array = []
 var view = "main_menu"
 var preferences_path = MatchPreferences.DEFAULT_PATH
 var preferences
+var settings_path = UserSettings.DEFAULT_PATH
+var user_settings
+var applying_settings = false
+var screen_transitions_enabled = true
 var settings_return = "main_menu"
 var live_timing = true
 var elapsed_turns: Array:
@@ -46,10 +51,11 @@ var victory_shown = false
 
 func _ready() -> void:
 	preferences = MatchPreferences.new(preferences_path)
+	user_settings = UserSettings.new(settings_path)
 	get_tree().auto_accept_quit = false
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.current = true
-	set_camera_view("isometric", false)
+	set_camera_view(user_settings.camera_view, false)
 	for identity in MatchConfig.IDENTITIES:
 		pawn_nodes.append(get_node("Pieces/" + identity + "Pawn"))
 	$Walls/Wall.hide()
@@ -58,12 +64,18 @@ func _ready() -> void:
 	$Walls.add_child(placed_walls)
 	create_preview()
 	ui = MatchInterface.new()
+	ui.screen_transitions_enabled = screen_transitions_enabled
 	add_child(ui)
 	ui.action_requested.connect(handle_ui_action)
 	ui.volume_changed.connect(set_volume)
 	ui.animations_changed.connect(set_animations)
+	ui.camera_transitions_changed.connect(set_camera_transitions)
+	ui.camera_view_changed.connect(set_camera_view)
+	ui.transition_started.connect(refresh_timing_gate)
+	ui.transition_finished.connect(refresh_timing_gate)
 	audio = MatchAudio.new()
 	add_child(audio)
+	apply_user_settings()
 	start_match()
 	show_main_menu()
 
@@ -83,11 +95,10 @@ func start_match(options = null) -> void:
 
 func reset_match_presentation() -> void:
 	victory_shown = false
-	view = "game"
 	ui.has_match = true
 	ui.animations_enabled = animations_enabled
 	ui.build_cards(engine.state)
-	ui.show_page("game")
+	show_screen("game")
 	sync_scene()
 
 func restart_match(replay: bool = false) -> void:
@@ -103,7 +114,7 @@ func restart_match(replay: bool = false) -> void:
 func sync_scene(animate: bool = false) -> void:
 	if not animate:
 		cancel_transition()
-		engine.set_timing_active(true)
+		refresh_timing_gate()
 	controller.clear_selection()
 	var tween: Tween = null
 	if animate and animations_enabled:
@@ -162,7 +173,7 @@ func cancel_transition() -> void:
 func finish_transition() -> void:
 	animation_busy = false
 	gameplay_tween = null
-	engine.set_timing_active(true)
+	refresh_timing_gate()
 	present_victory()
 
 func present_victory() -> void:
@@ -170,14 +181,28 @@ func present_victory() -> void:
 		return
 	victory_shown = true
 	ai.cancel()
-	view = "victory"
 	controller.clear_selection()
+	show_screen("victory")
 	update_interaction_visuals()
-	ui.show_page("victory", engine.state)
 	audio.play_effect("victory")
 
 func turn_token() -> Array:
 	return [engine.state.current_player, engine.state.turn_number, engine.state.status]
+
+func show_screen(next: String) -> void:
+	engine.set_timing_active(false)
+	view = next
+	# One 3D visibility boundary hides board, pawns, walls and all highlights.
+	# The independent CanvasLayer remains visible on full-screen application pages.
+	visible = view in ["game", "pause", "victory"] or (view == "settings" and settings_return in ["game", "pause", "victory"])
+	ui.match_background_visible = visible
+	ui.show_page(view, engine.state if view == "victory" else null)
+	refresh_timing_gate()
+	update_interaction_visuals()
+
+func refresh_timing_gate() -> void:
+	if engine != null:
+		engine.set_timing_active(view == "game" and not animation_busy and not ui.transitioning)
 
 func position_wall(wall: Node3D, anchor: Vector2i, orientation: String) -> void:
 	wall.global_transform = $Board.global_transform
@@ -211,7 +236,7 @@ func _process(delta: float) -> void:
 		sync_scene()
 		# The incoming seat must not inherit elapsed time from a timed-out turn.
 		delta = 0.0
-	if view == "game" and not engine.state.paused and not animation_busy:
+	if view == "game" and not engine.state.paused and not animation_busy and not ui.transitioning:
 		var outcome = ai.update(delta)
 		if outcome.get("accepted", false):
 			finish_action(outcome.action)
@@ -222,14 +247,14 @@ func _process(delta: float) -> void:
 		present_victory()
 
 func update_elapsed(delta: float) -> void:
-	if view == "game" and engine.state.status == "running" and not engine.state.paused and not animation_busy:
+	if view == "game" and engine.state.status == "running" and not engine.state.paused and not animation_busy and not ui.transitioning:
 		if engine.time_source.is_valid():
 			engine.poll_time()
 		else:
 			engine.tick(delta)
 
 func can_interact() -> bool:
-	return controller != null and view == "game" and not ui.menu.visible and not animation_busy and controller.available()
+	return controller != null and visible and view == "game" and not ui.transitioning and not ui.menu.visible and not animation_busy and controller.available()
 
 func target_at_screen(screen_position: Vector2) -> Dictionary:
 	if not can_interact() or not get_viewport().get_visible_rect().has_point(screen_position) or ui.blocks_board(screen_position):
@@ -300,16 +325,19 @@ func update_hud() -> void:
 			ui.feedback.text += "  " + engine.state.timing_notice
 
 func handle_ui_action(action: String) -> void:
+	if view == "closing" or ui.transitioning: return
 	match action:
 		"menu":
 			ui.menu.visible = not ui.menu.visible
 			controller.clear_selection()
 			update_interaction_visuals()
-		"setup_versus", "setup_battle", "setup_blitz":
-			var mode = {"setup_versus": "Versus", "setup_battle": "Battle Royale", "setup_blitz": "Blitz"}[action]
+		"setup_versus", "setup_battle", "setup_blitz", "setup_ai":
+			var mode = {"setup_versus": "Versus", "setup_battle": "Battle Royale", "setup_blitz": "Blitz", "setup_ai": "Versus"}[action]
 			ui.setup_config = preferences.configs[mode].copy()
-			view = "setup"
-			ui.show_page("setup")
+			ui.setup_heading = "Rise of the Machines" if action == "setup_ai" else ""
+			if action == "setup_ai" and ui.setup_config.controllers.all(func(c): return c == "Human"):
+				ui.setup_config.controllers[1] = "AI - Casual"
+			show_screen("setup")
 		"start":
 			if not ui.validate_setup(): return
 			persist_setup()
@@ -336,16 +364,21 @@ func handle_ui_action(action: String) -> void:
 				if engine.state.status == "finished":
 					sync_scene()
 					return
-			view = "settings"
-			ui.show_page("settings")
+			show_screen("settings")
 			update_interaction_visuals()
 		"settings_back":
 			if view != "settings":
 				return
-			view = settings_return
-			if view == "game":
+			if settings_return == "game":
 				set_match_paused(false)
-			ui.show_page(view)
+			show_screen(settings_return)
+		"reset_settings":
+			user_settings.reset()
+			apply_user_settings()
+			save_user_settings()
+			ui.show_page("settings")
+		"exit":
+			_notification(NOTIFICATION_WM_CLOSE_REQUEST)
 
 func set_match_paused(value: bool) -> void:
 	engine.set_paused(value)
@@ -363,8 +396,7 @@ func pause_match(value: bool) -> void:
 	if engine.state.status == "finished":
 		sync_scene()
 		return
-	view = "pause" if value else "game"
-	ui.show_page(view)
+	show_screen("pause" if value else "game")
 	update_interaction_visuals()
 	update_hud()
 
@@ -372,11 +404,10 @@ func show_main_menu() -> void:
 	if view == "setup": persist_setup()
 	ai.cancel()
 	cancel_transition()
-	view = "main_menu"
 	engine.set_paused(true)
+	show_screen("main_menu")
 	sync_scene()
 	ui.has_match = false
-	ui.show_page("main_menu")
 
 func persist_setup() -> void:
 	if ui.validate_setup():
@@ -393,19 +424,57 @@ func set_volume(category: String, value: float) -> void:
 		ui.music_volume = audio.music_volume
 	else:
 		ui.effects_volume = audio.effects_volume
+	user_settings.set("music_volume" if category == "music" else "effects_volume", value)
+	save_user_settings()
 
 func set_animations(enabled: bool) -> void:
 	animations_enabled = enabled
 	ui.set_animations(enabled)
+	user_settings.gameplay_animations = enabled
+	save_user_settings()
 	if not enabled and animation_busy:
 		cancel_transition()
-		engine.set_timing_active(true)
+		refresh_timing_gate()
 		sync_scene()
+
+func apply_user_settings() -> void:
+	applying_settings = true
+	set_volume("music", user_settings.music_volume)
+	set_volume("effects", user_settings.effects_volume)
+	set_animations(user_settings.gameplay_animations)
+	ui.camera_transitions_enabled = user_settings.camera_transitions
+	set_camera_view(user_settings.camera_view, false)
+	applying_settings = false
+
+func save_user_settings() -> void:
+	if applying_settings: return
+	if user_settings != null and user_settings.save() != OK:
+		push_warning("Application settings could not be saved; session values remain available.")
+
+func set_camera_transitions(enabled: bool) -> void:
+	user_settings.camera_transitions = enabled
+	ui.camera_transitions_enabled = enabled
+	if not enabled: set_camera_view(user_settings.camera_view, false)
+	save_user_settings()
+
+func handle_escape() -> void:
+	match view:
+		"game": pause_match(true)
+		"pause": pause_match(false)
+		"settings": handle_ui_action("settings_back")
+		"setup": show_main_menu()
+
+func _input(event) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if not ui.transitioning: handle_escape()
+		get_viewport().set_input_as_handled()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST and view != "closing":
 		if view == "setup": persist_setup()
 		view = "closing"
+		engine.set_paused(true)
+		engine.set_timing_active(false)
 		set_process(false)
 		cancel_transition()
 		ai.cancel()
@@ -415,33 +484,21 @@ func _notification(what: int) -> void:
 		get_tree().quit()
 
 func _unhandled_input(event) -> void:
+	if ui.transitioning: return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
-			KEY_1: set_camera_view("classic")
-			KEY_2: set_camera_view("isometric")
-			KEY_3: set_camera_view("cinematic")
+			KEY_1, KEY_2, KEY_3:
+				if view in ["game", "pause", "victory"]:
+					set_camera_view(["classic", "isometric", "cinematic"][event.keycode - KEY_1])
 			KEY_R:
 				if can_interact():
 					controller.rotate()
 					controller.hover(target_at_screen(get_viewport().get_mouse_position()))
 					update_interaction_visuals()
 			KEY_ESCAPE:
-				if view == "pause":
-					pause_match(false)
-				elif view == "settings":
-					handle_ui_action("settings_back")
-				elif view == "setup":
-					show_main_menu()
-				elif view == "game":
-					if ui.menu.visible:
-						ui.menu.hide()
-					elif controller.selected:
-						controller.clear_selection()
-						update_interaction_visuals()
-					else:
-						pause_match(true)
+				handle_escape()
 			KEY_N:
-				if view in ["game", "pause", "victory"]:
+				if view in ["game", "pause", "victory"] and not ui.menu.visible:
 					restart_match()
 	elif event is InputEventMouseButton and event.pressed and can_interact():
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -455,6 +512,12 @@ func set_camera_view(view_name: String, animate: bool = true):
 
 	if not camera_positions.has(view_name):
 		return
+	if user_settings != null:
+		animate = animate and user_settings.camera_transitions
+		if user_settings.camera_view != view_name:
+			user_settings.camera_view = view_name
+			save_user_settings()
+	if ui != null: ui.preferred_camera = view_name
 
 	var target_position = camera_positions[view_name]
 	var target_size = camera_sizes[view_name]

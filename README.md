@@ -2,7 +2,7 @@
 
 Gridlock is transitioning from its Python/Pygame Classic Edition to a Godot-based
 Gridlock v3.0. The original Pygame v2.8 implementation is preserved in `pygame/`.
-Gridlock v3.0-alpha.3.4 - Blitz Edit is implemented in `godot/`.
+Gridlock v3.0-beta.1 - UI & Menu Polish is implemented in `godot/`.
 Versus, Battle Royale, and Blitz support humans and Pathfinder AI, with Casual or
 Challenging difficulty per seat. Names, controller choices, and starting-player
 preferences are customizable and saved locally. Versus is untimed; Battle Royale
@@ -10,7 +10,9 @@ offers Per Turn or Per Game clocks. Blitz also offers both timer types; its Per 
 penalties and overtime preserve Classic behavior. AI turns consume no countdown time.
 The compact HUD,
 pause/settings, animations, audio, and victory/replay remain available.
-UI/menu polish is the next milestone.
+The graphite/gold main menu uses the official logo and hides the 3D board outside
+matches. Application settings now persist separately from match preferences.
+The next milestone is v3.0-beta.2 - Visual Overhaul.
 
 ## Repository layout
 
@@ -76,7 +78,8 @@ python pygame/tests/benchmark_battle_ai.py
 
 ## Godot development
 
-Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus, Battle Royale, or Blitz.
+Open `godot/project.godot` with Godot 4.7.2, run, and choose Versus, Battle Royale, Blitz, or Rise of the Machines.
+Rise opens the existing Versus setup with an AI seat; it adds no new rules.
 Select Human, AI - Casual, or AI - Challenging for each seat before starting.
 Edit player names and choose Default or Random starter. Versus is always untimed.
 Battle Royale offers 15/30/60/120/180-second turns or 1/3/5/10/15-minute player
@@ -88,9 +91,12 @@ AI turns show a thinking message and wait at least one second; pause freezes AI 
 Timed AI cards display Exempt; their thinking and presentation never consume clocks.
 Keys 1, 2, and 3 select Classic, Isometric, and Cinematic views.
 Click the active pawn and a green tile to move, or hover a groove and click to
-place a wall. R / right-click rotates; Esc deselects a selected pawn or pauses.
+place a wall. R / right-click rotates; Esc pauses, including when a pawn is selected.
 The top-left hamburger opens Settings, Pause, Restart Match, and Main Menu.
 Top-right cards show identity, walls, elapsed/countdown time, and Blitz overtime.
+Settings saves music/effects volumes, gameplay animations, camera transitions, and
+camera perspective in `user://user_settings.cfg`. Reset restores safe defaults.
+Tab/arrows navigate menu controls; Enter activates; Escape returns or resumes.
 
 From the repository root, with the Godot executable available as `godot`:
 
@@ -102,6 +108,7 @@ godot --headless --path godot --script res://tests/run_ai_tests.gd
 godot --headless --path godot --script res://tests/run_timing_tests.gd
 godot --headless --path godot --script res://tests/run_customization_tests.gd
 godot --headless --path godot --script res://tests/run_blitz_edit_tests.gd
+godot --headless --path godot --script res://tests/run_beta_ui_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
 python -B godot/tests/generate_timing_fixtures.py --check

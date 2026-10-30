@@ -1,5 +1,5 @@
 GRIDLOCK - GODOT DEVELOPMENT VERSION HISTORY
-Current version: 3.0-alpha.3.4
+Current version: 3.0-beta.1
 
 VERSION 3.0-alpha.1 - 3D Foundations
 Completion date: 2026-10-28 (existing foundations commit 207706a)
@@ -436,6 +436,63 @@ Known limitations and next milestone
   input still need the README manual checklist. Existing sandbox certificate-store
   and global editor-preference warnings do not prevent project verification.
 Next milestone: 3.0-beta.1 - UI & Menu Polish
+
+VERSION 3.0-beta.1 - UI & Menu Polish
+Completion date: 2026-10-30
+Status: Completed
+
+Features and fixes
+- Centralized screen navigation, 3D visibility and timing/input gates. Main Menu,
+  Setup and main-menu Settings hide the complete 3D presentation; Game, Pause,
+  Victory and match Settings retain it beneath their interface.
+- Added graphite/gold pages, the official transparent logo and licensed Lato font.
+  Main Menu prominently offers Versus, Battle Royale, Blitz and Rise of the Machines,
+  with secondary Settings and Exit Game. Rise reuses Versus setup and seeds a Casual
+  AI opponent only when all configured seats are Human; no new engine mode or rule.
+- Grouped setup into Players, Match Rules and Actions. Fields scroll with focus;
+  Start/Back/Reset remain accessible outside scrolling content. Existing names,
+  controllers, starter, timer presets and per-mode saved preferences are preserved.
+- Added 220 ms non-blocking page fades, a pointer shield and keyboard/action guards.
+  Navigation cannot stack pages or duplicate actions; clocks freeze during fades.
+- Persisted music/effects volumes, gameplay animations, camera transitions and camera
+  perspective in separate user://user_settings.cfg. Apply immediately, validate each
+  loaded field, and support Reset to Defaults without changing match setup or state.
+- Pause offers Resume, Settings, Restart Match and Main Menu. Escape always pauses
+  gameplay, resumes Pause, returns from Settings, and leaves Setup even with text
+  focus. Native Tab/arrows/Enter navigation and initial page focus are supported.
+- Retained compact Design B cards, active-player border and AI clock Exempt feedback.
+  Improved small-window readability using an 800 x 600 logical UI baseline with a
+  1280 x 720 default window. Existing camera presets and rendering are unchanged.
+- Victory preserves the color-specific trophy/custom banner with exactly Play Again
+  and Main Menu. Exit Game uses the existing clean audio/AI shutdown path.
+
+Validation
+- Godot 4.7.2: 3367 core, 602 interaction, 232 match, 1736 AI, 2426 timing,
+  575 customization, 382 Blitz Edit and 226 beta UI checks passed (9546 total).
+  All 12 AI matches completed; all three Classic fixture generators pass --check.
+- All 100 Pygame tests passed on Python 3.13.12 / Pygame 2.6.1. Classic source,
+  assets and pygame/version_notice.txt are unchanged.
+- Added deterministic settings round trips/repair/reset, screen visibility matrix,
+  transition/input/clock locks, keyboard focus and navigation, selected-pawn pause,
+  setup/victory actions and responsive-layout regression coverage.
+- Separate Godot processes verified all five application settings reload. Exit Game
+  closed the process cleanly. Scene tests use isolated settings paths, leaving real
+  user preferences untouched.
+- Inspected actual D3D12/Forward+ renders of Main Menu, four-seat Setup, Game, Pause,
+  match Settings and custom-name Victory at 800 x 600, 1280 x 720 and 1920 x 1080.
+  Native fullscreen Main Menu and AI Setup rendered correctly at 2560 x 1440.
+- Gameplay rules, algorithms, timing arithmetic, AI clock exemptions and scheduling,
+  board/pawn/wall models, materials, lighting and authored camera presets remain.
+
+Known limitations and next milestone
+- Audio remains placeholder material. Extended human play, auditory quality and
+  device/DPI-specific input still require the README manual verification checklist.
+- Records/replay storage and player-facing undo remain deferred. An exempt AI with
+  no legal action can still stall; no new pass/draw/loss rule has been introduced.
+- Sandbox certificate-store and global editor-preference warnings persist but do
+  not block import, rendering or regression verification.
+- No beta.2 graphical redesign was started.
+Next milestone: 3.0-beta.2 - Visual Overhaul
 
 Future releases
 Append each completed milestone here with actual dates and test results. Keep

@@ -8,6 +8,8 @@ func run() -> void:
 	for method in ["test_blitz_modes", "test_full_ai_exemption", "test_saved_blitz_choices"]:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
+	game.settings_path = ""
+	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
 	root.add_child(game)

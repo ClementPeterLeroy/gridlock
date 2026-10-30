@@ -1,4 +1,4 @@
-# Gridlock v3.0-alpha.3.4 - Blitz Edit
+# Gridlock v3.0-beta.1 - UI & Menu Polish
 
 Godot 4.7.2 / GDScript. Human and Pathfinder AI matches in Versus, Battle Royale, and Blitz,
 with the approved Design B compact HUD. The original rules, models, materials,
@@ -9,7 +9,9 @@ lighting, and camera presets are preserved.
 Open `project.godot` in Godot and run the project. Choose a mode in the main menu,
 then select each seat's controller and confirm Start Match. Each seat independently
 offers Human, AI - Casual, or AI - Challenging, including fully automated matches.
-The default is all Human. Versus uses Sapphire/Crimson and ten walls each.
+Direct mode setup defaults to all Human. Rise of the Machines opens the existing
+Versus preferences and seeds a Casual AI opponent if every seat is Human; existing
+AI selections are retained. Battle Royale AI remains configurable per seat. Versus uses Sapphire/Crimson and ten walls each.
 Battle Royale uses four players, five walls each, and clockwise turns:
 Sapphire, Emerald, Crimson, Violet. Every seat, including AI, accepts a custom name
 of up to twelve printable characters. Empty names block Start; control characters
@@ -44,7 +46,7 @@ Setup preferences persist per mode in `user://match_preferences.cfg`, using Godo
 local user-data directory. Names, controllers/difficulties, random-start preference,
 both Battle Royale durations, Blitz timer type and both Blitz durations are saved after valid Start or
 leaving setup. Reset to Defaults restores all mode preferences without restarting
-an active match. Audio and animation settings remain session-only.
+an active match. Application settings use a separate file described below.
 
 `scripts/core/match_preferences.gd` uses ConfigFile and repairs missing/invalid
 fields to safe defaults; older timed Versus and unsupported duration values cannot
@@ -58,7 +60,7 @@ positions, clocks, history and results are never stored as setup preferences.
 Disk failures leave current session choices available and emit a warning.
 
 - Left-click the active pawn to select it and show green legal destinations.
-- Click a green tile to move. Click the pawn again or press Esc to deselect.
+- Click a green tile to move. Click the pawn again to deselect; Esc always pauses gameplay.
 - Clicking an empty tile that is not highlighted clears selection without moving.
 - With no pawn selected, hover a groove to preview a wall. Left-click places it.
 - R or right-click rotates the orientation. Green previews are legal; red previews
@@ -76,8 +78,10 @@ Disk failures leave current session choices available and emit a warning.
 - The top-left hamburger opens Settings, Pause/Resume, Restart Match, and Main Menu.
   While expanded, it blocks board input. Opening it alone does not pause the timer;
   choose Pause to freeze the match. No large instruction panel obscures the board.
-- Esc deselects a selected pawn, closes the hamburger, or otherwise pauses/resumes.
-  The pause page offers Resume, Restart Match, and Main Menu. Cameras remain available.
+- Esc pauses gameplay even with a pawn selected, resumes from Pause, returns from
+  Settings to its caller, and returns from Setup to Main Menu, including while a
+  name field has focus. Pause offers Resume, Settings, Restart Match, and Main Menu.
+  Tab/arrows navigate controls; Enter activates the focused button. Cameras remain available.
 - Victory preserves the final board behind the existing color-specific trophy
   artwork. A single dynamic banner identifies the winner; the two buttons are
   Play Again and Main Menu. Play Again preserves configuration and redraws Random.
@@ -117,9 +121,14 @@ the scene is interpolated. Conflicting gameplay input is blocked until completio
 Pause freezes a pending transition; restart/main-menu navigation cancels it safely.
 Settings can disable animations immediately, snapping to the authoritative state.
 
-Settings provides Music and Sound Effects volume sliders plus Animations On/Off.
-Changes persist for the application session. Music loops quietly across screens
-and matches. Movement, wall placement, and victory reuse Classic placeholder audio;
+Settings provides Music and Sound Effects volume sliders, separate Gameplay
+animations and Camera transitions toggles, a Camera perspective dropdown, Reset to
+Defaults, and Back. Changes apply immediately and persist in
+`user://user_settings.cfg` through `scripts/user_settings.gd`. Defaults are 20% music,
+50% effects, both animation toggles enabled, and Isometric camera. Missing, malformed,
+out-of-range or unsupported fields fall back independently to defaults. This file
+contains only application settings, never match setup, clocks or live state. Reset
+does not change match preferences. Music loops quietly across screens and matches. Movement, wall placement, and victory reuse Classic placeholder audio;
 the wall effect is the move recording at a lower pitch. Audio is not final.
 The Dummy audio backend stays silent during headless runs or when no device is
 available; resource, volume, and sound-event tests still run without a speaker.
@@ -127,6 +136,26 @@ available; resource, volume, and sound-event tests still run without a speaker.
 Blender sources and exported models remain in their existing directories.
 No core module loads these assets. The authored demonstration wall is hidden;
 only walls in the authoritative state are rendered as permanent walls.
+
+## Menu presentation and navigation
+
+`game.gd` centrally owns screen changes and timing/input gates. The main menu and
+match setup use opaque graphite pages with the official transparent logo and gold
+focus accents. Setup groups Players, Match Rules and Actions: fields scroll and
+follow keyboard focus, while Start/Back/Reset remain outside the scroll area.
+
+The scene's existing Node3D root hides the entire 3D presentation in Main Menu, Setup,
+and main-menu Settings. Its separate CanvasLayer remains visible. Game, Pause,
+Victory and match Settings preserve the board; no camera, model, lighting or material
+changes are used to achieve visibility. A 220 ms page fade blocks mouse/keyboard
+activation and clock consumption until completion, with only one page tree alive.
+It is independent of the gameplay-animation preference. Victory keeps the existing
+sticker/custom banner and exactly Play Again / Main Menu.
+
+The responsive UI uses an 800 x 600 logical baseline and opens at 1280 x 720.
+Canvas-item stretching preserves proportions with expanding aspect; compact HUD
+cards wrap into two columns at narrow sizes. Native fullscreen rendering was checked
+at 2560 x 1440; this patch does not add a fullscreen settings control.
 
 ## Interaction architecture
 
@@ -301,6 +330,7 @@ godot --headless --path godot --script res://tests/run_ai_tests.gd
 godot --headless --path godot --script res://tests/run_timing_tests.gd
 godot --headless --path godot --script res://tests/run_customization_tests.gd
 godot --headless --path godot --script res://tests/run_blitz_edit_tests.gd
+godot --headless --path godot --script res://tests/run_beta_ui_tests.gd
 python -B godot/tests/generate_python_fixtures.py --check
 python -B godot/tests/generate_ai_fixtures.py --check
 python -B godot/tests/generate_timing_fixtures.py --check
@@ -324,8 +354,8 @@ ordering, all four victory stickers, responsive layouts, and complete opening-to
 matches with replay. Existing board regression checks run with animations disabled
 to isolate targeting/synchronization; match tests also verify enabled transitions.
 
-Validation for alpha.3.4: 3367 core checks, 602 interaction checks, 232 match checks,
-1736 AI checks, 2426 timing checks, 575 customization checks, and 382 Blitz Edit checks
+Validation for beta.1: 3367 core checks, 602 interaction checks, 232 match checks,
+1736 AI checks, 2426 timing checks, 575 customization checks, 382 Blitz Edit checks, and 226 beta UI checks (9546 total)
 passed on Godot 4.7.2. Python parity fixtures
 matched the unchanged Classic implementation. The Pygame suite passed all 100 tests on Python 3.13.12 /
 Pygame 2.6.1.
@@ -379,6 +409,18 @@ PCG; equal numeric seeds do not imply equal moves. Cooperative deadlines can als
 truncate search at different candidates. Heuristic weights and stable wall ties
 are preserved. Regenerate with `python -B godot/tests/generate_ai_fixtures.py`.
 
+`run_beta_ui_tests.gd` checks real scene visibility, transition locks and timing
+gates, single-page navigation, settings validation/reset/persistence and live-state
+isolation, actual Tab/arrow/Enter/Escape events, selected-pawn pause, AI-oriented
+setup, victory actions, and layout at 800 x 600, 1280 x 720, and 1920 x 1080.
+Older scene suites disable only page fades and disk writes for isolation; the beta
+suite exercises enabled fades deterministically. Separate processes verified all
+five saved settings reload; Exit Game completed a clean process shutdown.
+D3D12/Forward+ captures cover Main Menu, four-seat Setup, Game, Pause, match Settings
+and long-name Victory at all three sizes, plus actual 2560 x 1440 fullscreen Main
+Menu and AI Setup. No rendering fallback was needed. Sandbox certificate-store and
+global editor-preference warnings are environmental and did not block verification.
+
 Manual verification before wider release:
 
 1. In each camera view, select a pawn, move, deselect on an unrelated tile, and
@@ -411,6 +453,11 @@ Manual verification before wider release:
     saved durations. Let a human Per Turn clock expire (no penalty/overtime), then
     test Per Game penalties and overtime. Confirm AI shows Exempt throughout thinking
     in both types while the opposing human clock works normally.
+12. Navigate every page with Tab/arrows/Enter/Escape; scroll Setup dropdowns at
+    800 x 600, and check focus, hover and pointer placement at your display/DPI.
+    Visit Settings from Main Menu, Pause and gameplay, then return to each caller.
+    Change both animation toggles, volumes and perspective, close/reopen, and reset.
+    Check clean Exit Game and native fullscreen/windowed layouts on your monitor.
 
 `tests/core/python_parity.json` is generated from the unchanged Pygame rules/state
 and BFS distance implementation. It covers 20 reference positions, all 128 wall
@@ -425,8 +472,8 @@ python -B godot/tests/generate_python_fixtures.py
 
 ## Limitations and next milestones
 
-- Replay storage, records, and broader UI/texture polish remain deferred. Match
-  preferences persist; audio/animation settings remain session-only.
+- Replay storage, records, player-facing undo and the beta.2 visual overhaul remain
+  deferred. Match preferences and application settings now persist separately.
 - Audio remains placeholder material, including the reused wall sound. Auditory
   quality and long human play sessions need manual verification.
 - A pawn can have no legal move while every permanent route still exists. If it
@@ -439,9 +486,7 @@ python -B godot/tests/generate_python_fixtures.py
   material, and `Wall.tscn` contains a null wall-color override. Review separately
   without changing the imported ivory/walnut appearance.
 
-Next: **v3.0-beta.1 - UI & Menu Polish**. Record for that milestone: hide the 3D
-board on Main Menu and Match Setup; keep it visible in active, paused and completed
-matches. This board-visibility change remains deferred through alpha.3.4.
+Next: **v3.0-beta.2 - Visual Overhaul**. This release does not begin that redesign.
 Neural AI remains reserved for v3.1.
 
 ## Version workflow

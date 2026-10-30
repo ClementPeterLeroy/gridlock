@@ -29,6 +29,8 @@ func run() -> void:
 	test_live_boundaries()
 	test_ai_clocks()
 	game = Scene.instantiate()
+	game.settings_path = ""
+	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
 	root.add_child(game)

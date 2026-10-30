@@ -25,6 +25,8 @@ func check(condition: bool, message: String) -> void:
 func run() -> void:
 	root.size = Vector2i(1280, 900)
 	game = Scene.instantiate()
+	game.settings_path = ""
+	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
 	root.add_child(game)
@@ -284,6 +286,8 @@ func test_responsive_cameras() -> bool:
 	viewport.size = Vector2i(1280, 900)
 	root.add_child(viewport)
 	game = Scene.instantiate()
+	game.settings_path = ""
+	game.screen_transitions_enabled = false
 	viewport.add_child(game)
 	game.set_process(false)
 	start_mode("Battle Royale")

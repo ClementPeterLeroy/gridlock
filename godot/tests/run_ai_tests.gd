@@ -36,6 +36,8 @@ func run() -> void:
 	for method in ["test_python_parity", "test_legality_and_tactics", "test_scheduling", "test_complete_matches"]:
 		check(call(method) == true, method + " completed")
 	game = Scene.instantiate()
+	game.settings_path = ""
+	game.screen_transitions_enabled = false
 	game.live_timing = false
 	game.preferences_path = ""
 	root.add_child(game)
