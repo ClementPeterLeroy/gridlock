@@ -21,6 +21,7 @@ venv/
 # Godot 4 generated cache
 **/.godot/
 dist/
+/exe/
 
 # Godot temporary files
 *.tmp
